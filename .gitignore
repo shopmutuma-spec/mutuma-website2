@@ -1,0 +1,7 @@
+.env
+.env.*
+node_modules/
+.netlify/
+dist/
+files-mentioned-by-the-user-you/
+realwebsite/

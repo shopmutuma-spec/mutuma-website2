@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MUTUMA | Your Room. Your Culture.</title>
+    <meta name="description" content="Premium black-and-white room finds for modern street culture spaces.">
+    <link rel="preload" as="image" href="images/hero/hero-room.jpg" fetchpriority="high">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"Store","name":"MUTUMA","slogan":"YOUR ROOM. YOUR CULTURE.","priceRange":"££"}
+    </script>
+</head>
+<body class="home-page">
+    <div class="loading-screen" data-loader aria-hidden="true">
+        <div class="loading-logo">MUTUMA</div>
+    </div>
+    <script src="js/loader.js?v=20260722a"></script>
+    <header class="site-header" data-header></header>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-content" data-reveal>
+                <span class="eyebrow">MUTUMA / Room Finds</span>
+                <h1>YOUR ROOM.<br>YOUR CULTURE.</h1>
+                <p>Premium objects, lighting, tech and wall pieces for rooms that feel intentional.</p>
+                <div class="hero-actions">
+                    <a class="button primary" href="shop.html">Shop Now</a>
+                    <a class="button secondary" href="#featured">Explore</a>
+                </div>
+                <div class="hero-discovery" aria-label="Popular room edits">
+                    <a href="shop.html?sort=newest">New In</a>
+                    <a href="shop.html?category=Lighting">Lighting</a>
+                    <a href="shop.html?type=Decor">Desk Setup</a>
+                    <a href="shop.html?category=Rugs">Rugs</a>
+                    <a href="shop.html?category=Posters">Wall Decor</a>
+                    <a href="shop.html?style=Gaming">Gaming</a>
+                    <a href="shop.html?category=Organisation">Storage</a>
+                    <a href="shop.html?style=Collector">Collectibles</a>
+                </div>
+            </div>
+            <a class="scroll-cue" href="#featured" aria-label="Scroll to products"></a>
+        </section>
+
+        <!-- Trust Strip -->
+        <section class="trust-strip container" aria-label="Store promises" data-reveal>
+            <span>Secure checkout</span>
+            <span>Easy returns</span>
+            <span>Europe and US delivery</span>
+            <span>Customer support</span>
+        </section>
+
+        <!-- Featured Products -->
+        <section class="section container" id="featured" data-reveal>
+            <div class="section-head">
+                <h2>Featured Products</h2>
+                <a href="shop.html">View all</a>
+            </div>
+            <div class="product-grid" data-featured-products></div>
+        </section>
+
+        <!-- Categories -->
+        <section class="section container" id="categories" data-reveal>
+            <div class="section-head">
+                <h2>Shop by Category</h2>
+                <p>Start with the piece your room needs most.</p>
+            </div>
+            <div class="category-grid" data-category-grid></div>
+        </section>
+
+        <!-- Best Sellers -->
+        <section class="section container" data-reveal>
+            <div class="section-head">
+                <h2>Best Sellers</h2>
+                <a href="shop.html?tag=best-seller">Shop best sellers</a>
+            </div>
+            <div class="product-grid" data-best-sellers></div>
+        </section>
+
+        <!-- Discovery Rails -->
+        <section class="section container discovery-section" data-discovery-sections data-reveal></section>
+
+        <!-- Shop by Feeling -->
+        <section class="section container" data-feeling-section data-reveal></section>
+
+        <!-- Shop the Room -->
+        <section class="section container" data-room-section data-reveal></section>
+
+        <!-- About -->
+        <section class="about-section container" id="about" data-about data-reveal></section>
+
+        <!-- Newsletter -->
+        <section class="newsletter container" data-reveal>
+            <div>
+                <span class="eyebrow">Private Drop List</span>
+                <h2>Get the next room edit first.</h2>
+            </div>
+            <form name="mutuma-email-list" data-newsletter>
+                <input type="hidden" name="form-name" value="mutuma-email-list">
+                <input type="hidden" name="source" value="homepage-newsletter">
+                <input type="email" name="email" placeholder="Email address" aria-label="Email address" required>
+                <button class="button primary">Join</button>
+            </form>
+        </section>
+
+        <!-- Room Inspiration -->
+        <section class="section container" data-inspiration data-reveal></section>
+    </main>
+
+    <form name="mutuma-email-list" netlify netlify-honeypot="bot-field" hidden>
+        <input type="hidden" name="form-name" value="mutuma-email-list">
+        <input name="bot-field">
+        <input type="email" name="email">
+        <input name="source">
+    </form>
+
+    <footer class="site-footer" data-footer></footer>
+    <div data-modal></div>
+    <script type="module" src="js/main.js?v=20260722a"></script>
+</body>
+</html>
+

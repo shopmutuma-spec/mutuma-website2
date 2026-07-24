@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MUTUMA Shop | Premium Room Finds</title>
+    <meta name="description" content="Shop MUTUMA lighting, desk objects, wall art, furniture and tech.">
+    <link rel="preload" as="image" href="images/hero/shop-room.jpg" fetchpriority="high">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="shop-page">
+    <div class="loading-screen" data-loader aria-hidden="true">
+        <div class="loading-logo">MUTUMA</div>
+    </div>
+    <script src="js/loader.js?v=20260722a"></script>
+    <header class="site-header" data-header></header>
+
+    <main>
+        <!-- Shop Header -->
+        <section class="page-hero container">
+            <span class="eyebrow">Shop</span>
+            <h1>ROOM FINDS.</h1>
+            <p>Fast search, sharp filters and product-first buying.</p>
+        </section>
+
+        <!-- Shop Controls -->
+        <section class="shop-shell container">
+            <aside class="filters" id="categories">
+                <h2>Filters</h2>
+                <div class="filter-buttons" data-category-filters></div>
+            </aside>
+            <div class="shop-content">
+                <div class="shop-toolbar">
+                    <input type="search" data-shop-search placeholder="Search products" aria-label="Search products">
+                    <select data-sort aria-label="Sort products">
+                        <option value="featured">Featured</option>
+                        <option value="best-seller">Best sellers</option>
+                        <option value="price-low">Price low to high</option>
+                        <option value="price-high">Price high to low</option>
+                        <option value="rating">Top rated</option>
+                    </select>
+                </div>
+                <p class="product-count" data-product-count></p>
+                <div class="product-grid" data-shop-grid></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer" data-footer></footer>
+    <div data-modal></div>
+    <script type="module" src="js/shop.js?v=20260722a"></script>
+</body>
+</html>
+

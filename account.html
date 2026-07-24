@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MUTUMA Account | Saved Room Finds</title>
+    <meta name="description" content="Create or manage your MUTUMA customer account.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="loading-screen" data-loader aria-hidden="true"><div class="loading-logo">MUTUMA</div></div>
+    <script src="js/loader.js?v=20260722a"></script>
+    <header class="site-header" data-header></header>
+
+    <main>
+        <section class="page-hero container">
+            <span class="eyebrow">Account</span>
+            <h1>SIGN IN.</h1>
+            <p>Save your room finds and keep your shopping details close.</p>
+        </section>
+        <section class="account-layout container">
+            <form class="contact-form" data-auth-form>
+                <h2>Customer account</h2>
+                <label>Email<input type="email" name="email" autocomplete="email" required></label>
+                <label>Password<input type="password" name="password" autocomplete="current-password" minlength="6" required></label>
+                <div class="split-actions">
+                    <button class="button primary" data-sign-in>Sign In</button>
+                    <button class="button secondary" data-sign-up type="button">Create Account</button>
+                </div>
+                <p class="form-message" data-auth-message aria-live="polite"></p>
+            </form>
+            <section class="contact-card" data-account-panel>
+                <h2>Your MUTUMA space</h2>
+                <p>Sign in to connect your email with future account features. Wishlist and cart still work on this device without an account.</p>
+            </section>
+        </section>
+    </main>
+
+    <footer class="site-footer" data-footer></footer>
+    <div data-modal></div>
+    <script type="module" src="js/account.js?v=20260722a"></script>
+</body>
+</html>

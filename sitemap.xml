@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url><loc>https://mutuma.example/</loc></url>
+    <url><loc>https://mutuma.example/shop.html</loc></url>
+    <url><loc>https://mutuma.example/product.html</loc></url>
+    <url><loc>https://mutuma.example/cart.html</loc></url>
+    <url><loc>https://mutuma.example/wishlist.html</loc></url>
+    <url><loc>https://mutuma.example/account.html</loc></url>
+    <url><loc>https://mutuma.example/contact.html</loc></url>
+    <url><loc>https://mutuma.example/admin.html</loc></url>
+</urlset>

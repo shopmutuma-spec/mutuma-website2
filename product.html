@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MUTUMA Product | Details</title>
+    <meta name="description" content="View MUTUMA product details, gallery, cart actions and recommendations.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="loading-screen" data-loader aria-hidden="true">
+        <div class="loading-logo">MUTUMA</div>
+    </div>
+    <script src="js/loader.js?v=20260722a"></script>
+    <header class="site-header" data-header></header>
+
+    <main>
+        <!-- Product Detail -->
+        <div class="container" data-product-detail></div>
+
+        <!-- Complete Your Setup -->
+        <section class="section container" data-reveal>
+            <div class="section-head">
+                <h2>Complete Your Setup</h2>
+                <p>Recommended pieces that work with this product.</p>
+            </div>
+            <div class="product-grid" data-setup-products></div>
+        </section>
+
+        <!-- Recently Viewed -->
+        <section class="section container" data-reveal>
+            <div class="section-head">
+                <h2>Recently Viewed</h2>
+                <button class="button secondary" data-clear-recent hidden>Clear</button>
+            </div>
+            <div class="product-grid" data-recent-products></div>
+        </section>
+    </main>
+
+    <footer class="site-footer" data-footer></footer>
+    <div data-modal></div>
+    <script type="module" src="js/product.js?v=20260722a"></script>
+</body>
+</html>
+

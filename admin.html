@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MUTUMA Admin | Store Overview</title>
+    <meta name="description" content="MUTUMA admin overview for subscribers, orders and catalogue status.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="loading-screen" data-loader aria-hidden="true"><div class="loading-logo">MUTUMA</div></div>
+    <script src="js/loader.js?v=20260722a"></script>
+    <header class="site-header" data-header></header>
+
+    <main>
+        <section class="page-hero container">
+            <span class="eyebrow">Admin</span>
+            <h1>CONTROL.</h1>
+            <p>Private store overview for MUTUMA.</p>
+        </section>
+        <section class="admin-layout container">
+            <form class="contact-form" data-admin-login>
+                <h2>Admin sign in</h2>
+                <label>Email<input type="email" name="email" autocomplete="email" required></label>
+                <label>Password<input type="password" name="password" autocomplete="current-password" minlength="6" required></label>
+                <button class="button primary">Sign In</button>
+                <p class="form-message" data-admin-message aria-live="polite"></p>
+            </form>
+            <section class="admin-panel" data-admin-panel hidden></section>
+        </section>
+    </main>
+
+    <footer class="site-footer" data-footer></footer>
+    <div data-modal></div>
+    <script type="module" src="js/admin.js?v=20260722a"></script>
+</body>
+</html>
