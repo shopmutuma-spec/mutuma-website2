@@ -1,7 +1,7 @@
 const CURRENCY_KEY = "mutuma.currency";
 const RATES_KEY = "mutuma.exchangeRates";
 const GEO_KEY = "mutuma.location";
-const GEO_VERSION = 6;
+const GEO_VERSION = 7;
 const RATE_TTL = 1000 * 60 * 60 * 6;
 const GEO_TTL = 1000 * 60 * 15;
 
@@ -379,12 +379,12 @@ async function detectFromServices() {
             throw new Error("Currency service returned incomplete location data.");
         }
 
-        return [{
+        return {
             country,
             currency,
             source: service.url,
             priority: service.priority
-        }];
+        };
     };
 
     for (const service of primaryServices) {
@@ -430,24 +430,12 @@ async function detectFromTextServices() {
             priority: service.priority
         };
     } catch (error) {
-        return [];
+        return null;
     }
 }
 
 function bestSignal(signals) {
     const validSignals = signals.filter((signal) => signal.country && signal.currency);
-    const serviceSignal = validSignals
-        .filter((signal) => signal.priority >= 85)
-        .sort((first, second) => second.priority - first.priority)[0];
-    const usSignal = validSignals.find((signal) => signal.country === "US" || signal.currency === "USD");
-
-    if (serviceSignal && serviceSignal.country !== "US") {
-        return serviceSignal;
-    }
-
-    if (usSignal) {
-        return { ...usSignal, country: "US", currency: "USD" };
-    }
 
     return validSignals.sort((first, second) => second.priority - first.priority)[0] || {
         country: "GB",
@@ -467,7 +455,8 @@ async function detectCurrency() {
     }
 
     const serviceSignals = await detectFromServices();
-    const textSignals = serviceSignals.length ? [] : await detectFromTextServices();
+    const textSignal = serviceSignals.length ? null : await detectFromTextServices();
+    const textSignals = textSignal ? [textSignal] : [];
     const localSignals = browserSignals();
     const signal = bestSignal([...serviceSignals, ...textSignals, ...localSignals]);
     const { country, currency } = signal;

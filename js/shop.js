@@ -1,7 +1,7 @@
-import { products, categories, discountPercent, productOptions, isNewArrival } from "./products.js?v=20260722a";
-import { initCurrency } from "./currency.js?v=20260722a";
-import { trackEvent } from "./analytics.js?v=20260722a";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260722a";
+import { products, categories, discountPercent, productOptions, isNewArrival } from "./products.js?v=20260724a";
+import { initCurrency } from "./currency.js?v=20260724a";
+import { trackEvent } from "./analytics.js?v=20260724a";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260724a";
 
 initBaseLayout();
 initCurrency().catch(() => {});

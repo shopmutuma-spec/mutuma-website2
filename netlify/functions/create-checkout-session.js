@@ -85,10 +85,29 @@ function sanitizeCurrency(currency) {
     return supportedCurrencies.has(code) ? code : "GBP";
 }
 
-function stripeAmount(gbpAmount, currency) {
+async function loadRates() {
+    try {
+        const response = await fetch("https://api.frankfurter.app/latest?from=GBP", {
+            headers: {
+                Accept: "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Exchange-rate request failed.");
+        }
+
+        const data = await response.json();
+        return { ...fallbackRates, GBP: 1, ...(data.rates || {}) };
+    } catch (error) {
+        return fallbackRates;
+    }
+}
+
+function stripeAmount(gbpAmount, currency, rates) {
     if (gbpAmount <= 0) return 0;
 
-    const convertedAmount = gbpAmount * fallbackRates[currency];
+    const convertedAmount = gbpAmount * (rates[currency] || fallbackRates[currency] || 1);
     const multiplier = zeroDecimalCurrencies.has(currency) ? 1 : 100;
     return Math.max(1, Math.round(convertedAmount * multiplier));
 }
@@ -107,6 +126,7 @@ export async function handler(event) {
         const cart = sanitizeCart(payload.cart);
         const currency = sanitizeCurrency(payload.currency);
         const stripeCurrency = currency.toLowerCase();
+        const rates = await loadRates();
 
         if (!cart.length) {
             return json(400, { error: "Cart is empty." });
@@ -133,7 +153,7 @@ export async function handler(event) {
                         type: "fixed_amount",
                         display_name: shippingAmount ? "Tracked shipping" : "Free shipping",
                         fixed_amount: {
-                            amount: stripeAmount(shippingAmount, currency),
+                            amount: stripeAmount(shippingAmount, currency, rates),
                             currency: stripeCurrency
                         },
                         delivery_estimate: {
@@ -153,7 +173,7 @@ export async function handler(event) {
                 quantity,
                 price_data: {
                     currency: stripeCurrency,
-                    unit_amount: stripeAmount(product.price, currency),
+                    unit_amount: stripeAmount(product.price, currency, rates),
                     product_data: {
                         name: product.name,
                         description: product.description,
@@ -168,6 +188,7 @@ export async function handler(event) {
                 brand: "MUTUMA",
                 base_currency: "GBP",
                 display_currency: currency,
+                exchange_rate: String(rates[currency] || fallbackRates[currency] || 1),
                 item_count: String(cart.reduce((total, item) => total + item.quantity, 0))
             },
             success_url: `${origin}/cart.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
