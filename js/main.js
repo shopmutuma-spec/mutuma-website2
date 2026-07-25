@@ -7,7 +7,9 @@ import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmai
 initBaseLayout();
 initCurrency().catch(() => {});
 
-renderProductGrid("[data-featured-products]", products.filter((product) => product.featured).slice(0, 4));
+let activeRailUsage = null;
+
+renderProductGrid("[data-featured-products]", getRotatingFeaturedProducts());
 renderProductGrid("[data-best-sellers]", getProductsByTag("best-seller", 4));
 renderCategories("[data-category-grid]");
 renderDiscoverySections();
@@ -15,6 +17,46 @@ renderFeelings();
 renderRoomEdit();
 renderAbout();
 renderInspiration();
+
+function threeHourSeed(date = new Date()) {
+    return Math.floor(date.getTime() / (3 * 60 * 60 * 1000));
+}
+
+function seededRandom(seed) {
+    let value = seed + 0x6D2B79F5;
+
+    return () => {
+        value |= 0;
+        value = value + 0x6D2B79F5 | 0;
+        let mixed = Math.imul(value ^ value >>> 15, 1 | value);
+        mixed ^= mixed + Math.imul(mixed ^ mixed >>> 7, 61 | mixed);
+        return ((mixed ^ mixed >>> 14) >>> 0) / 4294967296;
+    };
+}
+
+function seededShuffle(list, seed) {
+    const shuffled = [...list];
+    const random = seededRandom(seed);
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(random() * (index + 1));
+        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+
+    return shuffled;
+}
+
+function getRotatingFeaturedProducts() {
+    const featured = products.filter((product) => product.featured && product.images?.[0]);
+    const fallback = products.filter((product) => product.images?.[0] && (product.tags.includes("trending") || product.tags.includes("best-seller")));
+    const pool = uniqueProducts([...featured, ...fallback]);
+
+    return seededShuffle(pool, threeHourSeed()).slice(0, 4);
+}
+
+function imageProducts(list) {
+    return list.filter((product) => product.images?.[0]);
+}
 
 function uniqueProducts(list) {
     const seen = new Set();
@@ -25,8 +67,16 @@ function uniqueProducts(list) {
     });
 }
 
-function productRail(title, link, list) {
-    const productsToShow = uniqueProducts(list).slice(0, 10);
+function productRail(title, link, list, options = {}) {
+    const used = options.used || activeRailUsage || new Set();
+    const limit = options.limit || 10;
+    const seed = threeHourSeed() + (options.seedOffset || 0);
+    const preferred = uniqueProducts(imageProducts(list)).filter((product) => !used.has(product.id));
+    const preferredIds = new Set(preferred.map((product) => product.id));
+    const backup = uniqueProducts(imageProducts(products)).filter((product) => !used.has(product.id) && !preferredIds.has(product.id));
+    const productsToShow = seededShuffle([...preferred, ...backup], seed).slice(0, limit);
+
+    productsToShow.forEach((product) => used.add(product.id));
     if (productsToShow.length < 3) return "";
 
     return `
@@ -51,10 +101,14 @@ function renderDiscoverySections() {
     const target = document.querySelector("[data-discovery-sections]");
     if (!target) return;
 
+    const usedRailProducts = new Set();
+    activeRailUsage = usedRailProducts;
     const under25 = products.filter((product) => product.price < 25);
     const lighting = products.filter((product) => product.category === "Lighting" || product.tags.includes("lighting"));
     const desk = products.filter((product) => /desk|lamp|organ/i.test(`${product.name} ${product.description} ${product.tags.join(" ")}`));
     const setup = products.filter((product) => ["Decor", "Lighting", "Organisation"].includes(product.category));
+    const trending = products.filter((product) => product.tags.includes("trending") || product.tags.includes("best-seller"));
+    const newFinds = [...products].reverse().filter((product) => product.featured || product.family || product.tags.includes("new") || product.tags.includes("trending"));
 
     target.innerHTML = `
         <div class="section-head">
@@ -65,14 +119,15 @@ function renderDiscoverySections() {
             <p>Curated from the live catalogue, not copied into separate lists.</p>
         </div>
         <div class="discovery-stack">
-            ${productRail("Trending Now", "shop.html?tag=trending", products.filter((product) => product.tags.includes("trending")))}
-            ${productRail("New Room Finds", "shop.html?sort=newest", products.filter((product) => product.featured || product.family))}
-            ${productRail("Under £25", "shop.html?price=Under%20%C2%A325", under25)}
-            ${productRail("Lighting That Changes the Room", "shop.html?category=Lighting", lighting)}
-            ${productRail("Desk Setup Essentials", "shop.html?type=Organisation", desk)}
-            ${productRail("Complete Your Setup", "shop.html?category=Decor", setup)}
+            ${productRail("Trending Now", "shop.html?tag=trending", trending, { used: usedRailProducts, seedOffset: 11 })}
+            ${productRail("New Room Finds", "shop.html?sort=newest", newFinds, { used: usedRailProducts, seedOffset: 29 })}
+            ${productRail("Under £25", "shop.html?price=Under%20%C2%A325", under25, { used: usedRailProducts, seedOffset: 47 })}
+            ${productRail("Lighting That Changes the Room", "shop.html?category=Lighting", lighting, { used: usedRailProducts, seedOffset: 71 })}
+            ${productRail("Desk Setup Essentials", "shop.html?type=Organisation", desk, { used: usedRailProducts, seedOffset: 89 })}
+            ${productRail("Complete Your Setup", "shop.html?category=Decor", setup, { used: usedRailProducts, seedOffset: 113 })}
         </div>
     `;
+    activeRailUsage = null;
 }
 
 function renderFeelings() {
