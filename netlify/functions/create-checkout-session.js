@@ -91,9 +91,9 @@ async function loadCheckoutProducts() {
             supabaseRequest("store_offers?select=name,discount_percent,scope,enabled,starts_at,ends_at&enabled=eq.true&limit=20")
         ]);
         const mergedProducts = [...products, ...remoteProducts.map(normalizeRemoteProduct)];
-        const activeOffers = offers.length ? offers : [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
-        const bestOffer = activeOffers
-            .filter(isActiveOffer)
+        const activeOffers = offers.filter(isActiveOffer);
+        const offersToApply = activeOffers.length ? activeOffers : [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
+        const bestOffer = offersToApply
             .filter((offer) => offer.scope === "all")
             .sort((first, second) => Number(second.discount_percent) - Number(first.discount_percent))[0];
 

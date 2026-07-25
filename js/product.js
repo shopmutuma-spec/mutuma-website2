@@ -1,13 +1,14 @@
 import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260725a";
 import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260724a";
 import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260724a";
-import { checkoutProduct } from "./stripe.js?v=20260724a";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260725b";
 import { trackEvent } from "./analytics.js?v=20260724a";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260725a";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260725b";
 
 await loadStoreCatalog();
 initBaseLayout();
 initCurrency().catch(() => {});
+prewarmCheckout();
 
 const params = new URLSearchParams(window.location.search);
 const product = getProductById(params.get("id"));

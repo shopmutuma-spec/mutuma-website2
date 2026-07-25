@@ -2,7 +2,7 @@ import { findProductById, products, getProductsByTag, loadStoreCatalog } from ".
 import { initCurrency } from "./currency.js?v=20260724a";
 import { addToCart } from "./store.js?v=20260724a";
 import { aboutMutuma, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260724a";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260725a";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260725b";
 
 await loadStoreCatalog();
 initBaseLayout();

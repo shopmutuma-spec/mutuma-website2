@@ -3101,9 +3101,6 @@ export async function loadStoreCatalog() {
             .filter((offer) => offer.scope === "all")
             .sort((first, second) => Number(second.discount_percent) - Number(first.discount_percent))[0];
 
-        if (bestOffer) {
-            products.forEach((product) => applyOffer(product, bestOffer));
-        }
     } catch (error) {
         activeStoreOffers = [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
     }

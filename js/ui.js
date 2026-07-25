@@ -1,6 +1,6 @@
 import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260725a";
 import { formatPrice, currentCurrency } from "./currency.js?v=20260724a";
-import { checkoutCart, checkoutProduct } from "./stripe.js?v=20260724a";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260725b";
 import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260724a";
 import { trackEvent } from "./analytics.js?v=20260724a";
 import { storeSettings } from "./site-settings.js?v=20260725a";
@@ -356,14 +356,21 @@ export function renderCartDrawer() {
 
     const subtotal = cart.reduce((total, { product, quantity }) => total + product.price * quantity, 0);
     const freeShippingThreshold = storeSettings.freeShippingThreshold;
+    const shipping = subtotal >= freeShippingThreshold ? 0 : storeSettings.standardShipping;
+    const total = subtotal + shipping;
     const progress = Math.min(100, subtotal / freeShippingThreshold * 100);
+
+    prewarmCheckout();
+
     drawerSummary.innerHTML = `
         <div class="shipping-progress" aria-label="Free shipping progress"><span style="width:${progress}%"></span></div>
         <small>${subtotal >= freeShippingThreshold ? "Free Europe and US delivery unlocked." : `Add ${formatPrice(freeShippingThreshold - subtotal)} more to unlock free Europe and US delivery.`}</small>
         <div><span>Subtotal</span><strong data-price="${subtotal}">${formatPrice(subtotal)}</strong></div>
+        <div><span>Shipping</span><strong>${shipping ? formatPrice(shipping) : "Included"}</strong></div>
+        <div class="drawer-total"><span>Total incl. shipping</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
         <label class="discount-field">Discount code<input data-discount-code placeholder="Enter at checkout"></label>
         <small>Discounts are securely validated in Stripe Checkout.</small>
-        <button class="button primary wide" data-drawer-checkout>Checkout</button>
+        <button class="button primary wide" data-drawer-checkout>Checkout - ${formatPrice(total)}</button>
         <button class="button secondary wide" data-cart-close>Continue Shopping</button>
         <a class="button secondary wide" href="cart.html">View Full Cart</a>
     `;
@@ -410,13 +417,16 @@ export function renderCartDrawer() {
     });
 
     drawerSummary.querySelector("[data-drawer-checkout]").addEventListener("click", async (event) => {
-        event.currentTarget.disabled = true;
-        event.currentTarget.textContent = "Opening Stripe...";
+        const checkoutButton = event.currentTarget;
+        checkoutButton.disabled = true;
+        checkoutButton.classList.add("is-loading");
+        checkoutButton.textContent = "Opening Stripe...";
         trackEvent("checkout_started", { source: "cart_drawer", value: subtotal, currency: currentCurrency() });
         const result = await checkoutCart(getCart());
         if (!result.ok) notify(result.message);
-        event.currentTarget.disabled = false;
-        event.currentTarget.textContent = "Checkout";
+        checkoutButton.disabled = false;
+        checkoutButton.classList.remove("is-loading");
+        checkoutButton.textContent = `Checkout - ${formatPrice(total)}`;
     });
     drawerSummary.querySelector("[data-cart-close]").addEventListener("click", closeCartDrawer);
 }
@@ -427,6 +437,7 @@ export function openCartDrawer() {
     if (!drawer || !backdrop) return;
 
     renderCartDrawer();
+    prewarmCheckout();
     drawer.classList.add("open");
     backdrop.classList.add("open");
     document.body.classList.add("menu-open");

@@ -6,8 +6,21 @@ export const stripeConfig = {
     checkoutEndpoint: "/.netlify/functions/create-checkout-session"
 };
 
+let checkoutWarmupStarted = false;
+
 export function isStripeLink(link) {
     return typeof link === "string" && /^https:\/\/(buy|checkout)\.stripe\.com\//.test(link.trim());
+}
+
+export function prewarmCheckout() {
+    if (checkoutWarmupStarted || !stripeConfig.checkoutEndpoint) return;
+
+    checkoutWarmupStarted = true;
+    fetch(stripeConfig.checkoutEndpoint, {
+        method: "GET",
+        cache: "no-store",
+        keepalive: true
+    }).catch(() => {});
 }
 
 export function getStripeProductLink(productId) {

@@ -1,6 +1,6 @@
 import { categories, products, loadStoreCatalog } from "./products.js?v=20260725a";
 import { initCurrency } from "./currency.js?v=20260724a";
-import { initBaseLayout, renderCategories, renderProductGrid } from "./ui.js?v=20260725a";
+import { initBaseLayout, renderCategories, renderProductGrid } from "./ui.js?v=20260725b";
 
 await loadStoreCatalog();
 initBaseLayout();

@@ -1,10 +1,10 @@
 import { initCurrency, formatPrice } from "./currency.js?v=20260724a";
 import { addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260724a";
-import { checkoutCart } from "./stripe.js?v=20260724a";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260725b";
 import { trackEvent } from "./analytics.js?v=20260724a";
 import { storeSettings } from "./site-settings.js?v=20260725a";
 import { loadStoreCatalog } from "./products.js?v=20260725a";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260725a";
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260725b";
 
 await loadStoreCatalog();
 initBaseLayout();
@@ -83,12 +83,14 @@ function renderCart() {
             <div class="shipping-progress"><span style="width:${progress}%"></span></div>
             <p>${subtotal >= FREE_SHIPPING_THRESHOLD ? "Free shipping unlocked." : `${formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} away from free shipping.`}</p>
             <div><span>Subtotal</span><strong data-price="${subtotal}">${formatPrice(subtotal)}</strong></div>
-            <div><span>Shipping</span><strong>${shipping ? formatPrice(shipping) : "Free"}</strong></div>
+            <div><span>Shipping</span><strong>${shipping ? formatPrice(shipping) : "Included"}</strong></div>
             <div><span>Tax</span><strong>Calculated by Stripe</strong></div>
-            <div class="total"><span>Total</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
-            <button class="button primary wide" data-checkout>Checkout with Stripe</button>
+            <div class="total"><span>Total incl. shipping</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
+            <button class="button primary wide" data-checkout>Checkout with Stripe - ${formatPrice(total)}</button>
         </div>
     `;
+
+    prewarmCheckout();
 
     cartItems.querySelectorAll("[data-increase]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -123,13 +125,16 @@ function renderCart() {
     });
 
     document.querySelector("[data-checkout]").addEventListener("click", async (event) => {
-        event.currentTarget.disabled = true;
-        event.currentTarget.textContent = "Opening Stripe...";
+        const checkoutButton = event.currentTarget;
+        checkoutButton.disabled = true;
+        checkoutButton.classList.add("is-loading");
+        checkoutButton.textContent = "Opening Stripe...";
         trackEvent("checkout_started", { source: "cart_page", value: subtotal });
         const result = await checkoutCart(getCart());
         if (!result.ok) notify(result.message);
-        event.currentTarget.disabled = false;
-        event.currentTarget.textContent = "Checkout with Stripe";
+        checkoutButton.disabled = false;
+        checkoutButton.classList.remove("is-loading");
+        checkoutButton.textContent = `Checkout with Stripe - ${formatPrice(total)}`;
     });
     updateCounts();
 }
