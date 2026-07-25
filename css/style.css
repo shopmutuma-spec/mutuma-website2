@@ -9,6 +9,33 @@
     --shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
     --radius: 8px;
     --nav-height: 76px;
+    --ambient-warmth: rgba(255, 255, 255, 0.08);
+    --ambient-glow: rgba(255, 255, 255, 0.16);
+    --ambient-hero-tint: rgba(9, 9, 9, 0.98);
+    --ambient-hero-mid: rgba(9, 9, 9, 0.76);
+    --ambient-hero-end: rgba(9, 9, 9, 0.3);
+    --ambient-shop-opacity: 0.62;
+    --ambient-bg-filter: none;
+}
+
+.theme-day {
+    --ambient-warmth: rgba(255, 244, 220, 0.14);
+    --ambient-glow: rgba(255, 238, 204, 0.2);
+    --ambient-hero-tint: rgba(9, 9, 9, 0.92);
+    --ambient-hero-mid: rgba(9, 9, 9, 0.58);
+    --ambient-hero-end: rgba(9, 9, 9, 0.2);
+    --ambient-shop-opacity: 0.54;
+    --ambient-bg-filter: saturate(1.04) brightness(1.06) contrast(1.02);
+}
+
+.theme-night {
+    --ambient-warmth: rgba(210, 220, 255, 0.07);
+    --ambient-glow: rgba(230, 235, 255, 0.13);
+    --ambient-hero-tint: rgba(5, 5, 5, 0.99);
+    --ambient-hero-mid: rgba(5, 5, 5, 0.82);
+    --ambient-hero-end: rgba(5, 5, 5, 0.46);
+    --ambient-shop-opacity: 0.72;
+    --ambient-bg-filter: saturate(0.94) brightness(0.9) contrast(1.08);
 }
 
 * {
@@ -29,7 +56,7 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     background:
-        radial-gradient(circle at 20% -10%, rgba(255, 255, 255, 0.08), transparent 30rem),
+        radial-gradient(circle at 20% -10%, var(--ambient-warmth), transparent 30rem),
         linear-gradient(180deg, #090909 0%, #111111 45%, #090909 100%);
 }
 
@@ -511,7 +538,7 @@ main {
     padding: clamp(56px, 8vw, 104px) 0 34px;
     overflow: hidden;
     background:
-        linear-gradient(90deg, rgba(9, 9, 9, 0.98), rgba(9, 9, 9, 0.76), rgba(9, 9, 9, 0.3)),
+        linear-gradient(90deg, var(--ambient-hero-tint), var(--ambient-hero-mid), var(--ambient-hero-end)),
         url("../images/hero/hero-room.jpg") center right / min(72vw, 940px) auto no-repeat;
 }
 
@@ -520,6 +547,7 @@ main {
         linear-gradient(180deg, rgba(9, 9, 9, 0.1), #090909 74%),
         url("../images/hero/hero-room.jpg") center top / cover no-repeat;
     opacity: 0.24;
+    filter: var(--ambient-bg-filter);
 }
 
 .hero::before {
@@ -529,7 +557,7 @@ main {
     z-index: 0;
     background:
         linear-gradient(180deg, rgba(9, 9, 9, 0.18), #090909 100%),
-        radial-gradient(circle at 74% 38%, rgba(255, 255, 255, 0.18), transparent 22rem);
+        radial-gradient(circle at 74% 38%, var(--ambient-glow), transparent 22rem);
     pointer-events: none;
 }
 
@@ -909,7 +937,8 @@ textarea {
         linear-gradient(180deg, rgba(9, 9, 9, 0.38), #090909 46%, #090909 100%),
         linear-gradient(90deg, rgba(9, 9, 9, 0.96), rgba(9, 9, 9, 0.72), rgba(9, 9, 9, 0.94)),
         url("../images/hero/shop-room.jpg") center top / cover no-repeat;
-    opacity: 0.62;
+    opacity: var(--ambient-shop-opacity);
+    filter: var(--ambient-bg-filter);
 }
 
 .shop-page main {
@@ -923,8 +952,8 @@ textarea {
     z-index: -1;
     height: min(68vh, 620px);
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 70%),
-        radial-gradient(circle at 78% 14%, rgba(255, 255, 255, 0.16), transparent 24rem);
+        linear-gradient(180deg, var(--ambient-warmth), transparent 70%),
+        radial-gradient(circle at 78% 14%, var(--ambient-glow), transparent 24rem);
     pointer-events: none;
 }
 
