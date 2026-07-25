@@ -67,7 +67,7 @@ export function renderHeader() {
             <div class="nav-group nav-left">
                 <a class="icon-button${page === "index.html" ? " active" : ""}" href="index.html" aria-label="Home"${page === "index.html" ? ' aria-current="page"' : ""}>${icons.home}</a>
                 <a class="icon-button${page === "shop.html" ? " active" : ""}" href="shop.html" aria-label="Shop"${page === "shop.html" ? ' aria-current="page"' : ""}>${icons.shop}</a>
-                <a class="icon-button" href="shop.html#categories" aria-label="Categories">${icons.grid}</a>
+                <a class="icon-button${page === "categories.html" ? " active" : ""}" href="categories.html" aria-label="Categories"${page === "categories.html" ? ' aria-current="page"' : ""}>${icons.grid}</a>
             </div>
             <a class="logo" href="index.html">MUTUMA</a>
             <div class="nav-group nav-right">
@@ -88,7 +88,7 @@ export function renderHeader() {
             </div>
             <a href="index.html"${activeAttr("index.html")}>${icons.home} Home</a>
             <a href="shop.html"${activeAttr("shop.html")}>${icons.shop} Shop</a>
-            <a href="shop.html#categories">${icons.grid} Categories</a>
+            <a href="categories.html"${activeAttr("categories.html")}>${icons.grid} Categories</a>
             <a href="shop.html?tag=trending">${icons.fire} Trending</a>
             <a href="account.html"${activeAttr("account.html")}>${icons.user} Account</a>
             <a href="wishlist.html">${icons.heart} Wishlist</a>
@@ -177,6 +177,7 @@ export function renderFooter() {
             <div>
                 <strong>Shop</strong>
                 <a href="shop.html">Shop</a>
+                <a href="categories.html">Categories</a>
                 <a href="index.html#about">About</a>
                 <a href="shop.html?tag=best-seller">Best Sellers</a>
                 <a href="wishlist.html">Wishlist</a>
@@ -295,7 +296,7 @@ export function renderCategories(target) {
     const element = document.querySelector(target);
     if (!element) return;
     element.innerHTML = categories.map((category) => `
-        <a class="category-card" href="shop.html?category=${encodeURIComponent(category.name)}">
+        <a class="category-card" href="categories.html?category=${encodeURIComponent(category.name)}#category-${category.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}">
             <img src="${category.image}" alt="${category.name}" loading="lazy" decoding="async" onerror="this.style.opacity='0';">
             <span>${category.name}</span>
         </a>

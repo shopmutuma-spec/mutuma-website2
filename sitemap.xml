@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url><loc>https://mutuma.example/</loc></url>
     <url><loc>https://mutuma.example/shop.html</loc></url>
+    <url><loc>https://mutuma.example/categories.html</loc></url>
     <url><loc>https://mutuma.example/product.html</loc></url>
     <url><loc>https://mutuma.example/cart.html</loc></url>
     <url><loc>https://mutuma.example/wishlist.html</loc></url>

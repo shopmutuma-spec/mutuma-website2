@@ -889,6 +889,15 @@ main {
     font-weight: 900;
 }
 
+.category-sections {
+    display: grid;
+    gap: clamp(44px, 7vw, 86px);
+}
+
+.category-detail {
+    scroll-margin-top: calc(var(--nav-height) + 24px);
+}
+
 /* Newsletter */
 .newsletter {
     margin-bottom: clamp(58px, 8vw, 112px);
