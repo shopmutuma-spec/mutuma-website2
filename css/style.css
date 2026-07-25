@@ -537,25 +537,61 @@ main {
     align-items: end;
     padding: clamp(56px, 8vw, 104px) 0 34px;
     overflow: hidden;
-    background:
-        linear-gradient(90deg, var(--ambient-hero-tint), var(--ambient-hero-mid), var(--ambient-hero-end)),
-        url("../images/hero/hero-room.jpg") center right / min(72vw, 940px) auto no-repeat;
+    background: #090909;
 }
 
 .home-page::before {
     background:
         linear-gradient(180deg, rgba(9, 9, 9, 0.1), #090909 74%),
-        url("../images/hero/hero-room.jpg") center top / cover no-repeat;
+        url("../images/hero/home-room-1.webp") center top / cover no-repeat;
     opacity: 0.24;
     filter: var(--ambient-bg-filter);
+}
+
+.hero-media {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: clamp(320px, 36vw, 520px);
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.hero-media span {
+    position: absolute;
+    inset: 0;
+    background-position: center right;
+    background-size: cover;
+    opacity: 0;
+    filter: var(--ambient-bg-filter);
+    transform: scale(1.04);
+    animation: hero-image-cycle 18s ease-in-out infinite;
+    will-change: opacity, transform;
+}
+
+.hero-media span:nth-child(1) {
+    background-image: url("../images/hero/home-room-1.webp");
+}
+
+.hero-media span:nth-child(2) {
+    background-image: url("../images/hero/home-room-2.webp");
+    animation-delay: 6s;
+}
+
+.hero-media span:nth-child(3) {
+    background-image: url("../images/hero/home-room-3.webp");
+    animation-delay: 12s;
 }
 
 .hero::before {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 1;
     background:
+        linear-gradient(90deg, var(--ambient-hero-tint), var(--ambient-hero-mid), var(--ambient-hero-end)),
         linear-gradient(180deg, rgba(9, 9, 9, 0.18), #090909 100%),
         radial-gradient(circle at 74% 38%, var(--ambient-glow), transparent 22rem);
     pointer-events: none;
@@ -567,7 +603,7 @@ main {
     right: 0;
     bottom: -1px;
     left: 0;
-    z-index: 0;
+    z-index: 1;
     height: 30%;
     background: linear-gradient(180deg, transparent, #090909);
     pointer-events: none;
@@ -575,7 +611,7 @@ main {
 
 .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     width: min(100% - 32px, 1320px);
     margin: 0 auto;
 }
@@ -617,6 +653,37 @@ main {
 .section,
 .page-hero {
     padding: clamp(58px, 8vw, 112px) 0;
+}
+
+.categories-page .page-hero {
+    position: relative;
+    width: 100%;
+    min-height: min(78vh, 760px);
+    display: grid;
+    align-content: end;
+    overflow: hidden;
+    padding-right: max(16px, calc((100vw - 1240px) / 2));
+    padding-left: max(16px, calc((100vw - 1240px) / 2));
+    background:
+        linear-gradient(90deg, rgba(9, 9, 9, 0.98), rgba(9, 9, 9, 0.76), rgba(9, 9, 9, 0.36)),
+        linear-gradient(180deg, transparent 62%, #090909 100%),
+        url("../images/hero/categories-room.webp") center right / min(58vw, 760px) auto no-repeat;
+}
+
+.categories-page .page-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 74% 42%, var(--ambient-glow), transparent 22rem),
+        linear-gradient(180deg, rgba(9, 9, 9, 0.06), #090909 100%);
+    pointer-events: none;
+}
+
+.categories-page .page-hero > * {
+    position: relative;
+    z-index: 1;
+    max-width: 920px;
 }
 
 .section,
@@ -945,7 +1012,7 @@ textarea {
     background:
         linear-gradient(180deg, rgba(9, 9, 9, 0.38), #090909 46%, #090909 100%),
         linear-gradient(90deg, rgba(9, 9, 9, 0.96), rgba(9, 9, 9, 0.72), rgba(9, 9, 9, 0.94)),
-        url("../images/hero/shop-room.jpg") center top / cover no-repeat;
+        url("../images/hero/shop-room-finds.webp") center top / cover no-repeat;
     opacity: var(--ambient-shop-opacity);
     filter: var(--ambient-bg-filter);
 }
@@ -2154,6 +2221,24 @@ textarea {
 }
 
 /* Motion */
+@keyframes hero-image-cycle {
+    0% {
+        opacity: 0;
+        transform: scale(1.04);
+    }
+
+    7%,
+    31% {
+        opacity: 1;
+    }
+
+    38%,
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
 @keyframes loader-logo {
     0% {
         opacity: 0;
@@ -2214,6 +2299,16 @@ textarea {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
     }
+
+    .hero-media span {
+        animation: none !important;
+        opacity: 0;
+        transform: none;
+    }
+
+    .hero-media span:first-child {
+        opacity: 1;
+    }
 }
 
 @media (hover: none) {
@@ -2228,9 +2323,11 @@ textarea {
 /* Responsive */
 @media (max-width: 980px) {
     .hero {
-        background:
-            linear-gradient(90deg, rgba(9, 9, 9, 0.98), rgba(9, 9, 9, 0.72)),
-            url("../images/hero/hero-room.jpg") center top / cover no-repeat;
+        background: #090909;
+    }
+
+    .hero-media {
+        left: 24vw;
     }
 
     .nav {
@@ -2367,14 +2464,32 @@ textarea {
     .hero {
         min-height: calc(86svh - var(--nav-height));
         padding-bottom: 24px;
-        background:
-            linear-gradient(180deg, rgba(9, 9, 9, 0.6), #090909 92%),
-            linear-gradient(90deg, rgba(9, 9, 9, 0.92), rgba(9, 9, 9, 0.62)),
-            url("../images/hero/hero-room.jpg") 58% top / auto 62vh no-repeat;
+        background: #090909;
+    }
+
+    .hero-media {
+        left: 0;
+        opacity: 0.86;
+    }
+
+    .hero-media span {
+        background-position: 58% top;
     }
 
     .shop-page .page-hero {
         min-height: 30vh;
+        background:
+            linear-gradient(180deg, rgba(9, 9, 9, 0.6), #090909 94%),
+            linear-gradient(90deg, rgba(9, 9, 9, 0.96), rgba(9, 9, 9, 0.54)),
+            url("../images/hero/shop-room-finds.webp") 62% top / auto 56vh no-repeat;
+    }
+
+    .categories-page .page-hero {
+        min-height: calc(82svh - var(--nav-height));
+        background:
+            linear-gradient(180deg, rgba(9, 9, 9, 0.52), #090909 96%),
+            linear-gradient(90deg, rgba(9, 9, 9, 0.94), rgba(9, 9, 9, 0.54)),
+            url("../images/hero/categories-room.webp") 64% top / auto 64vh no-repeat;
     }
 
     .container {
