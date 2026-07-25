@@ -19,6 +19,7 @@ export async function handler() {
     try {
         await supabaseRequest("subscribers?select=id&limit=1");
         await supabaseRequest("orders?select=id&limit=1");
+        await supabaseRequest("analytics_events?select=id&limit=1");
 
         return json(200, {
             ok: true,

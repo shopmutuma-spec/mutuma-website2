@@ -53,10 +53,20 @@ create table if not exists public.orders (
     total numeric,
     currency text not null default 'GBP',
     status text not null default 'paid',
+    tracking_courier text,
+    tracking_number text,
+    admin_notes text,
+    order_items jsonb not null default '[]'::jsonb,
     customer_details jsonb not null default '{}'::jsonb,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
+
+alter table public.orders
+add column if not exists tracking_courier text,
+add column if not exists tracking_number text,
+add column if not exists admin_notes text,
+add column if not exists order_items jsonb not null default '[]'::jsonb;
 
 alter table public.orders enable row level security;
 
@@ -82,3 +92,37 @@ create trigger orders_set_updated_at
 before update on public.orders
 for each row
 execute function public.set_updated_at();
+
+create table if not exists public.analytics_events (
+    id uuid primary key default gen_random_uuid(),
+    event_name text not null,
+    session_id text,
+    page_path text,
+    product_id text,
+    product_name text,
+    search_query text,
+    currency text,
+    value numeric,
+    metadata jsonb not null default '{}'::jsonb,
+    user_agent text,
+    country text,
+    created_at timestamptz not null default now()
+);
+
+alter table public.analytics_events enable row level security;
+
+drop policy if exists "No public analytics reads" on public.analytics_events;
+
+create policy "No public analytics reads"
+on public.analytics_events
+for select
+to anon, authenticated
+using (false);
+
+drop policy if exists "No public analytics writes" on public.analytics_events;
+
+create policy "No public analytics writes"
+on public.analytics_events
+for insert
+to anon, authenticated
+with check (false);

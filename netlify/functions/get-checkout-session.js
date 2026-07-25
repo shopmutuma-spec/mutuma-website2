@@ -54,6 +54,18 @@ async function saveOrder(session) {
     const orderNumber = session.id.replace(/^cs_(test|live)_/, "").slice(0, 12).toUpperCase();
 
     try {
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+            expand: ["data.price.product"],
+            limit: 100
+        });
+        const orderItems = lineItems.data.map((item) => ({
+            name: item.description || item.price?.product?.name || "",
+            quantity: item.quantity || 1,
+            amount_total: item.amount_total ? item.amount_total / 100 : null,
+            currency: String(item.currency || session.currency || "gbp").toUpperCase(),
+            product_id: item.price?.product?.metadata?.product_id || ""
+        }));
+
         await supabaseRequest("orders?on_conflict=stripe_session_id", {
             method: "POST",
             body: JSON.stringify([{
@@ -64,6 +76,7 @@ async function saveOrder(session) {
                 total: session.amount_total ? session.amount_total / 100 : null,
                 currency: String(session.currency || "gbp").toUpperCase(),
                 status: session.payment_status,
+                order_items: orderItems,
                 customer_details: session.customer_details || {}
             }])
         });

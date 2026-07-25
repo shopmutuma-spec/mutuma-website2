@@ -160,7 +160,7 @@ function scheduleRender() {
 
 searchInput.addEventListener("input", (event) => {
     state.query = event.target.value;
-    trackEvent("product_searched", { source: "shop", query: state.query });
+    trackEvent("search_performed", { source: "shop", query: state.query });
     scheduleRender();
 });
 

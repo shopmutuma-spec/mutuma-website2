@@ -82,13 +82,15 @@ export async function getCurrentUser() {
     return response.json();
 }
 
-export async function adminFetch(path) {
+export async function adminFetch(path, options = {}) {
     const session = getSession();
     if (!session?.access_token) throw new Error("Please sign in first.");
 
     const response = await fetch(path, {
+        ...options,
         headers: {
-            Authorization: `Bearer ${session.access_token}`
+            Authorization: `Bearer ${session.access_token}`,
+            ...(options.headers || {})
         }
     });
     const data = await response.json().catch(() => ({}));
