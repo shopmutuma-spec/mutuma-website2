@@ -1522,6 +1522,182 @@ textarea {
     align-items: start;
 }
 
+.admin-command-centre {
+    display: grid;
+    gap: 18px;
+    margin: 24px 0;
+}
+
+.admin-live-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.admin-live-grid > div,
+.admin-signal-grid > div {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+}
+
+.admin-live-grid span,
+.admin-live-grid small {
+    display: block;
+    color: var(--muted);
+}
+
+.admin-live-grid strong {
+    display: block;
+    margin: 4px 0;
+    color: var(--text);
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    line-height: 1;
+}
+
+.admin-chart-card {
+    overflow: hidden;
+}
+
+.admin-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.admin-chart-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.admin-chart-legend span::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.admin-line-chart {
+    width: 100%;
+    height: auto;
+    margin-top: 18px;
+    overflow: visible;
+}
+
+.admin-line-chart line {
+    stroke: rgba(255, 255, 255, 0.14);
+    stroke-width: 1;
+}
+
+.admin-line-chart polyline {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 8px 18px rgba(255, 255, 255, 0.12));
+}
+
+.chart-line-primary {
+    color: #ffffff;
+    stroke: #ffffff;
+}
+
+.chart-line-secondary {
+    color: #a7a7a7;
+    stroke: #a7a7a7;
+}
+
+.chart-line-tertiary {
+    color: #5f5f5f;
+    stroke: #5f5f5f;
+}
+
+.admin-bar-list {
+    display: grid;
+    gap: 12px;
+}
+
+.admin-bar-list > div {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+    padding: 0 0 12px;
+}
+
+.admin-bar-list span,
+.admin-bar-list b {
+    position: relative;
+    z-index: 1;
+}
+
+.admin-bar-list span {
+    overflow: hidden;
+    color: var(--muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-bar-list i {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: #ffffff;
+}
+
+.admin-funnel {
+    display: grid;
+    gap: 12px;
+}
+
+.admin-funnel > div {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-funnel span,
+.admin-funnel strong,
+.admin-funnel small {
+    position: relative;
+    z-index: 1;
+    display: block;
+}
+
+.admin-funnel span,
+.admin-funnel small {
+    color: var(--muted);
+}
+
+.admin-funnel strong {
+    margin: 3px 0;
+    color: var(--text);
+    font-size: 1.6rem;
+}
+
+.admin-funnel i {
+    position: absolute;
+    inset: auto auto 0 0;
+    height: 3px;
+    border-radius: 999px;
+    background: #ffffff;
+}
+
 .admin-rank-list {
     list-style: none;
     padding: 0;
@@ -2111,8 +2287,18 @@ textarea {
 
     .admin-analytics-grid,
     .admin-split,
-    .admin-detail-grid {
+    .admin-detail-grid,
+    .admin-live-grid {
         grid-template-columns: 1fr;
+    }
+
+    .admin-card-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-chart-legend {
+        justify-content: flex-start;
     }
 
     .filters,

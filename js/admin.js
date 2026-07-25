@@ -87,6 +87,183 @@ function listMetric(title, rows) {
     `;
 }
 
+function percent(value) {
+    return `${Math.round(Number(value || 0) * 100)}%`;
+}
+
+function maxValue(rows, key) {
+    return Math.max(1, ...rows.map((row) => Number(row[key] || 0)));
+}
+
+function lineChart(title, rows, series, formatter = (value) => value) {
+    const width = 720;
+    const height = 220;
+    const padding = 28;
+    const max = Math.max(1, ...rows.flatMap((row) => series.map((item) => Number(row[item.key] || 0))));
+    const xStep = rows.length > 1 ? (width - padding * 2) / (rows.length - 1) : 0;
+    const paths = series.map((item) => {
+        const points = rows.map((row, index) => {
+            const x = padding + index * xStep;
+            const y = height - padding - (Number(row[item.key] || 0) / max) * (height - padding * 2);
+            return `${x},${y}`;
+        }).join(" ");
+        return `<polyline points="${points}" class="${item.className}" vector-effect="non-scaling-stroke"></polyline>`;
+    }).join("");
+    const latest = rows[rows.length - 1] || {};
+
+    return `
+        <section class="admin-card admin-chart-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Trend</span>
+                    <h3>${escapeHtml(title)}</h3>
+                </div>
+                <div class="admin-chart-legend">
+                    ${series.map((item) => `<span class="${item.className}">${escapeHtml(item.label)} ${escapeHtml(formatter(latest[item.key] || 0))}</span>`).join("")}
+                </div>
+            </div>
+            <svg class="admin-line-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(title)}">
+                <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}"></line>
+                ${paths}
+            </svg>
+        </section>
+    `;
+}
+
+function barChart(title, rows, key = "count") {
+    const max = maxValue(rows, key);
+
+    return `
+        <section class="admin-card">
+            <h3>${escapeHtml(title)}</h3>
+            ${rows.length ? `
+                <div class="admin-bar-list">
+                    ${rows.map((row) => `
+                        <div>
+                            <span>${escapeHtml(row.label || row.name)}</span>
+                            <b>${escapeHtml(row[key])}</b>
+                            <i style="width:${Math.max(4, Number(row[key] || 0) / max * 100)}%"></i>
+                        </div>
+                    `).join("")}
+                </div>
+            ` : '<div class="empty-state compact">No data yet.</div>'}
+        </section>
+    `;
+}
+
+function signalCard(label, value, note = "") {
+    return `
+        <div>
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+            ${note ? `<small>${escapeHtml(note)}</small>` : ""}
+        </div>
+    `;
+}
+
+function funnelChart(rows) {
+    const max = maxValue(rows, "value");
+
+    return `
+        <section class="admin-card admin-funnel-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Conversion</span>
+                    <h3>Store Funnel</h3>
+                </div>
+            </div>
+            <div class="admin-funnel">
+                ${rows.map((row) => `
+                    <div>
+                        <span>${escapeHtml(row.label)}</span>
+                        <strong>${escapeHtml(row.value)}</strong>
+                        <small>${percent(row.rateFromVisitors)} of visitors</small>
+                        <i style="width:${Math.max(5, Number(row.value || 0) / max * 100)}%"></i>
+                    </div>
+                `).join("")}
+            </div>
+        </section>
+    `;
+}
+
+function productPerformanceTable(products) {
+    if (!products.length) return '<div class="empty-state compact">No product performance yet.</div>';
+
+    return `
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead><tr><th>Product</th><th>Views</th><th>Cart</th><th>Checkout</th><th>Purchases</th><th>View to cart</th></tr></thead>
+                <tbody>
+                    ${products.slice(0, 20).map((product) => `
+                        <tr>
+                            <td><strong>${escapeHtml(product.name)}</strong><br><span class="muted">${escapeHtml(product.category)}</span></td>
+                            <td>${product.views}</td>
+                            <td>${product.addToCart}</td>
+                            <td>${product.checkoutStarts}</td>
+                            <td>${product.purchases}</td>
+                            <td>${percent(product.cartRate)}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function analyticsCommandCentre(data) {
+    const dailySeries = data.metrics.dailySeries || [];
+    const funnel = data.metrics.funnel || [];
+    const categoryRows = (data.metrics.categoryPerformance || []).map((category) => ({
+        label: category.label,
+        count: category.views
+    }));
+    const underperformers = (data.metrics.underperformingProducts || []).map((product) => ({
+        label: product.name,
+        count: product.views
+    }));
+
+    return `
+        <section class="admin-command-centre">
+            <div class="admin-live-grid">
+                ${signalCard("Live visitors", data.metrics.liveVisitors || 0, "active in the last 10 minutes")}
+                ${signalCard("Conversion rate", percent(data.metrics.conversionRate || 0), "orders divided by visitors")}
+                ${signalCard("Engagement rate", percent(data.metrics.engagementRate || 0), "sessions with meaningful activity")}
+                ${signalCard("Single-page sessions", percent(data.metrics.singlePageRate || 0), "watch this if it rises")}
+            </div>
+            ${lineChart("Traffic and Product Interest", dailySeries, [
+                { key: "visitors", label: "Visitors", className: "chart-line-primary" },
+                { key: "pageViews", label: "Page views", className: "chart-line-secondary" },
+                { key: "productViews", label: "Product views", className: "chart-line-tertiary" }
+            ])}
+            ${lineChart("Checkout and Revenue", dailySeries, [
+                { key: "checkoutStarts", label: "Checkout starts", className: "chart-line-primary" },
+                { key: "purchases", label: "Purchases", className: "chart-line-secondary" },
+                { key: "revenue", label: "Revenue", className: "chart-line-tertiary" }
+            ], (value) => Number(value || 0).toFixed(0))}
+            <div class="admin-analytics-grid">
+                ${funnelChart(funnel)}
+                ${barChart("Category Demand", categoryRows)}
+                ${barChart("Most Viewed Products", data.metrics.topProducts || [])}
+                ${barChart("Most Visited Pages", data.metrics.topPages || [])}
+                ${barChart("Search Demand", data.metrics.topSearches || [])}
+                ${barChart("Needs Attention", underperformers)}
+                ${barChart("Countries", data.metrics.topCountries || [])}
+                ${barChart("Devices", data.metrics.deviceSplit || [])}
+                ${barChart("Browsers", data.metrics.browserSplit || [])}
+            </div>
+            <section class="admin-card">
+                <div class="admin-card-head">
+                    <div>
+                        <span class="eyebrow">Product Intelligence</span>
+                        <h3>Performance Table</h3>
+                    </div>
+                </div>
+                ${productPerformanceTable(data.metrics.productPerformance || [])}
+            </section>
+        </section>
+    `;
+}
+
 function orderRows(orders) {
     if (!orders.length) return '<div class="empty-state compact">No orders yet.</div>';
 
@@ -250,6 +427,7 @@ function renderAdmin(user, selectedOrderNumber = "") {
             </div>
             <div class="split-actions">
                 <button class="button secondary" data-export-subscribers>Email CSV</button>
+                <button class="button secondary" data-export-product-analytics>Product Analytics CSV</button>
                 <a class="button secondary" href="account.html">Account</a>
             </div>
         </div>
@@ -261,20 +439,16 @@ function renderAdmin(user, selectedOrderNumber = "") {
             ${metricCard("page views / 30 days", data.counts.pageViews)}
             ${metricCard("revenue", money(data.metrics.revenue || 0, data.orders[0]?.currency || "GBP"))}
         </div>
-        <div class="admin-analytics-grid">
-            ${listMetric("Most Viewed Products", data.metrics.topProducts || [])}
-            ${listMetric("Most Visited Pages", data.metrics.topPages || [])}
-            ${listMetric("Top Searches", data.metrics.topSearches || [])}
-            <section class="admin-card">
-                <h3>Store Signals</h3>
-                <div class="admin-mini-list">
-                    <div><span>Average order value</span><strong>${money(data.metrics.averageOrderValue || 0, data.orders[0]?.currency || "GBP")}</strong></div>
-                    <div><span>Product views</span><strong>${data.metrics.productViews || 0}</strong></div>
-                    <div><span>Checkout starts</span><strong>${data.metrics.checkoutStarts || 0}</strong></div>
-                    <div><span>Searches</span><strong>${data.metrics.searches || 0}</strong></div>
-                </div>
-            </section>
-        </div>
+        <section class="admin-card">
+            <h3>Store Signals</h3>
+            <div class="admin-mini-list admin-signal-grid">
+                <div><span>Average order value</span><strong>${money(data.metrics.averageOrderValue || 0, data.orders[0]?.currency || "GBP")}</strong></div>
+                <div><span>Product views</span><strong>${data.metrics.productViews || 0}</strong></div>
+                <div><span>Checkout starts</span><strong>${data.metrics.checkoutStarts || 0}</strong></div>
+                <div><span>Searches</span><strong>${data.metrics.searches || 0}</strong></div>
+            </div>
+        </section>
+        ${analyticsCommandCentre(data)}
         <div class="admin-split">
             <section>
                 <h3>Recent Orders</h3>
@@ -299,19 +473,20 @@ function renderAdmin(user, selectedOrderNumber = "") {
     `;
 }
 
-async function loadAdmin() {
+async function loadAdmin(options = {}) {
+    const silent = Boolean(options.silent);
     const user = await getCurrentUser().catch(() => null);
     if (!user) return;
 
     try {
-        message.textContent = "Loading admin data...";
+        if (!silent) message.textContent = "Loading admin data...";
         adminData = await adminFetch("/.netlify/functions/admin-data");
         form.hidden = true;
         panel.hidden = false;
         renderAdmin(user);
         message.textContent = "";
     } catch (error) {
-        message.textContent = error.message;
+        if (!silent) message.textContent = error.message;
     }
 }
 
@@ -374,6 +549,20 @@ panel.addEventListener("click", (event) => {
             { label: "Joined", key: "subscribed_at" }
         ], adminData.subscribers);
     }
+
+    if (event.target.closest("[data-export-product-analytics]") && adminData) {
+        downloadCsv("mutuma-product-analytics.csv", [
+            { label: "Product", key: "name" },
+            { label: "Category", key: "category" },
+            { label: "Views", key: "views" },
+            { label: "Cart Adds", key: "addToCart" },
+            { label: "Checkout Starts", key: "checkoutStarts" },
+            { label: "Purchases", key: "purchases" },
+            { label: "Revenue", key: "revenue" },
+            { label: "View To Cart Rate", key: "cartRate" },
+            { label: "Purchase Rate", key: "purchaseRate" }
+        ], adminData.metrics.productPerformance || []);
+    }
 });
 
 panel.addEventListener("input", (event) => {
@@ -401,3 +590,9 @@ panel.addEventListener("submit", (event) => {
 });
 
 loadAdmin();
+
+setInterval(() => {
+    if (!panel.hidden && document.visibilityState === "visible") {
+        loadAdmin({ silent: true });
+    }
+}, 60000);
