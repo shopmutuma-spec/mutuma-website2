@@ -1633,6 +1633,13 @@ textarea {
     margin: 24px 0;
 }
 
+.admin-management-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+}
+
 .admin-live-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1881,6 +1888,18 @@ textarea {
     padding: 12px;
     color: var(--text);
     background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-update-form .check-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: var(--muted);
+}
+
+.admin-update-form .check-row input {
+    width: auto;
+    margin: 0;
 }
 
 .muted {
@@ -2423,7 +2442,8 @@ textarea {
     .admin-analytics-grid,
     .admin-split,
     .admin-detail-grid,
-    .admin-live-grid {
+    .admin-live-grid,
+    .admin-management-grid {
         grid-template-columns: 1fr;
     }
 

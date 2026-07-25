@@ -14,6 +14,14 @@ function parseNumber(value) {
     return Number.isFinite(number) ? number : 0;
 }
 
+async function optionalSupabaseRequest(path) {
+    try {
+        return await supabaseRequest(path);
+    } catch (error) {
+        return [];
+    }
+}
+
 function topByCount(rows, key, limit = 8) {
     const counts = new Map();
     rows.forEach((row) => {
@@ -278,11 +286,28 @@ export async function handler(event) {
     try {
         const thirtyDaysAgo = startOfDay(30);
         const sevenDaysAgo = startOfDay(7);
-        const [subscribers, orders, analyticsEvents] = await Promise.all([
+        const [subscribers, orders, analyticsEvents, adminProducts, offers] = await Promise.all([
             supabaseRequest("subscribers?select=email,source,subscribed_at&order=subscribed_at.desc&limit=200"),
             supabaseRequest("orders?select=order_number,email,name,total,currency,status,stripe_session_id,tracking_courier,tracking_number,admin_notes,order_items,customer_details,created_at,updated_at&order=created_at.desc&limit=200"),
-            supabaseRequest(`analytics_events?select=event_name,session_id,page_path,product_id,product_name,search_query,currency,value,user_agent,country,created_at&created_at=gte.${encodeURIComponent(thirtyDaysAgo)}&order=created_at.desc&limit=3000`)
+            supabaseRequest(`analytics_events?select=event_name,session_id,page_path,product_id,product_name,search_query,currency,value,user_agent,country,created_at&created_at=gte.${encodeURIComponent(thirtyDaysAgo)}&order=created_at.desc&limit=3000`),
+            optionalSupabaseRequest("catalog_products?select=id,name,description,category,price,old_price,currency,image_url,tags,stock,featured,published,created_at&order=created_at.desc&limit=300"),
+            optionalSupabaseRequest("store_offers?select=id,name,discount_percent,scope,enabled,starts_at,ends_at,created_at&order=created_at.desc&limit=50")
         ]);
+        const allProducts = [
+            ...products,
+            ...adminProducts.map((product) => ({
+                id: product.id,
+                name: product.name,
+                description: product.description || "",
+                category: product.category || "Decor",
+                price: parseNumber(product.price),
+                oldPrice: product.old_price ? parseNumber(product.old_price) : null,
+                images: [product.image_url].filter(Boolean),
+                tags: Array.isArray(product.tags) ? product.tags : [],
+                stock: product.stock,
+                featured: product.featured
+            }))
+        ];
 
         const orderRevenue = orders.reduce((total, order) => total + parseNumber(order.total), 0);
         const productViews = analyticsEvents.filter((eventItem) => eventItem.event_name === "product_viewed");
@@ -292,13 +317,13 @@ export async function handler(event) {
         const visitorSessions = new Set(analyticsEvents.map((eventItem) => eventItem.session_id).filter(Boolean));
         const recentSevenDayEvents = analyticsEvents.filter((eventItem) => new Date(eventItem.created_at) >= new Date(sevenDaysAgo));
         const recentTenMinuteEvents = analyticsEvents.filter((eventItem) => Date.now() - new Date(eventItem.created_at).getTime() <= 10 * 60 * 1000);
-        const productPerformance = buildProductPerformance(analyticsEvents, products, orders);
+        const productPerformance = buildProductPerformance(analyticsEvents, allProducts, orders);
         const dailySeries = buildDailySeries(analyticsEvents, orders);
         const sessionQuality = buildSessionQuality(analyticsEvents);
 
         return json(200, {
             counts: {
-                products: products.length,
+                products: allProducts.length,
                 subscribers: subscribers.length,
                 orders: orders.length,
                 visitors: visitorSessions.size,
@@ -334,7 +359,9 @@ export async function handler(event) {
             subscribers,
             orders,
             customers: buildCustomers(orders, subscribers),
-            products: products.map((product) => ({
+            offers,
+            adminProducts,
+            products: allProducts.map((product) => ({
                 id: product.id,
                 name: product.name,
                 category: product.category,

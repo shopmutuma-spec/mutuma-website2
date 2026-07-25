@@ -264,6 +264,69 @@ function analyticsCommandCentre(data) {
     `;
 }
 
+function offersPanel(data) {
+    const activeOffer = (data.offers || []).find((offer) => offer.enabled) || {};
+
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Offers</span>
+                    <h3>Storewide Sale</h3>
+                </div>
+                <span class="status-pill">${activeOffer.enabled ? `${activeOffer.discount_percent}% off` : "No active offer"}</span>
+            </div>
+            <form class="admin-update-form" data-offer-form>
+                <input type="hidden" name="id" value="${escapeHtml(activeOffer.id || "")}">
+                <label>Offer name<input name="name" value="${escapeHtml(activeOffer.name || "45% off everything")}" required></label>
+                <label>Discount percent<input name="discountPercent" type="number" min="0" max="90" step="1" value="${escapeHtml(activeOffer.discount_percent || 45)}" required></label>
+                <label>Start date<input name="startsAt" type="datetime-local"></label>
+                <label>End date<input name="endsAt" type="datetime-local"></label>
+                <label class="check-row"><input name="enabled" type="checkbox" ${activeOffer.enabled !== false ? "checked" : ""}> Active on website</label>
+                <button class="button primary">Save Offer</button>
+                <p class="form-message" data-offer-message></p>
+            </form>
+            ${(data.offers || []).length ? `
+                <div class="admin-mini-list">
+                    ${(data.offers || []).slice(0, 5).map((offer) => `
+                        <div><span>${escapeHtml(offer.name)}</span><strong>${escapeHtml(offer.discount_percent)}%</strong></div>
+                    `).join("")}
+                </div>
+            ` : ""}
+        </section>
+    `;
+}
+
+function productManagerPanel() {
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Products</span>
+                    <h3>Add Product</h3>
+                </div>
+            </div>
+            <form class="admin-update-form" data-product-form>
+                <label>Name<input name="name" required placeholder="Chrome Heart Style Rug"></label>
+                <label>Description<textarea name="description" rows="3" placeholder="Short premium product description"></textarea></label>
+                <label>Category<input name="category" list="admin-category-list" value="Decor" required></label>
+                <datalist id="admin-category-list">
+                    ${["Rugs", "Posters", "Lighting", "Lego", "Organisation", "Mirrors", "Furniture", "Decor"].map((category) => `<option value="${category}"></option>`).join("")}
+                </datalist>
+                <label>Price GBP<input name="price" type="number" min="0" step="0.01" required></label>
+                <label>Previous price GBP<input name="oldPrice" type="number" min="0" step="0.01"></label>
+                <label>Image URL<input name="imageUrl" required placeholder="https://... or images/products/name.webp"></label>
+                <label>Tags<input name="tags" placeholder="featured, trending, rugs"></label>
+                <label>Stock<input name="stock" type="number" min="0" step="1"></label>
+                <label class="check-row"><input name="featured" type="checkbox"> Featured product</label>
+                <label class="check-row"><input name="published" type="checkbox" checked> Published</label>
+                <button class="button primary">Add Product</button>
+                <p class="form-message" data-product-message></p>
+            </form>
+        </section>
+    `;
+}
+
 function orderRows(orders) {
     if (!orders.length) return '<div class="empty-state compact">No orders yet.</div>';
 
@@ -448,6 +511,10 @@ function renderAdmin(user, selectedOrderNumber = "") {
                 <div><span>Searches</span><strong>${data.metrics.searches || 0}</strong></div>
             </div>
         </section>
+        <div class="admin-management-grid">
+            ${offersPanel(data)}
+            ${productManagerPanel()}
+        </div>
         ${analyticsCommandCentre(data)}
         <div class="admin-split">
             <section>
@@ -520,6 +587,72 @@ async function saveOrder(formElement) {
     }
 }
 
+async function saveOffer(formElement) {
+    const statusMessage = formElement.querySelector("[data-offer-message]");
+    const submitButton = formElement.querySelector("button");
+    submitButton.disabled = true;
+    statusMessage.textContent = "Saving offer...";
+
+    try {
+        await adminFetch("/.netlify/functions/admin-save-offer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: formElement.id.value || "",
+                name: formElement.name.value,
+                discountPercent: formElement.discountPercent.value,
+                startsAt: formElement.startsAt.value ? new Date(formElement.startsAt.value).toISOString() : null,
+                endsAt: formElement.endsAt.value ? new Date(formElement.endsAt.value).toISOString() : null,
+                enabled: formElement.enabled.checked
+            })
+        });
+        await loadAdmin({ silent: true });
+        statusMessage.textContent = "Offer saved.";
+    } catch (error) {
+        statusMessage.textContent = error.message;
+    } finally {
+        submitButton.disabled = false;
+    }
+}
+
+async function saveProduct(formElement) {
+    const statusMessage = formElement.querySelector("[data-product-message]");
+    const submitButton = formElement.querySelector("button");
+    submitButton.disabled = true;
+    statusMessage.textContent = "Adding product...";
+
+    try {
+        await adminFetch("/.netlify/functions/admin-save-product", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: formElement.name.value,
+                description: formElement.description.value,
+                category: formElement.category.value,
+                price: formElement.price.value,
+                oldPrice: formElement.oldPrice.value,
+                imageUrl: formElement.imageUrl.value,
+                tags: formElement.tags.value,
+                stock: formElement.stock.value,
+                featured: formElement.featured.checked,
+                published: formElement.published.checked
+            })
+        });
+        formElement.reset();
+        formElement.published.checked = true;
+        await loadAdmin({ silent: true });
+        statusMessage.textContent = "Product added.";
+    } catch (error) {
+        statusMessage.textContent = error.message;
+    } finally {
+        submitButton.disabled = false;
+    }
+}
+
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const button = form.querySelector("button");
@@ -584,9 +717,14 @@ panel.addEventListener("input", (event) => {
 
 panel.addEventListener("submit", (event) => {
     const updateForm = event.target.closest("[data-order-update]");
-    if (!updateForm) return;
+    const offerForm = event.target.closest("[data-offer-form]");
+    const productForm = event.target.closest("[data-product-form]");
+
+    if (!updateForm && !offerForm && !productForm) return;
     event.preventDefault();
-    saveOrder(updateForm);
+    if (updateForm) saveOrder(updateForm);
+    if (offerForm) saveOffer(offerForm);
+    if (productForm) saveProduct(productForm);
 });
 
 loadAdmin();

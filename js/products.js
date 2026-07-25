@@ -3039,6 +3039,75 @@ const baseProducts = [
 ];
 
 export const products = baseProducts;
+export let activeStoreOffers = [];
+let catalogLoaded = false;
+
+function normalizeRemoteProduct(product) {
+    return {
+        id: product.id,
+        name: product.name,
+        description: product.description || "",
+        category: product.category || "Decor",
+        price: Number(product.price || 0),
+        oldPrice: product.old_price ? Number(product.old_price) : null,
+        currency: product.currency || "GBP",
+        rating: 4.8,
+        reviews: 0,
+        stock: product.stock || null,
+        images: [product.image_url].filter(Boolean),
+        tags: Array.isArray(product.tags) ? product.tags : [],
+        featured: Boolean(product.featured),
+        adminProduct: true
+    };
+}
+
+function applyOffer(product, offer) {
+    if (!offer || offer.scope !== "all") return product;
+
+    const basePrice = Number(product.basePrice || product._basePrice || product.oldPrice || product.price || 0);
+    const discount = Math.max(0, Math.min(Number(offer.discount_percent || 0), 90));
+    if (!basePrice || !discount) return product;
+
+    product._basePrice = basePrice;
+    product.oldPrice = Math.max(Number(product.oldPrice || 0), basePrice);
+    product.price = Number((basePrice * (1 - discount / 100)).toFixed(2));
+    product.tags = Array.from(new Set([...(product.tags || []), "offer"]));
+    return product;
+}
+
+export async function loadStoreCatalog() {
+    if (catalogLoaded) return products;
+    catalogLoaded = true;
+
+    try {
+        const response = await fetch("/.netlify/functions/store-catalog");
+        if (!response.ok) throw new Error("Store catalogue unavailable.");
+
+        const data = await response.json();
+        activeStoreOffers = Array.isArray(data.offers) ? data.offers : [];
+        const remoteProducts = Array.isArray(data.products) ? data.products.map(normalizeRemoteProduct) : [];
+        const existingIds = new Set(products.map((product) => product.id));
+
+        remoteProducts.forEach((product) => {
+            if (product.images?.[0] && !existingIds.has(product.id)) {
+                products.push(product);
+                existingIds.add(product.id);
+            }
+        });
+
+        const bestOffer = activeStoreOffers
+            .filter((offer) => offer.scope === "all")
+            .sort((first, second) => Number(second.discount_percent) - Number(first.discount_percent))[0];
+
+        if (bestOffer) {
+            products.forEach((product) => applyOffer(product, bestOffer));
+        }
+    } catch (error) {
+        activeStoreOffers = [];
+    }
+
+    return products;
+}
 
 export const categories = [
     {
@@ -3245,4 +3314,3 @@ export function getRecommendedProducts(productId, limit = 4) {
         })
         .slice(0, limit);
 }
-

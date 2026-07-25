@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { products } from "../../js/products.js";
 import { storeSettings } from "../../js/site-settings.js";
+import { supabaseRequest } from "./supabase-client.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 const FREE_SHIPPING_THRESHOLD = storeSettings.freeShippingThreshold;
@@ -62,12 +63,59 @@ function getOrigin(event) {
     return host ? `https://${host}` : "https://mutuma.netlify.app";
 }
 
-function sanitizeCart(cart) {
+function normalizeRemoteProduct(product) {
+    return {
+        id: product.id,
+        name: product.name,
+        description: product.description || "",
+        category: product.category || "Decor",
+        price: Number(product.price || 0),
+        oldPrice: product.old_price ? Number(product.old_price) : null,
+        currency: product.currency || "GBP",
+        images: [product.image_url].filter(Boolean),
+        tags: Array.isArray(product.tags) ? product.tags : []
+    };
+}
+
+function isActiveOffer(offer) {
+    const now = Date.now();
+    const startsAt = offer.starts_at ? new Date(offer.starts_at).getTime() : 0;
+    const endsAt = offer.ends_at ? new Date(offer.ends_at).getTime() : Infinity;
+    return offer.enabled && startsAt <= now && now <= endsAt;
+}
+
+async function loadCheckoutProducts() {
+    try {
+        const [remoteProducts, offers] = await Promise.all([
+            supabaseRequest("catalog_products?select=id,name,description,category,price,old_price,currency,image_url,tags,published&published=eq.true&limit=300"),
+            supabaseRequest("store_offers?select=name,discount_percent,scope,enabled,starts_at,ends_at&enabled=eq.true&limit=20")
+        ]);
+        const mergedProducts = [...products, ...remoteProducts.map(normalizeRemoteProduct)];
+        const bestOffer = offers
+            .filter(isActiveOffer)
+            .filter((offer) => offer.scope === "all")
+            .sort((first, second) => Number(second.discount_percent) - Number(first.discount_percent))[0];
+
+        if (bestOffer) {
+            mergedProducts.forEach((product) => {
+                const basePrice = Number(product.oldPrice || product.price || 0);
+                product.oldPrice = Math.max(Number(product.oldPrice || 0), basePrice);
+                product.price = Number((basePrice * (1 - Number(bestOffer.discount_percent) / 100)).toFixed(2));
+            });
+        }
+
+        return mergedProducts;
+    } catch (error) {
+        return products;
+    }
+}
+
+function sanitizeCart(cart, catalogProducts) {
     if (!Array.isArray(cart)) return [];
 
     return cart
         .map((item) => {
-            const product = products.find((entry) => entry.id === item.id);
+            const product = catalogProducts.find((entry) => entry.id === item.id);
             const quantity = Math.max(1, Math.min(Number(item.quantity) || 1, 20));
 
             if (!product) return null;
@@ -123,7 +171,8 @@ export async function handler(event) {
 
     try {
         const payload = JSON.parse(event.body || "{}");
-        const cart = sanitizeCart(payload.cart);
+        const catalogProducts = await loadCheckoutProducts();
+        const cart = sanitizeCart(payload.cart, catalogProducts);
         const currency = sanitizeCurrency(payload.currency);
         const stripeCurrency = currency.toLowerCase();
         const rates = await loadRates();

@@ -1,4 +1,4 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260724a";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260725a";
 import { formatPrice, currentCurrency } from "./currency.js?v=20260724a";
 import { checkoutCart, checkoutProduct } from "./stripe.js?v=20260724a";
 import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260724a";

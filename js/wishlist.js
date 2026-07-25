@@ -1,8 +1,9 @@
-import { findProductById } from "./products.js?v=20260724a";
+import { findProductById, loadStoreCatalog } from "./products.js?v=20260725a";
 import { initCurrency } from "./currency.js?v=20260724a";
 import { getWishlist } from "./store.js?v=20260724a";
 import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260725a";
 
+await loadStoreCatalog();
 initBaseLayout();
 initCurrency().catch(() => {});
 

@@ -111,6 +111,97 @@ create table if not exists public.analytics_events (
 
 alter table public.analytics_events enable row level security;
 
+create table if not exists public.catalog_products (
+    id text primary key,
+    name text not null,
+    description text not null default '',
+    category text not null default 'Decor',
+    price numeric not null,
+    old_price numeric,
+    currency text not null default 'GBP',
+    image_url text not null,
+    tags text[] not null default '{}'::text[],
+    stock integer,
+    featured boolean not null default false,
+    published boolean not null default true,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+alter table public.catalog_products enable row level security;
+
+create policy "No public catalog product writes"
+on public.catalog_products
+for insert
+to anon, authenticated
+with check (false);
+
+create policy "No public catalog product updates"
+on public.catalog_products
+for update
+to anon, authenticated
+using (false)
+with check (false);
+
+create policy "No public catalog product deletes"
+on public.catalog_products
+for delete
+to anon, authenticated
+using (false);
+
+drop trigger if exists catalog_products_set_updated_at on public.catalog_products;
+
+create trigger catalog_products_set_updated_at
+before update on public.catalog_products
+for each row
+execute function public.set_updated_at();
+
+create table if not exists public.store_offers (
+    id uuid primary key default gen_random_uuid(),
+    name text not null,
+    discount_percent numeric not null,
+    scope text not null default 'all',
+    enabled boolean not null default true,
+    starts_at timestamptz,
+    ends_at timestamptz,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+alter table public.store_offers enable row level security;
+
+create policy "No public offer writes"
+on public.store_offers
+for insert
+to anon, authenticated
+with check (false);
+
+create policy "No public offer updates"
+on public.store_offers
+for update
+to anon, authenticated
+using (false)
+with check (false);
+
+create policy "No public offer deletes"
+on public.store_offers
+for delete
+to anon, authenticated
+using (false);
+
+drop trigger if exists store_offers_set_updated_at on public.store_offers;
+
+create trigger store_offers_set_updated_at
+before update on public.store_offers
+for each row
+execute function public.set_updated_at();
+
+insert into public.store_offers (name, discount_percent, scope, enabled)
+select '45% off everything', 45, 'all', true
+where not exists (
+    select 1 from public.store_offers where name = '45% off everything'
+);
+
 drop policy if exists "No public analytics reads" on public.analytics_events;
 
 create policy "No public analytics reads"
