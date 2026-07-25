@@ -2,7 +2,7 @@ import { initCurrency, formatPrice } from "./currency.js?v=20260724a";
 import { addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260724a";
 import { checkoutCart } from "./stripe.js?v=20260724a";
 import { trackEvent } from "./analytics.js?v=20260724a";
-import { storeSettings } from "./site-settings.js?v=20260724a";
+import { storeSettings } from "./site-settings.js?v=20260725a";
 import { loadStoreCatalog } from "./products.js?v=20260725a";
 import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260725a";
 

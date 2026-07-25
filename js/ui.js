@@ -3,7 +3,7 @@ import { formatPrice, currentCurrency } from "./currency.js?v=20260724a";
 import { checkoutCart, checkoutProduct } from "./stripe.js?v=20260724a";
 import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260724a";
 import { trackEvent } from "./analytics.js?v=20260724a";
-import { storeSettings } from "./site-settings.js?v=20260724a";
+import { storeSettings } from "./site-settings.js?v=20260725a";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',

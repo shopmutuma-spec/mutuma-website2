@@ -91,7 +91,8 @@ async function loadCheckoutProducts() {
             supabaseRequest("store_offers?select=name,discount_percent,scope,enabled,starts_at,ends_at&enabled=eq.true&limit=20")
         ]);
         const mergedProducts = [...products, ...remoteProducts.map(normalizeRemoteProduct)];
-        const bestOffer = offers
+        const activeOffers = offers.length ? offers : [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
+        const bestOffer = activeOffers
             .filter(isActiveOffer)
             .filter((offer) => offer.scope === "all")
             .sort((first, second) => Number(second.discount_percent) - Number(first.discount_percent))[0];
@@ -106,7 +107,17 @@ async function loadCheckoutProducts() {
 
         return mergedProducts;
     } catch (error) {
-        return products;
+        return products.map((product) => {
+            const offer = storeSettings.fallbackOffer;
+            const basePrice = Number(product.oldPrice || product.price || 0);
+            if (!offer?.enabled || !basePrice) return product;
+
+            return {
+                ...product,
+                oldPrice: Math.max(Number(product.oldPrice || 0), basePrice),
+                price: Number((basePrice * (1 - Number(offer.discount_percent) / 100)).toFixed(2))
+            };
+        });
     }
 }
 

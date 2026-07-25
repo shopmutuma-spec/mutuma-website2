@@ -1,3 +1,5 @@
+import { storeSettings } from "./site-settings.js?v=20260725a";
+
 const baseProducts = [
     {
         id: "cartoon-character-shaped-rug",
@@ -3084,7 +3086,7 @@ export async function loadStoreCatalog() {
         if (!response.ok) throw new Error("Store catalogue unavailable.");
 
         const data = await response.json();
-        activeStoreOffers = Array.isArray(data.offers) ? data.offers : [];
+        activeStoreOffers = Array.isArray(data.offers) && data.offers.length ? data.offers : [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
         const remoteProducts = Array.isArray(data.products) ? data.products.map(normalizeRemoteProduct) : [];
         const existingIds = new Set(products.map((product) => product.id));
 
@@ -3103,7 +3105,17 @@ export async function loadStoreCatalog() {
             products.forEach((product) => applyOffer(product, bestOffer));
         }
     } catch (error) {
-        activeStoreOffers = [];
+        activeStoreOffers = [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
+    }
+
+    if (activeStoreOffers.length) {
+        const fallbackBestOffer = activeStoreOffers
+            .filter((offer) => offer.scope === "all")
+            .sort((first, second) => Number(second.discount_percent) - Number(first.discount_percent))[0];
+
+        if (fallbackBestOffer) {
+            products.forEach((product) => applyOffer(product, fallbackBestOffer));
+        }
     }
 
     return products;
