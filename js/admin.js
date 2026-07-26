@@ -10,6 +10,16 @@ const message = document.querySelector("[data-admin-message]");
 const panel = document.querySelector("[data-admin-panel]");
 
 let adminData = null;
+let adminState = {
+    days: "30",
+    compare: "previous_period",
+    country: "",
+    device: "",
+    source: "",
+    campaign: "",
+    product: "",
+    category: ""
+};
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -53,7 +63,9 @@ function customerAddress(details = {}) {
 }
 
 function csvEscape(value) {
-    return `"${String(value ?? "").replaceAll('"', '""')}"`;
+    const text = String(value ?? "");
+    const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+    return `"${safe.replaceAll('"', '""')}"`;
 }
 
 function downloadCsv(filename, headers, rows) {
@@ -89,6 +101,292 @@ function listMetric(title, rows) {
 
 function percent(value) {
     return `${Math.round(Number(value || 0) * 100)}%`;
+}
+
+function signedPercent(value) {
+    if (value === null || value === undefined) return "No comparison";
+    const number = Math.round(Number(value || 0) * 100);
+    return `${number >= 0 ? "+" : ""}${number}%`;
+}
+
+function metricValue(key, value) {
+    if (["grossRevenue", "netRevenue", "netProfit", "averageOrderValue", "revenuePerVisitor", "refundAmount"].includes(key)) {
+        return money(value, "GBP");
+    }
+    if (["conversionRate", "returningCustomerRate", "cartAbandonmentRate", "checkoutCompletionRate", "paymentSuccessRate", "refundRate"].includes(key)) {
+        return percent(value);
+    }
+    return Intl.NumberFormat("en-GB").format(Number(value || 0));
+}
+
+function option(value, label, currentValue) {
+    return `<option value="${escapeHtml(value)}" ${String(currentValue) === String(value) ? "selected" : ""}>${escapeHtml(label)}</option>`;
+}
+
+function uniqueOptions(rows, key) {
+    return [...new Set((rows || []).map((row) => row[key]).filter(Boolean))]
+        .sort((first, second) => String(first).localeCompare(String(second)));
+}
+
+function analyticsToolbar(data) {
+    const filters = data.filters || {};
+    const countries = uniqueOptions(data.analyticsEvents, "country");
+    const categories = uniqueOptions(data.products, "category");
+    const sources = (data.metrics.sourcePerformance || []).map((source) => source.label);
+
+    return `
+        <form class="analytics-toolbar" data-analytics-toolbar>
+            <label>Date range
+                <select name="days">
+                    ${option("1", "Today", adminState.days)}
+                    ${option("2", "Yesterday / last 2 days", adminState.days)}
+                    ${option("7", "Last 7 days", adminState.days)}
+                    ${option("30", "Last 30 days", adminState.days)}
+                    ${option("90", "Last 90 days", adminState.days)}
+                    ${option("365", "This year", adminState.days)}
+                </select>
+            </label>
+            <label>Compare
+                <select name="compare">
+                    ${option("previous_period", "Previous period", adminState.compare)}
+                    ${option("previous_year", "Previous year", adminState.compare)}
+                </select>
+            </label>
+            <label>Country
+                <select name="country">
+                    ${option("", "All countries", adminState.country)}
+                    ${countries.map((country) => option(country, country, adminState.country)).join("")}
+                </select>
+            </label>
+            <label>Device
+                <select name="device">
+                    ${option("", "All devices", adminState.device)}
+                    ${["Mobile", "Tablet", "Desktop"].map((device) => option(device, device, adminState.device)).join("")}
+                </select>
+            </label>
+            <label>Source
+                <select name="source">
+                    ${option("", "All sources", adminState.source)}
+                    ${sources.map((source) => option(source, source, adminState.source)).join("")}
+                </select>
+            </label>
+            <label>Category
+                <select name="category">
+                    ${option("", "All categories", adminState.category)}
+                    ${categories.map((category) => option(category, category, adminState.category)).join("")}
+                </select>
+            </label>
+            <label>Product
+                <select name="product">
+                    ${option("", "All products", adminState.product)}
+                    ${(data.products || []).slice(0, 250).map((product) => option(product.id, product.name, adminState.product)).join("")}
+                </select>
+            </label>
+            <div class="analytics-toolbar-actions">
+                <span>GBP</span>
+                <button class="button secondary" type="submit">Apply</button>
+                <button class="button secondary" type="button" data-refresh-admin>Refresh</button>
+                <button class="button secondary" type="button" data-export-report>Export Report</button>
+            </div>
+            <small>Last updated ${formatDate(data.generatedAt)}. Range ${formatDate(filters.from)} to ${formatDate(filters.to)}.</small>
+        </form>
+    `;
+}
+
+function kpiGrid(data) {
+    return `
+        <section class="analytics-kpi-grid">
+            ${(data.metrics.kpis || []).map((kpi) => `
+                <a class="analytics-kpi-card" href="#report-${escapeHtml(kpi.key)}" title="${escapeHtml(kpi.tooltip)}">
+                    <span>${escapeHtml(kpi.label)}${kpi.estimated ? " (estimated)" : ""}</span>
+                    <strong>${escapeHtml(metricValue(kpi.key, kpi.value))}</strong>
+                    <small class="${Number(kpi.comparison.change || 0) >= 0 ? "positive" : "negative"}">${escapeHtml(signedPercent(kpi.comparison.change))} vs previous</small>
+                    <i style="width:${Math.min(100, Math.max(6, Math.abs(Number(kpi.comparison.change || 0)) * 100))}%"></i>
+                </a>
+            `).join("")}
+        </section>
+    `;
+}
+
+function insightCards(insights) {
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">AI-style Insights</span>
+                    <h3>Recommended Actions</h3>
+                </div>
+                <span class="status-pill">Rules based</span>
+            </div>
+            <div class="insight-grid">
+                ${(insights || []).map((insight) => `
+                    <article>
+                        <strong>${escapeHtml(insight.title)}</strong>
+                        <span>${escapeHtml(insight.metric)}</span>
+                        <p>${escapeHtml(insight.action)}</p>
+                        <small>${escapeHtml(insight.confidence)} confidence / ${escapeHtml(insight.report)}</small>
+                    </article>
+                `).join("")}
+            </div>
+        </section>
+    `;
+}
+
+function alertCentre(alerts) {
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Alerts</span>
+                    <h3>Risk Centre</h3>
+                </div>
+                <span class="status-pill">${alerts.length} active</span>
+            </div>
+            ${alerts.length ? `
+                <div class="alert-list">
+                    ${alerts.map((alert) => `
+                        <article class="${escapeHtml(alert.severity)}">
+                            <span>${escapeHtml(alert.severity)}</span>
+                            <strong>${escapeHtml(alert.title)}</strong>
+                            <p>${escapeHtml(alert.detail)}</p>
+                        </article>
+                    `).join("")}
+                </div>
+            ` : '<div class="empty-state compact">No alerts in this range.</div>'}
+        </section>
+    `;
+}
+
+function diagnosticsPanel(rows) {
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Data Quality</span>
+                    <h3>Diagnostics</h3>
+                </div>
+            </div>
+            <div class="admin-mini-list">
+                ${(rows || []).map((row) => `
+                    <div>
+                        <span>${escapeHtml(row.label)}</span>
+                        <strong>${escapeHtml(row.value)} ${row.status !== "ok" ? `(${escapeHtml(row.status)})` : ""}</strong>
+                    </div>
+                `).join("")}
+            </div>
+        </section>
+    `;
+}
+
+function liveActivityPanel(data) {
+    const live = data.metrics.live || {};
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Real Time</span>
+                    <h3>Live Activity</h3>
+                </div>
+                <span class="status-pill">${live.visitors || 0} online</span>
+            </div>
+            ${(live.activity || []).length ? `
+                <div class="activity-feed">
+                    ${live.activity.slice(0, 18).map((item) => `
+                        <article>
+                            <span>${escapeHtml(item.type)}</span>
+                            <strong>${escapeHtml(item.label)}</strong>
+                            <small>${escapeHtml(item.detail)} / ${formatDate(item.created_at)}</small>
+                        </article>
+                    `).join("")}
+                </div>
+            ` : '<div class="empty-state compact">No live activity yet.</div>'}
+        </section>
+    `;
+}
+
+function sourceTable(rows) {
+    if (!rows.length) return '<div class="empty-state compact">No acquisition data yet.</div>';
+
+    return `
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead><tr><th>Source</th><th>Sessions</th><th>Product views</th><th>Cart adds</th><th>Orders</th><th>Revenue</th><th>Conv.</th></tr></thead>
+                <tbody>
+                    ${rows.map((source) => `
+                        <tr>
+                            <td>${escapeHtml(source.label)}</td>
+                            <td>${source.sessions}</td>
+                            <td>${source.productViews}</td>
+                            <td>${source.cartAdds}</td>
+                            <td>${source.orders}</td>
+                            <td>${money(source.revenue, "GBP")}</td>
+                            <td>${percent(source.conversionRate)}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function campaignLinkGenerator(data) {
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Campaigns</span>
+                    <h3>Trackable Links</h3>
+                </div>
+            </div>
+            <div class="admin-mini-list">
+                ${(data.metrics.campaignLinks || []).map((campaign) => `
+                    <div>
+                        <span>${escapeHtml(campaign.platform)}</span>
+                        <button class="button secondary" type="button" data-copy-link="${escapeHtml(campaign.url)}">Copy URL</button>
+                    </div>
+                `).join("")}
+            </div>
+            <small class="muted">Rename the campaign value for each TikTok, Instagram or Pinterest post before posting.</small>
+        </section>
+    `;
+}
+
+function goalsPanel(data) {
+    const goals = data.goals || [];
+    const metrics = data.metrics || {};
+
+    function currentValue(metric) {
+        const key = String(metric || "").replaceAll("-", "_");
+        return metrics[key] ?? metrics[metric] ?? 0;
+    }
+
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Targets</span>
+                    <h3>Goals</h3>
+                </div>
+            </div>
+            ${goals.length ? `
+                <div class="goal-list">
+                    ${goals.map((goal) => {
+                        const current = Number(currentValue(goal.metric));
+                        const target = Number(goal.target_value || 0);
+                        const progress = target ? Math.min(100, current / target * 100) : 0;
+                        return `
+                            <article>
+                                <span>${escapeHtml(goal.name)}</span>
+                                <strong>${escapeHtml(current.toFixed(2))} / ${escapeHtml(target.toFixed(2))}</strong>
+                                <i style="width:${progress}%"></i>
+                                <small>${escapeHtml(goal.period)} / ${escapeHtml(goal.metric)}</small>
+                            </article>
+                        `;
+                    }).join("")}
+                </div>
+            ` : '<div class="empty-state compact">No business goals set yet. Add rows to the business_goals table when you are ready.</div>'}
+        </section>
+    `;
 }
 
 function maxValue(rows, key) {
@@ -192,7 +490,7 @@ function productPerformanceTable(products) {
     return `
         <div class="admin-table-wrap">
             <table class="admin-table">
-                <thead><tr><th>Product</th><th>Views</th><th>Cart</th><th>Checkout</th><th>Purchases</th><th>View to cart</th></tr></thead>
+                <thead><tr><th>Product</th><th>Views</th><th>Cart</th><th>Checkout</th><th>Units</th><th>Revenue</th><th>Profit</th><th>View to cart</th></tr></thead>
                 <tbody>
                     ${products.slice(0, 20).map((product) => `
                         <tr>
@@ -201,6 +499,8 @@ function productPerformanceTable(products) {
                             <td>${product.addToCart}</td>
                             <td>${product.checkoutStarts}</td>
                             <td>${product.purchases}</td>
+                            <td>${money(product.revenue, "GBP")}</td>
+                            <td>${money(product.estimatedProfit, "GBP")} <span class="muted">est.</span></td>
                             <td>${percent(product.cartRate)}</td>
                         </tr>
                     `).join("")}
@@ -225,7 +525,7 @@ function analyticsCommandCentre(data) {
     return `
         <section class="admin-command-centre">
             <div class="admin-live-grid">
-                ${signalCard("Live visitors", data.metrics.liveVisitors || 0, "active in the last 10 minutes")}
+                ${signalCard("Live visitors", data.metrics.live?.visitors || 0, "active in the last 10 minutes")}
                 ${signalCard("Conversion rate", percent(data.metrics.conversionRate || 0), "orders divided by visitors")}
                 ${signalCard("Engagement rate", percent(data.metrics.engagementRate || 0), "sessions with meaningful activity")}
                 ${signalCard("Single-page sessions", percent(data.metrics.singlePageRate || 0), "watch this if it rises")}
@@ -250,6 +550,23 @@ function analyticsCommandCentre(data) {
                 ${barChart("Countries", data.metrics.topCountries || [])}
                 ${barChart("Devices", data.metrics.deviceSplit || [])}
                 ${barChart("Browsers", data.metrics.browserSplit || [])}
+            </div>
+            <div class="admin-analytics-grid">
+                ${insightCards(data.metrics.insights || [])}
+                ${alertCentre(data.metrics.alerts || [])}
+                ${liveActivityPanel(data)}
+                ${diagnosticsPanel(data.metrics.diagnostics || [])}
+                ${campaignLinkGenerator(data)}
+                ${goalsPanel(data)}
+                <section class="admin-card">
+                    <div class="admin-card-head">
+                        <div>
+                            <span class="eyebrow">Acquisition</span>
+                            <h3>Traffic Sources</h3>
+                        </div>
+                    </div>
+                    ${sourceTable(data.metrics.sourcePerformance || [])}
+                </section>
             </div>
             <section class="admin-card">
                 <div class="admin-card-head">
@@ -494,6 +811,8 @@ function renderAdmin(user, selectedOrderNumber = "") {
                 <a class="button secondary" href="account.html">Account</a>
             </div>
         </div>
+        ${analyticsToolbar(data)}
+        ${kpiGrid(data)}
         <div class="admin-stats">
             ${metricCard("products", data.counts.products)}
             ${metricCard("orders", data.counts.orders)}
@@ -540,6 +859,14 @@ function renderAdmin(user, selectedOrderNumber = "") {
     `;
 }
 
+function adminDataUrl() {
+    const params = new URLSearchParams();
+    Object.entries(adminState).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+    });
+    return `/.netlify/functions/admin-data?${params.toString()}`;
+}
+
 async function loadAdmin(options = {}) {
     const silent = Boolean(options.silent);
     const user = await getCurrentUser().catch(() => null);
@@ -547,7 +874,7 @@ async function loadAdmin(options = {}) {
 
     try {
         if (!silent) message.textContent = "Loading admin data...";
-        adminData = await adminFetch("/.netlify/functions/admin-data");
+        adminData = await adminFetch(adminDataUrl());
         form.hidden = true;
         panel.hidden = false;
         renderAdmin(user);
@@ -675,6 +1002,36 @@ panel.addEventListener("click", (event) => {
         getCurrentUser().then((user) => renderAdmin(user, row.dataset.orderRow));
     }
 
+    if (event.target.closest("[data-refresh-admin]")) {
+        loadAdmin();
+    }
+
+    const copyLink = event.target.closest("[data-copy-link]");
+    if (copyLink) {
+        navigator.clipboard?.writeText(copyLink.dataset.copyLink).then(() => {
+            copyLink.textContent = "Copied";
+            setTimeout(() => {
+                copyLink.textContent = "Copy URL";
+            }, 1400);
+        });
+    }
+
+    if (event.target.closest("[data-export-report]") && adminData) {
+        downloadCsv("mutuma-analytics-report.csv", [
+            { label: "Metric", key: "label" },
+            { label: "Value", key: "value" },
+            { label: "Previous", key: "previous" },
+            { label: "Change", key: "change" },
+            { label: "Estimated", key: "estimated" }
+        ], (adminData.metrics.kpis || []).map((kpi) => ({
+            label: kpi.label,
+            value: metricValue(kpi.key, kpi.value),
+            previous: metricValue(kpi.key, kpi.previous),
+            change: signedPercent(kpi.comparison.change),
+            estimated: kpi.estimated ? "yes" : "no"
+        })));
+    }
+
     if (event.target.closest("[data-export-subscribers]") && adminData) {
         downloadCsv("mutuma-subscribers.csv", [
             { label: "Email", key: "email" },
@@ -719,9 +1076,23 @@ panel.addEventListener("submit", (event) => {
     const updateForm = event.target.closest("[data-order-update]");
     const offerForm = event.target.closest("[data-offer-form]");
     const productForm = event.target.closest("[data-product-form]");
+    const toolbar = event.target.closest("[data-analytics-toolbar]");
 
-    if (!updateForm && !offerForm && !productForm) return;
+    if (!updateForm && !offerForm && !productForm && !toolbar) return;
     event.preventDefault();
+    if (toolbar) {
+        adminState = {
+            days: toolbar.days.value,
+            compare: toolbar.compare.value,
+            country: toolbar.country.value,
+            device: toolbar.device.value,
+            source: toolbar.source.value,
+            campaign: adminState.campaign,
+            product: toolbar.product.value,
+            category: toolbar.category.value
+        };
+        loadAdmin();
+    }
     if (updateForm) saveOrder(updateForm);
     if (offerForm) saveOffer(offerForm);
     if (productForm) saveProduct(productForm);

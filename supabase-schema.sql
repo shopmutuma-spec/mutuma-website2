@@ -217,3 +217,123 @@ on public.analytics_events
 for insert
 to anon, authenticated
 with check (false);
+
+create index if not exists analytics_events_created_at_idx
+on public.analytics_events (created_at desc);
+
+create index if not exists analytics_events_event_name_idx
+on public.analytics_events (event_name);
+
+create index if not exists analytics_events_session_idx
+on public.analytics_events (session_id);
+
+create index if not exists analytics_events_product_idx
+on public.analytics_events (product_id);
+
+create index if not exists orders_created_at_idx
+on public.orders (created_at desc);
+
+create index if not exists orders_email_idx
+on public.orders (email);
+
+create table if not exists public.product_costs (
+    id uuid primary key default gen_random_uuid(),
+    product_id text not null unique,
+    product_cost numeric,
+    fulfilment_cost numeric,
+    shipping_cost numeric,
+    supplier text,
+    notes text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+alter table public.product_costs enable row level security;
+
+drop policy if exists "No public product cost reads" on public.product_costs;
+
+create policy "No public product cost reads"
+on public.product_costs
+for select
+to anon, authenticated
+using (false);
+
+drop policy if exists "No public product cost writes" on public.product_costs;
+
+create policy "No public product cost writes"
+on public.product_costs
+for insert
+to anon, authenticated
+with check (false);
+
+drop trigger if exists product_costs_set_updated_at on public.product_costs;
+
+create trigger product_costs_set_updated_at
+before update on public.product_costs
+for each row
+execute function public.set_updated_at();
+
+create table if not exists public.business_goals (
+    id uuid primary key default gen_random_uuid(),
+    name text not null,
+    metric text not null,
+    target_value numeric not null,
+    period text not null default 'monthly',
+    starts_at timestamptz,
+    ends_at timestamptz,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+alter table public.business_goals enable row level security;
+
+drop policy if exists "No public business goal reads" on public.business_goals;
+
+create policy "No public business goal reads"
+on public.business_goals
+for select
+to anon, authenticated
+using (false);
+
+drop policy if exists "No public business goal writes" on public.business_goals;
+
+create policy "No public business goal writes"
+on public.business_goals
+for insert
+to anon, authenticated
+with check (false);
+
+drop trigger if exists business_goals_set_updated_at on public.business_goals;
+
+create trigger business_goals_set_updated_at
+before update on public.business_goals
+for each row
+execute function public.set_updated_at();
+
+create table if not exists public.admin_audit_log (
+    id uuid primary key default gen_random_uuid(),
+    admin_email text,
+    action text not null,
+    entity_type text,
+    entity_id text,
+    metadata jsonb not null default '{}'::jsonb,
+    created_at timestamptz not null default now()
+);
+
+alter table public.admin_audit_log enable row level security;
+
+drop policy if exists "No public admin audit reads" on public.admin_audit_log;
+
+create policy "No public admin audit reads"
+on public.admin_audit_log
+for select
+to anon, authenticated
+using (false);
+
+drop policy if exists "No public admin audit writes" on public.admin_audit_log;
+
+create policy "No public admin audit writes"
+on public.admin_audit_log
+for insert
+to anon, authenticated
+with check (false);

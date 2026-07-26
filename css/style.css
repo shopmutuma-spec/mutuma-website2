@@ -1587,6 +1587,104 @@ textarea {
     margin-bottom: 18px;
 }
 
+.analytics-toolbar {
+    position: sticky;
+    top: calc(var(--nav-height) + 8px);
+    z-index: 8;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 0 0 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px;
+    background: rgba(9, 9, 9, 0.94);
+    backdrop-filter: blur(18px);
+}
+
+.analytics-toolbar label,
+.analytics-toolbar small {
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.analytics-toolbar select {
+    width: 100%;
+    margin-top: 6px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+    color: var(--text);
+    background: #111111;
+}
+
+.analytics-toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: end;
+}
+
+.analytics-toolbar-actions span {
+    min-height: 48px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 14px;
+    font-weight: 900;
+}
+
+.analytics-toolbar small {
+    grid-column: 1 / -1;
+}
+
+.analytics-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+}
+
+.analytics-kpi-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 15px;
+    color: var(--text);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+    text-decoration: none;
+}
+
+.analytics-kpi-card span,
+.analytics-kpi-card small {
+    display: block;
+    color: var(--muted);
+}
+
+.analytics-kpi-card strong {
+    display: block;
+    margin: 8px 0;
+    font-size: clamp(1.35rem, 3vw, 2.1rem);
+    line-height: 1;
+}
+
+.analytics-kpi-card .positive {
+    color: #e9e9e9;
+}
+
+.analytics-kpi-card .negative {
+    color: #a8a8a8;
+}
+
+.analytics-kpi-card i {
+    position: absolute;
+    inset: auto auto 0 0;
+    height: 3px;
+    background: var(--text);
+}
+
 .admin-table-wrap {
     overflow-x: auto;
     margin: 12px 0 28px;
@@ -1626,6 +1724,83 @@ textarea {
     border-radius: var(--radius);
     padding: 16px;
     background: rgba(255, 255, 255, 0.04);
+}
+
+.insight-grid,
+.alert-list,
+.activity-feed {
+    display: grid;
+    gap: 10px;
+}
+
+.insight-grid article,
+.alert-list article,
+.activity-feed article {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.insight-grid strong,
+.insight-grid span,
+.insight-grid small,
+.activity-feed span,
+.activity-feed small,
+.alert-list span {
+    display: block;
+}
+
+.insight-grid span,
+.insight-grid p,
+.insight-grid small,
+.activity-feed span,
+.activity-feed small,
+.alert-list p,
+.alert-list span {
+    color: var(--muted);
+}
+
+.alert-list article.critical {
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+.alert-list article.warning {
+    border-color: rgba(255, 255, 255, 0.32);
+}
+
+.goal-list {
+    display: grid;
+    gap: 12px;
+}
+
+.goal-list article {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.goal-list span,
+.goal-list strong,
+.goal-list small {
+    position: relative;
+    z-index: 1;
+    display: block;
+}
+
+.goal-list span,
+.goal-list small {
+    color: var(--muted);
+}
+
+.goal-list i {
+    position: absolute;
+    inset: auto auto 0 0;
+    height: 3px;
+    background: var(--text);
 }
 
 .admin-card h3,
@@ -2456,8 +2631,14 @@ textarea {
     .admin-split,
     .admin-detail-grid,
     .admin-live-grid,
-    .admin-management-grid {
+    .admin-management-grid,
+    .analytics-kpi-grid,
+    .analytics-toolbar {
         grid-template-columns: 1fr;
+    }
+
+    .analytics-toolbar {
+        position: static;
     }
 
     .admin-card-head {
