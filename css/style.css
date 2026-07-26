@@ -1588,18 +1588,14 @@ textarea {
 }
 
 .analytics-toolbar {
-    position: sticky;
-    top: calc(var(--nav-height) + 8px);
-    z-index: 8;
     display: grid;
-    grid-template-columns: repeat(7, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 10px;
     margin: 0 0 18px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     padding: 12px;
-    background: rgba(9, 9, 9, 0.94);
-    backdrop-filter: blur(18px);
+    background: rgba(255, 255, 255, 0.035);
 }
 
 .analytics-toolbar label,
@@ -1619,10 +1615,11 @@ textarea {
 }
 
 .analytics-toolbar-actions {
+    grid-column: 1 / -1;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    align-items: end;
+    align-items: center;
 }
 
 .analytics-toolbar-actions span {
@@ -1633,6 +1630,10 @@ textarea {
     align-items: center;
     padding: 0 14px;
     font-weight: 900;
+}
+
+.analytics-toolbar-actions .button {
+    min-width: 132px;
 }
 
 .analytics-toolbar small {
