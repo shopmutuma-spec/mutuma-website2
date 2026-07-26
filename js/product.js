@@ -3,7 +3,8 @@ import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=2026
 import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260724a";
 import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260725b";
 import { trackEvent } from "./analytics.js?v=20260724a";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260725b";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260726a";
+import { setupBundleForProduct } from "./merchandising.js?v=20260726a";
 
 await loadStoreCatalog();
 initBaseLayout();
@@ -15,6 +16,7 @@ const product = getProductById(params.get("id"));
 const productRoot = document.querySelector("[data-product-detail]");
 const recommendationLimit = product.family || product.sourceUrl ? 8 : 4;
 const recommendations = getRecommendedProducts(product.id, recommendationLimit);
+const setupBundle = setupBundleForProduct(product, 3);
 const galleryImages = buildGalleryImages(product);
 const options = productOptions(product);
 const variationList = (product.variations || options.colours).join(", ");
@@ -55,6 +57,19 @@ ${galleryThumbs}
                 <button data-qty-plus>+</button>
             </div>
             ${groupedVariants}
+            ${setupBundle.length >= 2 ? `
+                <div class="setup-bundle-card">
+                    <div>
+                        <span class="eyebrow">Bundle</span>
+                        <strong>Complete the setup</strong>
+                        <small>Add ${setupBundle.length} matching pieces in one tap.</small>
+                    </div>
+                    <div class="setup-bundle-images">
+                        ${setupBundle.map((item) => productImage(item.images[0], item.name)).join("")}
+                    </div>
+                    <button class="button secondary wide" data-add-setup-bundle>Add Full Setup</button>
+                </div>
+            ` : ""}
             <button class="button primary wide" data-add-product>Add to Cart</button>
             <button class="button secondary wide" data-buy-stripe>Buy Now</button>
             <button class="button secondary wide ${getWishlist().includes(product.id) ? "active" : ""}" data-wishlist-product>Wishlist</button>
@@ -150,6 +165,18 @@ document.querySelector("[data-mobile-add]").addEventListener("click", () => {
     updateCounts();
     notify("Added to cart");
     openCartDrawer();
+});
+
+document.querySelector("[data-add-setup-bundle]")?.addEventListener("click", () => {
+    setupBundle.forEach((item) => addToCart(item.id, 1));
+    updateCounts();
+    notify("Setup bundle added to cart");
+    openCartDrawer();
+    trackEvent("add_to_cart", {
+        source: "setup_bundle",
+        productId: product.id,
+        quantity: setupBundle.length
+    });
 });
 
 document.querySelector("[data-buy-stripe]").addEventListener("click", async (event) => {

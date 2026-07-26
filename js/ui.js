@@ -3,7 +3,8 @@ import { formatPrice, currentCurrency } from "./currency.js?v=20260724a";
 import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260725b";
 import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260724a";
 import { trackEvent } from "./analytics.js?v=20260724a";
-import { storeSettings } from "./site-settings.js?v=20260725a";
+import { storeSettings } from "./site-settings.js?v=20260726a";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260726a";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -44,8 +45,9 @@ function productBadges(product) {
     const discount = discountPercent(product);
 
     if (discount) badges.push(`${discount}% OFF`);
-    if (isNewArrival(product)) badges.push("New");
+    badges.push(productSpendBadge(product));
     if (product.tags.includes("best-seller")) badges.push("Best Seller");
+    if (isNewArrival(product)) badges.push("New");
     if (product.tags.includes("low-stock")) badges.push("Low stock");
 
     return badges.slice(0, 3).map((badge) => `<span>${badge}</span>`).join("");
@@ -62,6 +64,11 @@ export function renderHeader() {
         .slice(0, 3);
 
     header.innerHTML = `
+        <div class="sale-ticker" role="note">
+            <span>45% off everything right now</span>
+            <span>Prices already reduced</span>
+            <span>Build your room for less</span>
+        </div>
         <nav class="nav">
             <button class="icon-button mobile-toggle" data-menu-toggle aria-label="Open menu">${icons.menu}</button>
             <div class="nav-group nav-left">
@@ -355,21 +362,44 @@ export function renderCartDrawer() {
     `).join("");
 
     const subtotal = cart.reduce((total, { product, quantity }) => total + product.price * quantity, 0);
+    const itemCount = cartItemCount(cart);
+    const rewardDiscount = cartRewardDiscount(subtotal, itemCount);
+    const rewardMessage = cartRewardMessage(itemCount);
+    const adjustedSubtotal = Math.max(0, subtotal - rewardDiscount);
     const freeShippingThreshold = storeSettings.freeShippingThreshold;
     const shipping = subtotal >= freeShippingThreshold ? 0 : storeSettings.standardShipping;
-    const total = subtotal + shipping;
+    const total = adjustedSubtotal + shipping;
     const progress = Math.min(100, subtotal / freeShippingThreshold * 100);
+    const cartProducts = cart.map((line) => line.product);
+    const upsells = subtotal < freeShippingThreshold
+        ? freeShippingUpsells(cartProducts, freeShippingThreshold - subtotal, 3)
+        : complementaryProducts(cartProducts, 3);
 
     prewarmCheckout();
 
     drawerSummary.innerHTML = `
+        <div class="cart-reward-card">
+            <strong>${rewardMessage}</strong>
+            <small>Multi-item rewards are applied automatically at checkout.</small>
+        </div>
         <div class="shipping-progress" aria-label="Free shipping progress"><span style="width:${progress}%"></span></div>
         <small>${subtotal >= freeShippingThreshold ? "Free Europe and US delivery unlocked." : `Add ${formatPrice(freeShippingThreshold - subtotal)} more to unlock free Europe and US delivery.`}</small>
         <div><span>Subtotal</span><strong data-price="${subtotal}">${formatPrice(subtotal)}</strong></div>
+        ${rewardDiscount ? `<div><span>Room reward</span><strong>-${formatPrice(rewardDiscount)}</strong></div>` : ""}
         <div><span>Shipping</span><strong>${shipping ? formatPrice(shipping) : "Included"}</strong></div>
         <div class="drawer-total"><span>Total incl. shipping</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
-        <label class="discount-field">Discount code<input data-discount-code placeholder="Enter at checkout"></label>
-        <small>Discounts are securely validated in Stripe Checkout.</small>
+        ${upsells.length ? `
+            <div class="drawer-recommendations drawer-upsells">
+                <strong>${subtotal < freeShippingThreshold ? "Add one to unlock more value" : "Complete the room"}</strong>
+                ${upsells.map((product) => `
+                    <button type="button" data-drawer-upsell="${product.id}">
+                        ${productImage(product.images[0], product.name)}
+                        <span>${product.name}<small>${formatPrice(product.price)}</small></span>
+                    </button>
+                `).join("")}
+            </div>
+        ` : ""}
+        <small>45% off is already applied to product prices. Extra room rewards apply automatically.</small>
         <button class="button primary wide" data-drawer-checkout>Checkout - ${formatPrice(total)}</button>
         <button class="button secondary wide" data-cart-close>Continue Shopping</button>
         <a class="button secondary wide" href="cart.html">View Full Cart</a>
@@ -413,6 +443,15 @@ export function renderCartDrawer() {
             renderCartDrawer();
             updateCounts();
             notify("Saved for later");
+        });
+    });
+
+    drawerSummary.querySelectorAll("[data-drawer-upsell]").forEach((button) => {
+        button.addEventListener("click", () => {
+            addToCart(button.dataset.drawerUpsell, 1);
+            renderCartDrawer();
+            updateCounts();
+            notify("Added to cart");
         });
     });
 
@@ -820,18 +859,18 @@ function initEmailOffer() {
             <div class="modal offer-modal open" data-offer-modal>
                 <div class="modal-panel offer-panel">
                     <div class="modal-head">
-                        <span class="eyebrow">First Order Offer</span>
+                        <span class="eyebrow">Current MUTUMA offer</span>
                         <button class="icon-button" data-offer-close aria-label="Close offer">${icons.close}</button>
                     </div>
-                    <h2>Get your first room drop for less.</h2>
-                    <p>Subscribe to MUTUMA emails for a welcome discount and free shipping on the first item you buy.</p>
+                    <h2>Everything is 45% off right now.</h2>
+                    <p>The room finds sale is live. Join the MUTUMA drop list before you shop and get first access to new room edits, restocks and private deals.</p>
                     <form class="offer-form" name="mutuma-email-list" data-offer-form>
                         <input type="hidden" name="form-name" value="mutuma-email-list">
                         <input type="hidden" name="source" value="first-visit-offer">
                         <input type="email" name="email" placeholder="Email address" aria-label="Email address" required>
-                        <button class="button primary">Unlock Code</button>
+                        <button class="button primary">Get Sale Access</button>
                     </form>
-                    <small>No spam. Drops, room edits and private offers only.</small>
+                    <small>No code needed. Sale prices are already applied across the store.</small>
                 </div>
             </div>
         `;
@@ -857,7 +896,7 @@ function initEmailOffer() {
             } catch (error) {
                 notify(error.message);
                 button.disabled = false;
-                button.textContent = "Unlock Code";
+                button.textContent = "Get Sale Access";
                 return;
             }
 
@@ -865,9 +904,9 @@ function initEmailOffer() {
             localStorage.setItem(OFFER_KEY, "true");
             modal.querySelector(".offer-panel").innerHTML = `
                 <div class="offer-success">
-                    <span class="eyebrow">Unlocked</span>
-                    <h2>Use code FIRSTROOM</h2>
-                    <p>Enter this code at Stripe Checkout for your first-order discount and free shipping on your first item.</p>
+                    <span class="eyebrow">You're on the list</span>
+                    <h2>45% off is live.</h2>
+                    <p>No code needed. The sale is already applied across MUTUMA, and extra room rewards unlock when you add more pieces.</p>
                     <button class="button primary wide" data-offer-close>Shop Now</button>
                 </div>
             `;

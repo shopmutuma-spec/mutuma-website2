@@ -171,6 +171,16 @@ function stripeAmount(gbpAmount, currency, rates) {
     return Math.max(1, Math.round(convertedAmount * multiplier));
 }
 
+function itemCount(cart) {
+    return cart.reduce((total, item) => total + Number(item.quantity || 1), 0);
+}
+
+function bestCartReward(count) {
+    return [...(storeSettings.cartRewardTiers || [])]
+        .filter((tier) => count >= Number(tier.minimumItems || 0))
+        .sort((first, second) => Number(second.discountPercent || 0) - Number(first.discountPercent || 0))[0] || null;
+}
+
 export async function handler(event) {
     if (event.httpMethod !== "POST") {
         return json(405, { error: "Method not allowed" });
@@ -193,8 +203,11 @@ export async function handler(event) {
         }
 
         const subtotal = cart.reduce((total, { product, quantity }) => total + product.price * quantity, 0);
+        const reward = bestCartReward(itemCount(cart));
+        const rewardDiscount = reward ? Number((subtotal * Number(reward.discountPercent || 0) / 100).toFixed(2)) : 0;
         const shippingAmount = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING;
         const origin = getOrigin(event);
+        const discountMultiplier = subtotal ? Math.max(0, (subtotal - rewardDiscount) / subtotal) : 1;
 
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
@@ -233,7 +246,7 @@ export async function handler(event) {
                 quantity,
                 price_data: {
                     currency: stripeCurrency,
-                    unit_amount: stripeAmount(product.price, currency, rates),
+                    unit_amount: stripeAmount(product.price * discountMultiplier, currency, rates),
                     product_data: {
                         name: product.name,
                         description: product.description,
@@ -249,7 +262,9 @@ export async function handler(event) {
                 base_currency: "GBP",
                 display_currency: currency,
                 exchange_rate: String(rates[currency] || fallbackRates[currency] || 1),
-                item_count: String(cart.reduce((total, item) => total + item.quantity, 0))
+                item_count: String(cart.reduce((total, item) => total + item.quantity, 0)),
+                room_reward: reward ? `${reward.discountPercent}%` : "0%",
+                room_reward_discount_gbp: String(rewardDiscount)
             },
             success_url: `${origin}/cart.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/cart.html?checkout=cancelled`

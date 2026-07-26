@@ -2,7 +2,8 @@ import { findProductById, products, getProductsByTag, loadStoreCatalog } from ".
 import { initCurrency } from "./currency.js?v=20260724a";
 import { addToCart } from "./store.js?v=20260724a";
 import { aboutMutuma, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260724a";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260725b";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260726a";
+import { homepageBundles } from "./merchandising.js?v=20260726a";
 
 await loadStoreCatalog();
 initBaseLayout();
@@ -13,6 +14,8 @@ let activeRailUsage = null;
 renderProductGrid("[data-featured-products]", getRotatingFeaturedProducts());
 renderProductGrid("[data-best-sellers]", getProductsByTag("best-seller", 4));
 renderCategories("[data-category-grid]");
+renderSpendBanner();
+renderHomeBundles();
 renderDiscoverySections();
 renderFeelings();
 renderRoomEdit();
@@ -65,6 +68,64 @@ function uniqueProducts(list) {
         if (!product || seen.has(product.id)) return false;
         seen.add(product.id);
         return true;
+    });
+}
+
+function renderSpendBanner() {
+    const target = document.querySelector("[data-spend-banner]");
+    if (!target) return;
+
+    target.innerHTML = `
+        <div>
+            <span class="eyebrow">Live storewide sale</span>
+            <strong>Everything is 45% off right now.</strong>
+            <p>Sale prices are already applied. Add more room pieces to unlock extra setup rewards in checkout.</p>
+        </div>
+        <a class="button primary" href="shop.html">Build a setup</a>
+    `;
+}
+
+function renderHomeBundles() {
+    const target = document.querySelector("[data-home-bundles]");
+    if (!target) return;
+
+    const bundles = homepageBundles(3);
+    if (!bundles.length) {
+        target.hidden = true;
+        return;
+    }
+
+    target.innerHTML = `
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Room bundles</span>
+                <h2>Start with a full setup.</h2>
+            </div>
+            <p>Built from real products in the catalogue. Add the edit or swap pieces later.</p>
+        </div>
+        <div class="bundle-grid">
+            ${bundles.map((bundle, index) => `
+                <article class="bundle-card">
+                    <a href="${bundle.href}" class="bundle-images" aria-label="${bundle.title}">
+                        ${bundle.products.map((product) => `<img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async">`).join("")}
+                    </a>
+                    <div>
+                        <span class="eyebrow">Save more together</span>
+                        <h3>${bundle.title}</h3>
+                        <p>${bundle.products.map((product) => product.name).join(" + ")}</p>
+                        <button class="button primary wide" data-home-bundle="${index}">Add Bundle</button>
+                    </div>
+                </article>
+            `).join("")}
+        </div>
+    `;
+
+    target.querySelectorAll("[data-home-bundle]").forEach((button) => {
+        button.addEventListener("click", () => {
+            bundles[Number(button.dataset.homeBundle)].products.forEach((product) => addToCart(product.id, 1));
+            updateCounts();
+            notify("Room bundle added to cart");
+        });
     });
 }
 
@@ -233,7 +294,7 @@ if (newsletterForm) {
         try {
             await submitEmailSignup(email, "homepage-newsletter");
             localStorage.setItem("mutuma.emailSubscribed", "true");
-            newsletterForm.innerHTML = "<strong>You're on the list. Use code FIRSTROOM at checkout.</strong>";
+            newsletterForm.innerHTML = "<strong>You're on the list. 45% off is already live across MUTUMA.</strong>";
         } catch (error) {
             notify(error.message);
             button.disabled = false;
