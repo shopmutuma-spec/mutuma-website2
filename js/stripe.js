@@ -42,6 +42,44 @@ export function getStripeCartLink(cart) {
     return "";
 }
 
+function showCheckoutFallback(url) {
+    let fallback = document.querySelector("[data-checkout-fallback]");
+
+    if (!fallback) {
+        fallback = document.createElement("div");
+        fallback.className = "checkout-fallback";
+        fallback.setAttribute("data-checkout-fallback", "");
+        document.body.append(fallback);
+    }
+
+    fallback.innerHTML = `
+        <div>
+            <strong>Secure checkout is ready.</strong>
+            <span>If TikTok does not open it automatically, tap below.</span>
+        </div>
+        <a class="button primary" href="${url}" rel="noopener">Open secure checkout</a>
+    `;
+}
+
+function redirectToCheckout(url) {
+    showCheckoutFallback(url);
+
+    try {
+        window.location.assign(url);
+    } catch (error) {
+        try {
+            window.top.location.href = url;
+        } catch (topError) {
+            const link = document.createElement("a");
+            link.href = url;
+            link.rel = "noopener";
+            document.body.append(link);
+            link.click();
+            link.remove();
+        }
+    }
+}
+
 async function createStripeCheckout(cart) {
     const response = await fetch(stripeConfig.checkoutEndpoint, {
         method: "POST",
@@ -65,7 +103,7 @@ async function createStripeCheckout(cart) {
         throw new Error("Stripe checkout URL was not returned.");
     }
 
-    window.location.href = data.url;
+    redirectToCheckout(data.url);
 }
 
 export async function checkoutProduct(productId, quantity = 1) {
@@ -76,7 +114,7 @@ export async function checkoutProduct(productId, quantity = 1) {
         const link = getStripeProductLink(productId);
 
         if (link) {
-            window.location.href = link;
+            redirectToCheckout(link);
             return { ok: true };
         }
 
@@ -95,7 +133,7 @@ export async function checkoutCart(cart) {
         const link = getStripeCartLink(cart);
 
         if (link) {
-            window.location.href = link;
+            redirectToCheckout(link);
             return { ok: true };
         }
 
@@ -116,6 +154,6 @@ export function checkoutProductLink(productId) {
         };
     }
 
-    window.location.href = link;
+    redirectToCheckout(link);
     return { ok: true };
 }

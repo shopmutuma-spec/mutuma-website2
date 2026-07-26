@@ -1,10 +1,15 @@
-import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260726b";
+import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260727a";
 import { initCurrency } from "./currency.js?v=20260724a";
-import { addToCart } from "./store.js?v=20260724a";
+import { addToCart } from "./store.js?v=20260727a";
 import { aboutMutuma, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260724a";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260726b";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260727a";
 import { homepageBundles } from "./merchandising.js?v=20260726a";
 
+boot().catch((error) => {
+    console.error("MUTUMA homepage failed to start.", error);
+});
+
+async function boot() {
 await loadStoreCatalog();
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -301,4 +306,5 @@ if (newsletterForm) {
             button.textContent = "Join";
         }
     });
+}
 }

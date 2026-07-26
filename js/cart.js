@@ -1,15 +1,11 @@
 import { initCurrency, formatPrice } from "./currency.js?v=20260724a";
-import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260724a";
-import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260725b";
+import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260727a";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260727a";
 import { trackEvent } from "./analytics.js?v=20260724a";
 import { storeSettings } from "./site-settings.js?v=20260726a";
-import { loadStoreCatalog } from "./products.js?v=20260726b";
+import { loadStoreCatalog } from "./products.js?v=20260727a";
 import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260726a";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260726b";
-
-await loadStoreCatalog();
-initBaseLayout();
-initCurrency().catch(() => {});
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260727a";
 
 const cartItems = document.querySelector("[data-cart-items]");
 const summary = document.querySelector("[data-cart-summary]");
@@ -18,14 +14,25 @@ const STANDARD_SHIPPING = storeSettings.standardShipping;
 const params = new URLSearchParams(window.location.search);
 const checkoutStatus = params.get("checkout");
 
-if (checkoutStatus === "success") {
-    clearCart();
-    notify("Payment complete. Your order details are in Stripe.");
-    trackEvent("purchase_completed", { sessionId: params.get("session_id") || "" });
-    syncStripeCustomerEmail(params.get("session_id"));
-    renderPostPurchasePicks();
-} else if (checkoutStatus === "cancelled") {
-    notify("Checkout cancelled. Your cart is still here.");
+boot();
+
+async function boot() {
+    await loadStoreCatalog();
+    initBaseLayout();
+    initCurrency().catch(() => {});
+
+    if (checkoutStatus === "success") {
+        clearCart();
+        notify("Payment complete. Your order details are in Stripe.");
+        trackEvent("purchase_completed", { sessionId: params.get("session_id") || "" });
+        syncStripeCustomerEmail(params.get("session_id"));
+        renderPostPurchasePicks();
+    } else if (checkoutStatus === "cancelled") {
+        notify("Checkout cancelled. Your cart is still here.");
+    }
+
+    renderCart();
+    window.addEventListener("currencychange", renderCart);
 }
 
 async function syncStripeCustomerEmail(sessionId) {
@@ -204,5 +211,3 @@ function renderPostPurchasePicks() {
     }, 0);
 }
 
-renderCart();
-window.addEventListener("currencychange", renderCart);

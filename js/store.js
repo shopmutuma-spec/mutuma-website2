@@ -3,11 +3,21 @@ const WISHLIST_KEY = "mutuma.wishlist";
 const RECENT_KEY = "mutuma.recent";
 
 export function readStorage(key, fallback) {
-    return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+    try {
+        return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+    } catch (error) {
+        return fallback;
+    }
 }
 
 export function writeStorage(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+        return false;
+    }
+
+    return true;
 }
 
 export function getCart() {

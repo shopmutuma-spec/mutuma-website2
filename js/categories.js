@@ -1,12 +1,16 @@
-import { categories, products, loadStoreCatalog } from "./products.js?v=20260726b";
+import { categories, products, loadStoreCatalog } from "./products.js?v=20260727a";
 import { initCurrency } from "./currency.js?v=20260724a";
-import { initBaseLayout, renderCategories, renderProductGrid } from "./ui.js?v=20260726b";
+import { initBaseLayout, renderCategories, renderProductGrid } from "./ui.js?v=20260727a";
 
-await loadStoreCatalog();
-initBaseLayout();
-initCurrency().catch(() => {});
-renderCategories("[data-category-grid]");
-renderCategorySections();
+boot();
+
+async function boot() {
+    await loadStoreCatalog();
+    initBaseLayout();
+    initCurrency().catch(() => {});
+    renderCategories("[data-category-grid]");
+    renderCategorySections();
+}
 
 function categoryId(name) {
     return `category-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`;

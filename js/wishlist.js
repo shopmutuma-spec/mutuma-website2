@@ -1,17 +1,21 @@
-import { findProductById, loadStoreCatalog } from "./products.js?v=20260726b";
+import { findProductById, loadStoreCatalog } from "./products.js?v=20260727a";
 import { initCurrency } from "./currency.js?v=20260724a";
-import { getWishlist } from "./store.js?v=20260724a";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260726b";
+import { getWishlist } from "./store.js?v=20260727a";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260727a";
 
-await loadStoreCatalog();
-initBaseLayout();
-initCurrency().catch(() => {});
+boot();
 
-const wishlist = getWishlist().map(findProductById).filter(Boolean);
-const grid = document.querySelector("[data-wishlist-grid]");
+async function boot() {
+    await loadStoreCatalog();
+    initBaseLayout();
+    initCurrency().catch(() => {});
 
-if (wishlist.length) {
-    renderProductGrid(grid, wishlist);
-} else {
-    grid.innerHTML = '<div class="empty-state">Your wishlist is empty.</div>';
+    const wishlist = getWishlist().map(findProductById).filter(Boolean);
+    const grid = document.querySelector("[data-wishlist-grid]");
+
+    if (wishlist.length) {
+        renderProductGrid(grid, wishlist);
+    } else {
+        grid.innerHTML = '<div class="empty-state">Your wishlist is empty.</div>';
+    }
 }

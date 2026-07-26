@@ -1,11 +1,16 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260726b";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260727a";
 import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260724a";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260724a";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260725b";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260727a";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260727a";
 import { trackEvent } from "./analytics.js?v=20260724a";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260726b";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260727a";
 import { setupBundleForProduct } from "./merchandising.js?v=20260726a";
 
+boot().catch((error) => {
+    console.error("MUTUMA product page failed to start.", error);
+});
+
+async function boot() {
 await loadStoreCatalog();
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -14,6 +19,19 @@ prewarmCheckout();
 const params = new URLSearchParams(window.location.search);
 const product = getProductById(params.get("id"));
 const productRoot = document.querySelector("[data-product-detail]");
+
+if (!product) {
+    productRoot.innerHTML = `
+        <section class="section container">
+            <div class="empty-state">
+                This product could not be loaded.
+                <a class="button primary" href="shop.html">Shop room finds</a>
+            </div>
+        </section>
+    `;
+    return;
+}
+
 const recommendationLimit = product.family || product.sourceUrl ? 8 : 4;
 const recommendations = getRecommendedProducts(product.id, recommendationLimit);
 const setupBundle = setupBundleForProduct(product, 3);
@@ -229,3 +247,4 @@ document.querySelector("[data-clear-recent]")?.addEventListener("click", () => {
     renderRecentProducts();
     notify("Recently viewed cleared");
 });
+}

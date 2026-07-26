@@ -347,6 +347,36 @@ img {
     transform: translateX(0);
 }
 
+.checkout-fallback {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    z-index: 950;
+    width: min(calc(100% - 24px), 520px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: var(--radius);
+    padding: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    color: #ffffff;
+    background: rgba(9, 9, 9, 0.94);
+    box-shadow: var(--shadow);
+    transform: translateX(-50%);
+}
+
+.checkout-fallback strong,
+.checkout-fallback span {
+    display: block;
+}
+
+.checkout-fallback span {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
 .cart-drawer-head,
 .cart-drawer-summary {
     padding: 18px;
@@ -2917,6 +2947,11 @@ textarea {
     .nav {
         width: min(100% - 18px, 1440px);
         gap: 8px;
+    }
+
+    .checkout-fallback {
+        grid-template-columns: 1fr;
+        bottom: 10px;
     }
 
     .logo {
