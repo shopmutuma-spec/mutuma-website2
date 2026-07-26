@@ -3,9 +3,9 @@ import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCar
 import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260725b";
 import { trackEvent } from "./analytics.js?v=20260724a";
 import { storeSettings } from "./site-settings.js?v=20260726a";
-import { loadStoreCatalog } from "./products.js?v=20260725a";
+import { loadStoreCatalog } from "./products.js?v=20260726b";
 import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260726a";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260726a";
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260726b";
 
 await loadStoreCatalog();
 initBaseLayout();

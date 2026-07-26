@@ -3077,12 +3077,26 @@ function applyOffer(product, offer) {
     return product;
 }
 
+async function fetchStoreCatalog(timeout = 1800) {
+    const controller = new AbortController();
+    const timeoutId = globalThis.setTimeout(() => controller.abort(), timeout);
+
+    try {
+        return await fetch("/.netlify/functions/store-catalog", {
+            signal: controller.signal,
+            cache: "no-store"
+        });
+    } finally {
+        globalThis.clearTimeout(timeoutId);
+    }
+}
+
 export async function loadStoreCatalog() {
     if (catalogLoaded) return products;
     catalogLoaded = true;
 
     try {
-        const response = await fetch("/.netlify/functions/store-catalog");
+        const response = await fetchStoreCatalog();
         if (!response.ok) throw new Error("Store catalogue unavailable.");
 
         const data = await response.json();
@@ -3096,10 +3110,6 @@ export async function loadStoreCatalog() {
                 existingIds.add(product.id);
             }
         });
-
-        const bestOffer = activeStoreOffers
-            .filter((offer) => offer.scope === "all")
-            .sort((first, second) => Number(second.discount_percent) - Number(first.discount_percent))[0];
 
     } catch (error) {
         activeStoreOffers = [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);

@@ -1,6 +1,6 @@
 import { initCurrency } from "./currency.js?v=20260724a";
 import { getCart, getWishlist } from "./store.js?v=20260724a";
-import { initBaseLayout, notify } from "./ui.js?v=20260726a";
+import { initBaseLayout, notify } from "./ui.js?v=20260726b";
 import { clearSession, getCurrentUser, signIn, signUp } from "./supabase-auth.js?v=20260724a";
 
 initBaseLayout();

@@ -1,4 +1,4 @@
-import { products, getRecommendedProducts } from "./products.js?v=20260725a";
+import { products, getRecommendedProducts } from "./products.js?v=20260726b";
 import { storeSettings } from "./site-settings.js?v=20260726a";
 
 export function cartItemCount(cart) {

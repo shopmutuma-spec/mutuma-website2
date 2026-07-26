@@ -1,4 +1,4 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260725a";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260726b";
 import { formatPrice, currentCurrency } from "./currency.js?v=20260724a";
 import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260725b";
 import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260724a";
@@ -64,10 +64,11 @@ export function renderHeader() {
         .slice(0, 3);
 
     header.innerHTML = `
-        <div class="sale-ticker" role="note">
-            <span>45% off everything right now</span>
+        <div class="sale-ticker" role="note" aria-label="45% off everything right now. Prices already reduced.">
+            <span>45% off everything</span>
+            <span>Limited time</span>
+            <span>No code needed</span>
             <span>Prices already reduced</span>
-            <span>Build your room for less</span>
         </div>
         <nav class="nav">
             <button class="icon-button mobile-toggle" data-menu-toggle aria-label="Open menu">${icons.menu}</button>
