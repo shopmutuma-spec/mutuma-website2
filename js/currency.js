@@ -461,7 +461,7 @@ async function detectCurrency() {
     const signal = bestSignal([...serviceSignals, ...textSignals, ...localSignals]);
     const { country, currency } = signal;
 
-    window.MUTUMACurrencyDebug = {
+    window.RoomfindsCurrencyDebug = {
         chosen: signal,
         signals: [...serviceSignals, ...textSignals, ...localSignals],
         stored: {
@@ -498,11 +498,11 @@ export async function initCurrency() {
         loadRates().catch(() => fallbackRates)
     ]);
     currencyState = { currency, rates };
-    window.MUTUMACurrency = {
+    window.RoomfindsCurrency = {
         currency,
         rates,
         country: safeJsonGet(GEO_KEY)?.country || "",
-        debug: () => window.MUTUMACurrencyDebug,
+        debug: () => window.RoomfindsCurrencyDebug,
         refresh: async () => {
             safeSet(GEO_KEY, "");
             safeSet(CURRENCY_KEY, "");

@@ -1,4 +1,4 @@
-# MUTUMA Supabase Setup
+# Roomfinds Supabase Setup
 
 ## 1. Create the table
 

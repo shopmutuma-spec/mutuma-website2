@@ -1,12 +1,12 @@
-import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260727a";
+import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260729b";
 import { initCurrency } from "./currency.js?v=20260724a";
 import { addToCart } from "./store.js?v=20260727a";
-import { aboutMutuma, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260724a";
+import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260729a";
 import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260727a";
 import { homepageBundles } from "./merchandising.js?v=20260726a";
 
 boot().catch((error) => {
-    console.error("MUTUMA homepage failed to start.", error);
+    console.error("Roomfinds homepage failed to start.", error);
 });
 
 async function boot() {
@@ -225,7 +225,7 @@ function renderRoomEdit() {
     target.innerHTML = `
         <div class="room-edit">
             <div class="room-edit-image">
-                <img src="${roomEdit.image}" alt="MUTUMA room setup" loading="lazy" decoding="async">
+                <img src="${roomEdit.image}" alt="Roomfinds room setup" loading="lazy" decoding="async">
             </div>
             <div class="room-edit-content">
                 <span class="eyebrow">${roomEdit.eyebrow}</span>
@@ -256,9 +256,9 @@ function renderAbout() {
     if (!about) return;
 
     about.innerHTML = `
-        <span class="eyebrow">${aboutMutuma.eyebrow}</span>
-        <h2>${aboutMutuma.title}</h2>
-        <p>${aboutMutuma.body}</p>
+        <span class="eyebrow">${aboutRoomfinds.eyebrow}</span>
+        <h2>${aboutRoomfinds.title}</h2>
+        <p>${aboutRoomfinds.body}</p>
         <a class="button secondary" href="shop.html">Shop the edit</a>
     `;
 }
@@ -299,7 +299,7 @@ if (newsletterForm) {
         try {
             await submitEmailSignup(email, "homepage-newsletter");
             localStorage.setItem("mutuma.emailSubscribed", "true");
-            newsletterForm.innerHTML = "<strong>You're on the list. 45% off is already live across MUTUMA.</strong>";
+            newsletterForm.innerHTML = "<strong>You're on the list. 45% off is already live across Roomfinds.</strong>";
         } catch (error) {
             notify(error.message);
             button.disabled = false;

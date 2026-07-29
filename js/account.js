@@ -15,7 +15,7 @@ async function renderAccount() {
 
     if (!user) {
         panel.innerHTML = `
-            <h2>Your MUTUMA space</h2>
+            <h2>Your Roomfinds space</h2>
             <p>Sign in to connect your email with future account features. Wishlist and cart still work on this device without an account.</p>
         `;
         return;

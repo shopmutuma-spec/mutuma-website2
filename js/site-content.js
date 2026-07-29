@@ -1,7 +1,7 @@
-export const aboutMutuma = {
-    eyebrow: "About MUTUMA",
+export const aboutRoomfinds = {
+    eyebrow: "About Roomfinds",
     title: "Room finds with culture built in.",
-    body: "MUTUMA curates sharp room pieces for people who want their space to feel intentional, personal and current. The edit is product-first: lighting, rugs, wall pieces, tech and objects that make a room feel more like you."
+    body: "Roomfinds curates sharp room pieces for people who want their space to feel intentional, personal and current. The edit is product-first: lighting, rugs, wall pieces, tech and objects that make a room feel more like you."
 };
 
 export const inspirationGallery = {

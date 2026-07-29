@@ -1017,7 +1017,7 @@ panel.addEventListener("click", (event) => {
     }
 
     if (event.target.closest("[data-export-report]") && adminData) {
-        downloadCsv("mutuma-analytics-report.csv", [
+        downloadCsv("roomfinds-analytics-report.csv", [
             { label: "Metric", key: "label" },
             { label: "Value", key: "value" },
             { label: "Previous", key: "previous" },
@@ -1033,7 +1033,7 @@ panel.addEventListener("click", (event) => {
     }
 
     if (event.target.closest("[data-export-subscribers]") && adminData) {
-        downloadCsv("mutuma-subscribers.csv", [
+        downloadCsv("roomfinds-subscribers.csv", [
             { label: "Email", key: "email" },
             { label: "Source", key: "source" },
             { label: "Joined", key: "subscribed_at" }
@@ -1041,7 +1041,7 @@ panel.addEventListener("click", (event) => {
     }
 
     if (event.target.closest("[data-export-product-analytics]") && adminData) {
-        downloadCsv("mutuma-product-analytics.csv", [
+        downloadCsv("roomfinds-product-analytics.csv", [
             { label: "Product", key: "name" },
             { label: "Category", key: "category" },
             { label: "Views", key: "views" },

@@ -27,7 +27,7 @@ form.addEventListener("submit", async (event) => {
         });
 
         if (response.status === 404) {
-            message.textContent = "Order tracking is not connected yet. Contact MUTUMA with your order number and checkout email.";
+            message.textContent = "Order tracking is not connected yet. Contact Roomfinds with your order number and checkout email.";
             return;
         }
 
@@ -36,7 +36,7 @@ form.addEventListener("submit", async (event) => {
             ? data.message
             : "Tracking is not available for this order yet.";
     } catch (error) {
-        message.textContent = "Order tracking is not connected yet. Contact MUTUMA with your order number and checkout email.";
+        message.textContent = "Order tracking is not connected yet. Contact Roomfinds with your order number and checkout email.";
     } finally {
         button.disabled = false;
         button.textContent = "Check Order";

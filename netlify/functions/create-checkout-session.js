@@ -258,7 +258,7 @@ export async function handler(event) {
                 }
             })),
             metadata: {
-                brand: "MUTUMA",
+                brand: "Roomfinds",
                 base_currency: "GBP",
                 display_currency: currency,
                 exchange_rate: String(rates[currency] || fallbackRates[currency] || 1),

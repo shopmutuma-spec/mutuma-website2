@@ -1,4 +1,4 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260727a";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260729b";
 import { formatPrice, currentCurrency } from "./currency.js?v=20260724a";
 import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260727a";
 import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260727a";
@@ -26,7 +26,7 @@ export function placeholderImage(productName) {
             <rect x="60" y="60" width="780" height="1005" rx="28" fill="#090909" stroke="#ffffff" stroke-opacity=".14"/>
             <circle cx="450" cy="470" r="180" fill="#ffffff" fill-opacity=".88"/>
             <text x="80" y="980" fill="#ffffff" font-family="Arial" font-size="56" font-weight="900">${productName}</text>
-            <text x="80" y="1040" fill="#bdbdbd" font-family="Arial" font-size="26" font-weight="700">MUTUMA</text>
+            <text x="80" y="1040" fill="#bdbdbd" font-family="Arial" font-size="26" font-weight="700">Roomfinds</text>
         </svg>
     `;
     return `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -77,7 +77,7 @@ export function renderHeader() {
                 <a class="icon-button${page === "shop.html" ? " active" : ""}" href="shop.html" aria-label="Shop"${page === "shop.html" ? ' aria-current="page"' : ""}>${icons.shop}</a>
                 <a class="icon-button${page === "categories.html" ? " active" : ""}" href="categories.html" aria-label="Categories"${page === "categories.html" ? ' aria-current="page"' : ""}>${icons.grid}</a>
             </div>
-            <a class="logo" href="index.html">MUTUMA</a>
+            <a class="logo" href="index.html">Roomfinds</a>
             <div class="nav-group nav-right">
                 <a class="icon-button" href="shop.html?tag=trending" aria-label="Trending">${icons.fire}</a>
                 <button class="icon-button" data-search-open aria-label="Search">${icons.search}</button>
@@ -91,7 +91,7 @@ export function renderHeader() {
         <div class="drawer-backdrop" data-menu-close></div>
         <aside class="mobile-menu" data-mobile-menu aria-hidden="true">
             <div class="mobile-menu-head">
-                <strong>MUTUMA</strong>
+                <strong>Roomfinds</strong>
                 <button class="icon-button" data-menu-close aria-label="Close menu">${icons.close}</button>
             </div>
             <a href="index.html"${activeAttr("index.html")}>${icons.home} Home</a>
@@ -178,7 +178,7 @@ export function renderFooter() {
     footer.innerHTML = `
         <div class="container footer-grid">
             <div>
-                <strong>MUTUMA</strong>
+                <strong>Roomfinds</strong>
                 <p>YOUR ROOM. YOUR CULTURE.</p>
                 <p>Premium room finds for sharp modern spaces.</p>
             </div>
@@ -587,7 +587,7 @@ export function openSearch() {
         <div class="modal open" role="dialog" aria-modal="true" aria-label="Product search">
             <div class="modal-panel">
                 <div class="modal-head">
-                    <strong>Search MUTUMA</strong>
+                    <strong>Search Roomfinds</strong>
                     <button class="icon-button" data-modal-close aria-label="Close search">${icons.close}</button>
                 </div>
                 <input class="search-input" data-global-search placeholder="Search lighting, desk, wall art..." aria-label="Search products">
@@ -860,11 +860,11 @@ function initEmailOffer() {
             <div class="modal offer-modal open" data-offer-modal>
                 <div class="modal-panel offer-panel">
                     <div class="modal-head">
-                        <span class="eyebrow">Current MUTUMA offer</span>
+                        <span class="eyebrow">Current Roomfinds offer</span>
                         <button class="icon-button" data-offer-close aria-label="Close offer">${icons.close}</button>
                     </div>
                     <h2>Everything is 45% off right now.</h2>
-                    <p>The room finds sale is live. Join the MUTUMA drop list before you shop and get first access to new room edits, restocks and private deals.</p>
+                    <p>The room finds sale is live. Join the Roomfinds drop list before you shop and get first access to new room edits, restocks and private deals.</p>
                     <form class="offer-form" name="mutuma-email-list" data-offer-form>
                         <input type="hidden" name="form-name" value="mutuma-email-list">
                         <input type="hidden" name="source" value="first-visit-offer">
@@ -907,7 +907,7 @@ function initEmailOffer() {
                 <div class="offer-success">
                     <span class="eyebrow">You're on the list</span>
                     <h2>45% off is live.</h2>
-                    <p>No code needed. The sale is already applied across MUTUMA, and extra room rewards unlock when you add more pieces.</p>
+                    <p>No code needed. The sale is already applied across Roomfinds, and extra room rewards unlock when you add more pieces.</p>
                     <button class="button primary wide" data-offer-close>Shop Now</button>
                 </div>
             `;

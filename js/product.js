@@ -1,4 +1,4 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260727a";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260729b";
 import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260724a";
 import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260727a";
 import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260727a";
@@ -7,7 +7,7 @@ import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid
 import { setupBundleForProduct } from "./merchandising.js?v=20260726a";
 
 boot().catch((error) => {
-    console.error("MUTUMA product page failed to start.", error);
+    console.error("Roomfinds product page failed to start.", error);
 });
 
 async function boot() {

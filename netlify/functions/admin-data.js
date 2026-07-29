@@ -618,7 +618,7 @@ function buildInsights(current, previous, productPerformance, sourceRows, search
             title: `Customers searched for "${zeroResult.label}" with no clear match`,
             metric: `${zeroResult.count} searches`,
             confidence: "Medium",
-            action: "Add a matching product, synonym or category keyword if it fits MUTUMA.",
+            action: "Add a matching product, synonym or category keyword if it fits Roomfinds.",
             report: "Search"
         });
     }

@@ -3037,6 +3037,28 @@ const baseProducts = [
         featured: false,
         family: "violent-bear-400-figures",
         sourceUrl: "https://item.taobao.com/item.htm?id=896833707726"
+    },
+    {
+        id: "super-mario-question-block-table-lamp",
+        name: "Super Mario Table Lamp - Question Block",
+        description: "A 35cm character table lamp with a question-block shade for desks, shelves and gaming room setups.",
+        category: "Lighting",
+        price: 27.49,
+        oldPrice: 49.99,
+        currency: "GBP",
+        rating: 4.8,
+        reviews: 42,
+        stock: 18,
+        images: [
+            "images/products/super-mario-question-block-table-lamp.webp",
+            "images/products/super-mario-question-block-table-lamp-gallery-1.webp",
+            "images/products/super-mario-question-block-table-lamp-gallery-2.webp",
+            "images/products/super-mario-question-block-table-lamp-gallery-3.webp"
+        ],
+        tags: ["lighting", "table-lamp", "gaming", "character", "new"],
+        featured: true,
+        family: "super-mario-table-lamps",
+        sourceUrl: "https://item.taobao.com/item.htm?id=1021769895354"
     }
 ];
 
@@ -3182,6 +3204,7 @@ export function productFamilyLabel(product) {
         "coolbee-14l-bins": "Coolbee 14L Bins",
         "q-cute-ceramic-cups": "Q-Cute Ceramic Cups",
         "sesame-display-banks": "Sesame Display Banks",
+        "super-mario-table-lamps": "Super Mario Table Lamps",
         "sunflower-smile-cushions": "Sunflower Smile Cushions",
         "violent-bear-400-figures": "Violent Bear 400% Figures"
     };
@@ -3204,6 +3227,7 @@ export function productVariantLabel(product) {
     if (family === "coolbee-14l-bins") return name.replace("Coolbee 14L ", "");
     if (family === "q-cute-ceramic-cups") return name.replace("Q-Cute Ceramic Cup - ", "").replace("Q-Cute Ceramic Mug - ", "");
     if (family === "sesame-display-banks") return name.replace("Sesame Display Bank - ", "");
+    if (family === "super-mario-table-lamps") return name.replace("Super Mario Table Lamp - ", "");
     if (family === "sunflower-smile-cushions") return name.replace("Sunflower Smile Cushion - ", "");
     if (family === "violent-bear-400-figures") return name.replace("Violent Bear 400% Figure - ", "");
     if (family && family.includes("749978569678")) return name.replace("Spider-Man Poster Rug - ", "");
