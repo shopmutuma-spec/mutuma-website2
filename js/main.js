@@ -1,9 +1,9 @@
-import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260729b";
-import { initCurrency } from "./currency.js?v=20260724a";
-import { addToCart } from "./store.js?v=20260727a";
-import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260729a";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260727a";
-import { homepageBundles } from "./merchandising.js?v=20260726a";
+import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260730c";
+import { initCurrency } from "./currency.js?v=20260730c";
+import { addToCart } from "./store.js?v=20260730c";
+import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260730c";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260730c";
+import { homepageBundles } from "./merchandising.js?v=20260730c";
 
 boot().catch((error) => {
     console.error("Roomfinds homepage failed to start.", error);
@@ -26,6 +26,7 @@ renderFeelings();
 renderRoomEdit();
 renderAbout();
 renderInspiration();
+startHeroRotation();
 
 function threeHourSeed(date = new Date()) {
     return Math.floor(date.getTime() / (3 * 60 * 60 * 1000));
@@ -88,6 +89,19 @@ function renderSpendBanner() {
         </div>
         <a class="button primary" href="shop.html">Build a setup</a>
     `;
+}
+
+function startHeroRotation() {
+    const media = document.querySelector(".hero-media");
+    if (!media) return;
+
+    const enableRotation = () => media.classList.add("is-rotating");
+    if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(enableRotation, { timeout: 1800 });
+        return;
+    }
+
+    window.setTimeout(enableRotation, 1400);
 }
 
 function renderHomeBundles() {

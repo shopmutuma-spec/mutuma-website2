@@ -8,3 +8,23 @@
 [[edge_functions]]
     path = "/currency-location"
     function = "currency-location"
+
+[[headers]]
+    for = "/*.html"
+    [headers.values]
+        Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+    for = "/css/*"
+    [headers.values]
+        Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+    for = "/js/*"
+    [headers.values]
+        Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+    for = "/images/*"
+    [headers.values]
+        Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"

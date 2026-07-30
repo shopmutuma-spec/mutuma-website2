@@ -1,4 +1,4 @@
-import { storeSettings } from "./site-settings.js?v=20260726a";
+import { storeSettings } from "./site-settings.js?v=20260730c";
 
 const baseProducts = [
     {
@@ -3099,15 +3099,40 @@ function applyOffer(product, offer) {
     return product;
 }
 
-async function fetchStoreCatalog(timeout = 1800) {
+async function fetchStoreCatalog(timeout = 900) {
+    const cacheKey = "mutuma.storeCatalog.v1";
+    const cacheMaxAge = 10 * 60 * 1000;
+    const storage = globalThis.sessionStorage;
+
+    if (storage) {
+        try {
+            const cached = JSON.parse(storage.getItem(cacheKey) || "null");
+            if (cached?.savedAt && Date.now() - cached.savedAt < cacheMaxAge && cached.data) {
+                return cached.data;
+            }
+        } catch (error) {
+            storage.removeItem(cacheKey);
+        }
+    }
+
     const controller = new AbortController();
     const timeoutId = globalThis.setTimeout(() => controller.abort(), timeout);
 
     try {
-        return await fetch("/.netlify/functions/store-catalog", {
+        const response = await fetch("/.netlify/functions/store-catalog", {
             signal: controller.signal,
-            cache: "no-store"
+            cache: "default"
         });
+        if (!response.ok) throw new Error("Store catalogue unavailable.");
+
+        const data = await response.json();
+        if (storage) {
+            storage.setItem(cacheKey, JSON.stringify({
+                savedAt: Date.now(),
+                data
+            }));
+        }
+        return data;
     } finally {
         globalThis.clearTimeout(timeoutId);
     }
@@ -3118,10 +3143,7 @@ export async function loadStoreCatalog() {
     catalogLoaded = true;
 
     try {
-        const response = await fetchStoreCatalog();
-        if (!response.ok) throw new Error("Store catalogue unavailable.");
-
-        const data = await response.json();
+        const data = await fetchStoreCatalog();
         activeStoreOffers = Array.isArray(data.offers) && data.offers.length ? data.offers : [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
         const remoteProducts = Array.isArray(data.products) ? data.products.map(normalizeRemoteProduct) : [];
         const existingIds = new Set(products.map((product) => product.id));

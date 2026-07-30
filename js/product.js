@@ -1,10 +1,10 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260729b";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260724a";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260727a";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260727a";
-import { trackEvent } from "./analytics.js?v=20260724a";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260727a";
-import { setupBundleForProduct } from "./merchandising.js?v=20260726a";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260730c";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260730c";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260730c";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260730c";
+import { trackEvent } from "./analytics.js?v=20260730c";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260730c";
+import { setupBundleForProduct } from "./merchandising.js?v=20260730c";
 
 boot().catch((error) => {
     console.error("Roomfinds product page failed to start.", error);
@@ -55,7 +55,7 @@ productRoot.innerHTML = `
     <section class="product-layout">
         <div class="gallery">
             <div class="gallery-main" data-gallery-main>
-                ${productImage(galleryImages[0], product.name)}
+                ${productImage(galleryImages[0], product.name, { eager: true, sizes: "(max-width: 980px) 100vw, 58vw" })}
             </div>
 ${galleryThumbs}
         </div>
@@ -139,7 +139,7 @@ function buildGroupedVariants(item, familyItems) {
 
 function showGalleryImage(index) {
     activeGalleryIndex = (index + galleryImages.length) % galleryImages.length;
-    document.querySelector("[data-gallery-main]").innerHTML = productImage(galleryImages[activeGalleryIndex], product.name);
+    document.querySelector("[data-gallery-main]").innerHTML = productImage(galleryImages[activeGalleryIndex], product.name, { eager: true, sizes: "(max-width: 980px) 100vw, 58vw" });
     document.querySelectorAll("[data-gallery-image]").forEach((item, itemIndex) => item.classList.toggle("active", itemIndex === activeGalleryIndex));
 }
 

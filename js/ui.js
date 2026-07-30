@@ -1,10 +1,10 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260729b";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260724a";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260727a";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260727a";
-import { trackEvent } from "./analytics.js?v=20260724a";
-import { storeSettings } from "./site-settings.js?v=20260726a";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260726a";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260730c";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260730c";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260730c";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260730c";
+import { trackEvent } from "./analytics.js?v=20260730c";
+import { storeSettings } from "./site-settings.js?v=20260730c";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260730c";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -32,8 +32,12 @@ export function placeholderImage(productName) {
     return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
-export function productImage(image, alt) {
-    return `<img src="${image}" alt="${alt}" loading="lazy" decoding="async" sizes="(max-width: 620px) 33vw, (max-width: 980px) 50vw, 25vw" onerror="this.onerror=null;const card=this.closest('[data-product-card], .gallery-thumbs button');if(card){card.remove();}else{this.remove();}">`;
+export function productImage(image, alt, options = {}) {
+    const loading = options.eager ? "eager" : "lazy";
+    const priority = options.eager ? ' fetchpriority="high"' : "";
+    const sizes = options.sizes || "(max-width: 620px) 33vw, (max-width: 980px) 50vw, 25vw";
+
+    return `<img src="${image}" alt="${alt}" loading="${loading}" decoding="async"${priority} width="900" height="1125" sizes="${sizes}" onerror="this.onerror=null;const card=this.closest('[data-product-card], .gallery-thumbs button');if(card){card.remove();}else{this.remove();}">`;
 }
 
 function optionDots(options) {

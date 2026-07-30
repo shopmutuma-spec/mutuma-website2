@@ -623,6 +623,16 @@ main {
     width: 100%;
 }
 
+.section,
+.about-section,
+.newsletter,
+.room-edit,
+.social-gallery,
+.shop-shell {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 720px;
+}
+
 /* Hero */
 .hero {
     position: relative;
@@ -670,13 +680,19 @@ main {
 }
 
 .hero-media span:nth-child(2) {
-    background-image: url("../images/hero/home-room-2.webp");
     animation-delay: 6s;
 }
 
 .hero-media span:nth-child(3) {
-    background-image: url("../images/hero/home-room-3.webp");
     animation-delay: 12s;
+}
+
+.hero-media.is-rotating span:nth-child(2) {
+    background-image: url("../images/hero/home-room-2.webp");
+}
+
+.hero-media.is-rotating span:nth-child(3) {
+    background-image: url("../images/hero/home-room-3.webp");
 }
 
 .hero::before {
