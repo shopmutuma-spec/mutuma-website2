@@ -8,6 +8,7 @@ initCurrency().catch(() => {});
 const form = document.querySelector("[data-admin-login]");
 const message = document.querySelector("[data-admin-message]");
 const panel = document.querySelector("[data-admin-panel]");
+const layout = document.querySelector(".admin-layout");
 
 let adminData = null;
 let adminState = {
@@ -459,6 +460,142 @@ function signalCard(label, value, note = "") {
     `;
 }
 
+function growthScore(data) {
+    const metrics = data.metrics || {};
+    const conversion = Math.min(35, Number(metrics.conversionRate || 0) * 3500);
+    const engagement = Math.min(25, Number(metrics.engagementRate || 0) * 2500);
+    const checkout = Math.min(25, Number(metrics.checkoutCompletionRate || 0) * 2500);
+    const revenue = Math.min(15, Number(metrics.revenuePerVisitor || 0) * 30);
+    return Math.round(conversion + engagement + checkout + revenue);
+}
+
+function analyticsExecutiveStrip(data) {
+    const metrics = data.metrics || {};
+    const score = growthScore(data);
+    const strongestProduct = metrics.productRankings?.mostViewed?.[0];
+    const strongestSource = metrics.sourcePerformance?.[0];
+    const biggestLeak = [...(metrics.funnel || [])]
+        .slice(1)
+        .sort((first, second) => Number(second.dropOffFromPrevious || 0) - Number(first.dropOffFromPrevious || 0))[0];
+
+    return `
+        <section class="analytics-executive-strip">
+            <article>
+                <span>Store momentum</span>
+                <strong>${escapeHtml(score)}/100</strong>
+                <small>Blends conversion, engagement, checkout completion and revenue per visitor.</small>
+                <i style="width:${Math.max(6, Math.min(100, score))}%"></i>
+            </article>
+            <article>
+                <span>Strongest product signal</span>
+                <strong>${escapeHtml(strongestProduct?.name || "Waiting for product views")}</strong>
+                <small>${strongestProduct ? `${strongestProduct.views} views / ${percent(strongestProduct.cartRate)} view-to-cart` : "More events will make this useful."}</small>
+            </article>
+            <article>
+                <span>Best traffic source</span>
+                <strong>${escapeHtml(strongestSource?.label || "No source yet")}</strong>
+                <small>${strongestSource ? `${strongestSource.sessions} sessions / ${percent(strongestSource.conversionRate)} conversion` : "Use tracked links for TikTok, Instagram and Pinterest."}</small>
+            </article>
+            <article>
+                <span>Biggest funnel leak</span>
+                <strong>${escapeHtml(biggestLeak?.label || "No leak yet")}</strong>
+                <small>${biggestLeak ? `${percent(biggestLeak.dropOffFromPrevious)} drop from previous step` : "More traffic is needed before judging."}</small>
+            </article>
+        </section>
+    `;
+}
+
+function productSpotlightCard(product, label, valueFormatter = (item) => `${item.views || 0} views`) {
+    if (!product) {
+        return `
+            <article class="analytics-product-spotlight empty">
+                <span>${escapeHtml(label)}</span>
+                <strong>Waiting for data</strong>
+                <small>More customer events will unlock this card.</small>
+            </article>
+        `;
+    }
+
+    return `
+        <article class="analytics-product-spotlight">
+            ${product.image ? `<img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy">` : ""}
+            <div>
+                <span>${escapeHtml(label)}</span>
+                <strong>${escapeHtml(product.name)}</strong>
+                <small>${escapeHtml(product.category || "Product")} / ${escapeHtml(valueFormatter(product))}</small>
+            </div>
+        </article>
+    `;
+}
+
+function productRankingsPanel(data) {
+    const rankings = data.metrics.productRankings || {};
+
+    return `
+        <section class="admin-card analytics-rankings-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Merchandising</span>
+                    <h3>What To Push Next</h3>
+                </div>
+                <span class="status-pill">Live catalogue</span>
+            </div>
+            <div class="analytics-product-spotlight-grid">
+                ${productSpotlightCard(rankings.mostViewed?.[0], "Most viewed", (product) => `${product.views} views / ${percent(product.cartRate)} cart rate`)}
+                ${productSpotlightCard(rankings.highestRevenue?.[0], "Highest revenue", (product) => `${money(product.revenue, "GBP")} revenue`)}
+                ${productSpotlightCard(rankings.highestProfit?.[0], "Highest profit", (product) => `${money(product.estimatedProfit, "GBP")} estimated profit`)}
+                ${productSpotlightCard(rankings.highViewsLowSales?.[0], "Fix this first", (product) => `${product.views} views / ${percent(product.purchaseRate)} purchase rate`)}
+            </div>
+        </section>
+    `;
+}
+
+function conversionLeversPanel(data) {
+    const metrics = data.metrics || {};
+    const levers = [
+        {
+            label: "Product page pull",
+            value: percent(metrics.productViews && metrics.uniqueVisitors ? metrics.productViews / metrics.uniqueVisitors : 0),
+            note: "Product views per visitor. Raise this with stronger hero/category paths."
+        },
+        {
+            label: "View to cart",
+            value: percent(metrics.productViews ? metrics.cartAdds / metrics.productViews : 0),
+            note: "If low, improve images, price clarity and product descriptions."
+        },
+        {
+            label: "Cart to checkout",
+            value: percent(metrics.cartAdds ? metrics.checkoutStarts / metrics.cartAdds : 0),
+            note: "If low, make shipping and discount totals impossible to miss."
+        },
+        {
+            label: "Checkout finish",
+            value: percent(metrics.checkoutCompletionRate || 0),
+            note: "If low, test payment speed and Stripe handoff."
+        }
+    ];
+
+    return `
+        <section class="admin-card analytics-levers-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Growth</span>
+                    <h3>Conversion Levers</h3>
+                </div>
+            </div>
+            <div class="analytics-lever-grid">
+                ${levers.map((lever) => `
+                    <article>
+                        <span>${escapeHtml(lever.label)}</span>
+                        <strong>${escapeHtml(lever.value)}</strong>
+                        <small>${escapeHtml(lever.note)}</small>
+                    </article>
+                `).join("")}
+            </div>
+        </section>
+    `;
+}
+
 function funnelChart(rows) {
     const max = maxValue(rows, "value");
 
@@ -530,6 +667,7 @@ function analyticsCommandCentre(data) {
                 ${signalCard("Engagement rate", percent(data.metrics.engagementRate || 0), "sessions with meaningful activity")}
                 ${signalCard("Single-page sessions", percent(data.metrics.singlePageRate || 0), "watch this if it rises")}
             </div>
+            ${analyticsExecutiveStrip(data)}
             ${lineChart("Traffic and Product Interest", dailySeries, [
                 { key: "visitors", label: "Visitors", className: "chart-line-primary" },
                 { key: "pageViews", label: "Page views", className: "chart-line-secondary" },
@@ -540,7 +678,9 @@ function analyticsCommandCentre(data) {
                 { key: "purchases", label: "Purchases", className: "chart-line-secondary" },
                 { key: "revenue", label: "Revenue", className: "chart-line-tertiary" }
             ], (value) => Number(value || 0).toFixed(0))}
+            ${productRankingsPanel(data)}
             <div class="admin-analytics-grid">
+                ${conversionLeversPanel(data)}
                 ${funnelChart(funnel)}
                 ${barChart("Category Demand", categoryRows)}
                 ${barChart("Most Viewed Products", data.metrics.topProducts || [])}
@@ -870,16 +1010,25 @@ function adminDataUrl() {
 async function loadAdmin(options = {}) {
     const silent = Boolean(options.silent);
     const user = await getCurrentUser().catch(() => null);
-    if (!user) return;
+    if (!user) {
+        layout?.classList.remove("is-signed-in");
+        form.hidden = false;
+        panel.hidden = true;
+        return;
+    }
 
     try {
         if (!silent) message.textContent = "Loading admin data...";
         adminData = await adminFetch(adminDataUrl());
         form.hidden = true;
         panel.hidden = false;
+        layout?.classList.add("is-signed-in");
         renderAdmin(user);
         message.textContent = "";
     } catch (error) {
+        layout?.classList.remove("is-signed-in");
+        form.hidden = false;
+        panel.hidden = true;
         if (!silent) message.textContent = error.message;
     }
 }

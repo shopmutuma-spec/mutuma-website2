@@ -72,6 +72,10 @@ body.menu-open {
     overflow: hidden;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 a {
     color: inherit;
     text-decoration: none;
@@ -1761,6 +1765,15 @@ textarea {
     align-items: start;
 }
 
+.admin-layout.is-signed-in {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: min(1880px, calc(100vw - 24px));
+}
+
+.admin-layout.is-signed-in .admin-panel {
+    width: 100%;
+}
+
 .split-actions,
 .account-stats,
 .admin-stats {
@@ -1803,7 +1816,7 @@ textarea {
 
 .analytics-toolbar {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px;
     margin: 0 0 18px;
     border: 1px solid var(--line);
@@ -2069,6 +2082,96 @@ textarea {
     color: var(--text);
     font-size: clamp(1.5rem, 4vw, 2.4rem);
     line-height: 1;
+}
+
+.analytics-executive-strip,
+.analytics-product-spotlight-grid,
+.analytics-lever-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.analytics-executive-strip article,
+.analytics-product-spotlight,
+.analytics-lever-grid article {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px;
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.028)),
+        #111111;
+}
+
+.analytics-executive-strip span,
+.analytics-executive-strip small,
+.analytics-product-spotlight span,
+.analytics-product-spotlight small,
+.analytics-lever-grid span,
+.analytics-lever-grid small {
+    display: block;
+    color: var(--muted);
+}
+
+.analytics-executive-strip strong,
+.analytics-product-spotlight strong,
+.analytics-lever-grid strong {
+    display: block;
+    margin: 7px 0;
+    color: var(--text);
+    font-size: clamp(1rem, 1.8vw, 1.35rem);
+    line-height: 1.12;
+}
+
+.analytics-executive-strip i {
+    position: absolute;
+    inset: auto auto 0 0;
+    height: 3px;
+    background: #ffffff;
+}
+
+.analytics-rankings-card,
+.analytics-levers-card {
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.08), transparent 24rem),
+        rgba(255, 255, 255, 0.04);
+}
+
+.analytics-product-spotlight {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 118px;
+}
+
+.analytics-product-spotlight.empty {
+    display: block;
+}
+
+.analytics-product-spotlight img {
+    width: 86px;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #050505;
+}
+
+.analytics-product-spotlight strong {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.analytics-lever-grid article {
+    min-height: 138px;
+}
+
+.analytics-lever-grid strong {
+    font-size: clamp(1.45rem, 3vw, 2.45rem);
 }
 
 .admin-chart-card {
@@ -2854,6 +2957,9 @@ textarea {
     .admin-detail-grid,
     .admin-live-grid,
     .admin-management-grid,
+    .analytics-executive-strip,
+    .analytics-product-spotlight-grid,
+    .analytics-lever-grid,
     .analytics-kpi-grid,
     .analytics-toolbar {
         grid-template-columns: 1fr;
