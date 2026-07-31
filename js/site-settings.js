@@ -10,8 +10,8 @@ export const storeSettings = {
     },
     freeGift: {
         enabled: true,
-        productId: "q-cute-ceramic-cup-classic-250ml",
-        label: "Buy one, get one free gift"
+        productId: "travis-scott-astroworld-tracklist-canvas-poster",
+        label: "Free poster with every order"
     },
     cartRewardTiers: [
         { minimumItems: 2, discountPercent: 5, label: "2-piece room reward" },

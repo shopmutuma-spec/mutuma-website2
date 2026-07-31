@@ -1,9 +1,9 @@
-import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260731b";
-import { initCurrency } from "./currency.js?v=20260731b";
-import { addToCart } from "./store.js?v=20260731b";
-import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260731b";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260731b";
-import { homepageBundles } from "./merchandising.js?v=20260731b";
+import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260731c";
+import { initCurrency } from "./currency.js?v=20260731c";
+import { addToCart } from "./store.js?v=20260731c";
+import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260731c";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260731c";
+import { homepageBundles } from "./merchandising.js?v=20260731c";
 
 boot().catch((error) => {
     console.error("Roomfinds homepage failed to start.", error);
@@ -85,7 +85,7 @@ function renderSpendBanner() {
         <div>
             <span class="eyebrow">Live room deal</span>
             <strong>Buy one, get one free.</strong>
-            <p>Buy anything and your free Q-Cute Ceramic Cup is added automatically. Sale prices are still 30% off across the store.</p>
+            <p>Buy anything and your free poster is added automatically. Sale prices are still 30% off across the store.</p>
         </div>
         <a class="button primary" href="shop.html">Shop the deal</a>
     `;

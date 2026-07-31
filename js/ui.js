@@ -1,10 +1,10 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260731b";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260731b";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260731b";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260731b";
-import { trackEvent } from "./analytics.js?v=20260731b";
-import { storeSettings } from "./site-settings.js?v=20260731b";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260731b";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260731c";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260731c";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260731c";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260731c";
+import { trackEvent } from "./analytics.js?v=20260731c";
+import { storeSettings } from "./site-settings.js?v=20260731c";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260731c";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -70,7 +70,7 @@ export function renderHeader() {
     header.innerHTML = `
         <div class="sale-ticker" role="note" aria-label="Buy one, get one free gift. 30% off everything right now.">
             <span>Buy one, get one free</span>
-            <span>Free cup with any order</span>
+            <span>Free poster with any order</span>
             <span>30% off everything</span>
             <span>No code needed</span>
         </div>
@@ -890,7 +890,7 @@ function initEmailOffer() {
                         <button class="icon-button" data-offer-close aria-label="Close offer">${icons.close}</button>
                     </div>
                     <h2>Buy one, get one free.</h2>
-                    <p>Buy anything and your free Q-Cute Ceramic Cup is added automatically. Join the Roomfinds drop list before you shop for new room edits, restocks and private deals.</p>
+                    <p>Buy anything and your free poster is added automatically. Join the Roomfinds drop list before you shop for new room edits, restocks and private deals.</p>
                     <form class="offer-form" name="mutuma-email-list" data-offer-form>
                         <input type="hidden" name="form-name" value="mutuma-email-list">
                         <input type="hidden" name="source" value="first-visit-offer">

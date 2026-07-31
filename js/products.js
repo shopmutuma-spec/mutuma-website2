@@ -1,4 +1,4 @@
-import { storeSettings } from "./site-settings.js?v=20260731b";
+import { storeSettings } from "./site-settings.js?v=20260731c";
 
 const baseProducts = [
     {
@@ -3677,6 +3677,15 @@ export function getFamilyProducts(productId) {
 }
 
 export function productOptions(product) {
+    const musicPosterSizes = [
+        "A4 21x30cm No Frame",
+        "30x40cm No Frame",
+        "A3 30x42cm No Frame",
+        "40x60cm No Frame",
+        "50x70cm No Frame",
+        "60x80cm No Frame"
+    ];
+
     const categoryOptions = {
         Rugs: {
             sizes: ["Small", "Medium", "Large"],
@@ -3753,7 +3762,7 @@ export function productOptions(product) {
 
     return {
         ...fallbackOptions,
-        sizes: product.sizes || fallbackOptions.sizes,
+        sizes: product.family === "music-tracklist-canvas-posters" ? musicPosterSizes : product.sizes || fallbackOptions.sizes,
         colours: product.colours || product.variations || fallbackOptions.colours,
         type: product.type || fallbackOptions.type,
         roomTypes: product.roomTypes || fallbackOptions.roomTypes,
