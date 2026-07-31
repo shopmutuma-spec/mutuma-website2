@@ -65,6 +65,19 @@ async function saveOrder(session) {
             currency: String(item.currency || session.currency || "gbp").toUpperCase(),
             product_id: item.price?.product?.metadata?.product_id || ""
         }));
+        const freeGiftProductId = session.metadata?.free_gift_product_id || "";
+        const freeGiftProductName = session.metadata?.free_gift_product_name || "";
+
+        if (freeGiftProductId && freeGiftProductName && !orderItems.some((item) => item.product_id === freeGiftProductId)) {
+            orderItems.push({
+                name: freeGiftProductName,
+                quantity: 1,
+                amount_total: 0,
+                currency: String(session.currency || "gbp").toUpperCase(),
+                product_id: freeGiftProductId,
+                gift: true
+            });
+        }
 
         await supabaseRequest("orders?on_conflict=stripe_session_id", {
             method: "POST",

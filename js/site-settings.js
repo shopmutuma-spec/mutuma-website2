@@ -3,10 +3,15 @@ export const storeSettings = {
     standardShipping: 6,
     popularSearches: ["lamp", "rug", "poster", "desk", "gaming"],
     fallbackOffer: {
-        name: "45% off everything",
-        discount_percent: 45,
+        name: "30% off everything",
+        discount_percent: 30,
         scope: "all",
         enabled: true
+    },
+    freeGift: {
+        enabled: true,
+        productId: "q-cute-ceramic-cup-classic-250ml",
+        label: "Buy one, get one free gift"
     },
     cartRewardTiers: [
         { minimumItems: 2, discountPercent: 5, label: "2-piece room reward" },

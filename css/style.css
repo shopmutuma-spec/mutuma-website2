@@ -518,6 +518,19 @@ img {
     background: transparent;
 }
 
+.free-gift-line {
+    border-color: rgba(255, 255, 255, 0.32);
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035)),
+        rgba(255, 255, 255, 0.035);
+}
+
+.free-gift-line b {
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
 .mobile-menu-head {
     display: flex;
     align-items: center;

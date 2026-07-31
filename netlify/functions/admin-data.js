@@ -33,6 +33,20 @@ function cleanText(value, fallback = "") {
     return String(value ?? fallback).trim();
 }
 
+function normalizeOffer(offer) {
+    if (!offer) return offer;
+    const isLegacyStorewideSale = Number(offer.discount_percent) === 45
+        && String(offer.name || "").toLowerCase().includes("45% off everything");
+
+    if (!isLegacyStorewideSale) return offer;
+
+    return {
+        ...offer,
+        name: "30% off everything",
+        discount_percent: 30
+    };
+}
+
 function clampDays(value) {
     const days = Number(value || DEFAULT_DAYS);
     if (!Number.isFinite(days)) return DEFAULT_DAYS;
@@ -866,7 +880,7 @@ export async function handler(event) {
             subscribers,
             orders: currentRows.orders,
             customers: buildCustomers(currentRows.orders, subscribers),
-            offers,
+            offers: offers.map(normalizeOffer),
             goals,
             adminProducts,
             products: allProducts.map((product) => ({

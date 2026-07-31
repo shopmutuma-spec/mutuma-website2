@@ -1,10 +1,10 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260730c";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260730c";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260730c";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260730c";
-import { trackEvent } from "./analytics.js?v=20260730c";
-import { storeSettings } from "./site-settings.js?v=20260730c";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260730c";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260731b";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260731b";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260731b";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260731b";
+import { trackEvent } from "./analytics.js?v=20260731b";
+import { storeSettings } from "./site-settings.js?v=20260731b";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260731b";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -68,11 +68,11 @@ export function renderHeader() {
         .slice(0, 3);
 
     header.innerHTML = `
-        <div class="sale-ticker" role="note" aria-label="45% off everything right now. Prices already reduced.">
-            <span>45% off everything</span>
-            <span>Limited time</span>
+        <div class="sale-ticker" role="note" aria-label="Buy one, get one free gift. 30% off everything right now.">
+            <span>Buy one, get one free</span>
+            <span>Free cup with any order</span>
+            <span>30% off everything</span>
             <span>No code needed</span>
-            <span>Prices already reduced</span>
         </div>
         <nav class="nav">
             <button class="icon-button mobile-toggle" data-menu-toggle aria-label="Open menu">${icons.menu}</button>
@@ -322,6 +322,13 @@ export function updateCounts() {
     document.querySelectorAll("[data-wishlist-count]").forEach((item) => item.textContent = wishlistCount);
 }
 
+export function freeGiftProduct(cart = getCart()) {
+    if (!storeSettings.freeGift?.enabled || !cart.length) return null;
+
+    const gift = findProductById(storeSettings.freeGift.productId);
+    return gift?.images?.[0] ? gift : null;
+}
+
 export function renderCartDrawer() {
     const drawerBody = document.querySelector("[data-cart-drawer-body]");
     const drawerSummary = document.querySelector("[data-cart-drawer-summary]");
@@ -346,6 +353,20 @@ export function renderCartDrawer() {
         return;
     }
 
+    const gift = freeGiftProduct(cart);
+    const giftLine = gift ? `
+        <article class="drawer-line free-gift-line">
+            ${productImage(gift.images[0], gift.name)}
+            <div>
+                <strong>${gift.name}</strong>
+                <span>${storeSettings.freeGift.label}</span>
+            </div>
+            <div class="drawer-line-end">
+                <b>Free</b>
+            </div>
+        </article>
+    ` : "";
+
     drawerBody.innerHTML = cart.map(({ product, quantity }) => `
         <article class="drawer-line">
             ${productImage(product.images[0], product.name)}
@@ -364,7 +385,7 @@ export function renderCartDrawer() {
                 <button data-drawer-save="${product.id}" aria-label="Save ${product.name} for later">Save for later</button>
             </div>
         </article>
-    `).join("");
+    `).join("") + giftLine;
 
     const subtotal = cart.reduce((total, { product, quantity }) => total + product.price * quantity, 0);
     const itemCount = cartItemCount(cart);
@@ -384,13 +405,14 @@ export function renderCartDrawer() {
 
     drawerSummary.innerHTML = `
         <div class="cart-reward-card">
-            <strong>${rewardMessage}</strong>
-            <small>Multi-item rewards are applied automatically at checkout.</small>
+            <strong>${gift ? "Buy one, get one free is unlocked." : rewardMessage}</strong>
+            <small>${gift ? `${gift.name} is included free with this order.` : "Multi-item rewards are applied automatically at checkout."}</small>
         </div>
         <div class="shipping-progress" aria-label="Free shipping progress"><span style="width:${progress}%"></span></div>
         <small>${subtotal >= freeShippingThreshold ? "Free Europe and US delivery unlocked." : `Add ${formatPrice(freeShippingThreshold - subtotal)} more to unlock free Europe and US delivery.`}</small>
         <div><span>Subtotal</span><strong data-price="${subtotal}">${formatPrice(subtotal)}</strong></div>
         ${rewardDiscount ? `<div><span>Room reward</span><strong>-${formatPrice(rewardDiscount)}</strong></div>` : ""}
+        ${gift ? `<div><span>${escapeHtml(storeSettings.freeGift.label)}</span><strong>Free</strong></div>` : ""}
         <div><span>Shipping</span><strong>${shipping ? formatPrice(shipping) : "Included"}</strong></div>
         <div class="drawer-total"><span>Total incl. shipping</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
         ${upsells.length ? `
@@ -404,7 +426,7 @@ export function renderCartDrawer() {
                 `).join("")}
             </div>
         ` : ""}
-        <small>45% off is already applied to product prices. Extra room rewards apply automatically.</small>
+        <small>Buy one, get one free gift is active. 30% off is already applied to product prices.</small>
         <button class="button primary wide" data-drawer-checkout>Checkout - ${formatPrice(total)}</button>
         <button class="button secondary wide" data-cart-close>Continue Shopping</button>
         <a class="button secondary wide" href="cart.html">View Full Cart</a>
@@ -867,15 +889,15 @@ function initEmailOffer() {
                         <span class="eyebrow">Current Roomfinds offer</span>
                         <button class="icon-button" data-offer-close aria-label="Close offer">${icons.close}</button>
                     </div>
-                    <h2>Everything is 45% off right now.</h2>
-                    <p>The room finds sale is live. Join the Roomfinds drop list before you shop and get first access to new room edits, restocks and private deals.</p>
+                    <h2>Buy one, get one free.</h2>
+                    <p>Buy anything and your free Q-Cute Ceramic Cup is added automatically. Join the Roomfinds drop list before you shop for new room edits, restocks and private deals.</p>
                     <form class="offer-form" name="mutuma-email-list" data-offer-form>
                         <input type="hidden" name="form-name" value="mutuma-email-list">
                         <input type="hidden" name="source" value="first-visit-offer">
                         <input type="email" name="email" placeholder="Email address" aria-label="Email address" required>
                         <button class="button primary">Get Sale Access</button>
                     </form>
-                    <small>No code needed. Sale prices are already applied across the store.</small>
+                    <small>No code needed. The free gift and 30% sale prices are already applied across the store.</small>
                 </div>
             </div>
         `;
@@ -910,8 +932,8 @@ function initEmailOffer() {
             modal.querySelector(".offer-panel").innerHTML = `
                 <div class="offer-success">
                     <span class="eyebrow">You're on the list</span>
-                    <h2>45% off is live.</h2>
-                    <p>No code needed. The sale is already applied across Roomfinds, and extra room rewards unlock when you add more pieces.</p>
+                    <h2>Buy one, get one free is live.</h2>
+                    <p>No code needed. Your free gift unlocks when you buy anything, and 30% sale prices are already applied across Roomfinds.</p>
                     <button class="button primary wide" data-offer-close>Shop Now</button>
                 </div>
             `;

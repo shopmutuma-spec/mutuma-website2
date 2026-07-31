@@ -8,6 +8,20 @@ function isActiveOffer(offer) {
     return offer.enabled && startsAt <= now && now <= endsAt;
 }
 
+function normalizeOffer(offer) {
+    if (!offer) return offer;
+    const isLegacyStorewideSale = Number(offer.discount_percent) === 45
+        && String(offer.name || "").toLowerCase().includes("45% off everything");
+
+    if (!isLegacyStorewideSale) return offer;
+
+    return {
+        ...offer,
+        name: "30% off everything",
+        discount_percent: 30
+    };
+}
+
 export async function handler(event) {
     if (event.httpMethod !== "GET") {
         return json(405, { error: "Method not allowed" });
@@ -21,7 +35,7 @@ export async function handler(event) {
 
         return json(200, {
             products,
-            offers: offers.filter(isActiveOffer)
+            offers: offers.filter(isActiveOffer).map(normalizeOffer)
         });
     } catch (error) {
         return json(200, {

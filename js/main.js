@@ -1,9 +1,9 @@
-import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260730c";
-import { initCurrency } from "./currency.js?v=20260730c";
-import { addToCart } from "./store.js?v=20260730c";
-import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260730c";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260730c";
-import { homepageBundles } from "./merchandising.js?v=20260730c";
+import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260731b";
+import { initCurrency } from "./currency.js?v=20260731b";
+import { addToCart } from "./store.js?v=20260731b";
+import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260731b";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260731b";
+import { homepageBundles } from "./merchandising.js?v=20260731b";
 
 boot().catch((error) => {
     console.error("Roomfinds homepage failed to start.", error);
@@ -83,11 +83,11 @@ function renderSpendBanner() {
 
     target.innerHTML = `
         <div>
-            <span class="eyebrow">Live storewide sale</span>
-            <strong>Everything is 45% off right now.</strong>
-            <p>Sale prices are already applied. Add more room pieces to unlock extra setup rewards in checkout.</p>
+            <span class="eyebrow">Live room deal</span>
+            <strong>Buy one, get one free.</strong>
+            <p>Buy anything and your free Q-Cute Ceramic Cup is added automatically. Sale prices are still 30% off across the store.</p>
         </div>
-        <a class="button primary" href="shop.html">Build a setup</a>
+        <a class="button primary" href="shop.html">Shop the deal</a>
     `;
 }
 
@@ -313,7 +313,7 @@ if (newsletterForm) {
         try {
             await submitEmailSignup(email, "homepage-newsletter");
             localStorage.setItem("mutuma.emailSubscribed", "true");
-            newsletterForm.innerHTML = "<strong>You're on the list. 45% off is already live across Roomfinds.</strong>";
+            newsletterForm.innerHTML = "<strong>You're on the list. Buy one, get one free is live across Roomfinds.</strong>";
         } catch (error) {
             notify(error.message);
             button.disabled = false;

@@ -6,6 +6,7 @@ import { supabaseRequest } from "./supabase-client.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 const FREE_SHIPPING_THRESHOLD = storeSettings.freeShippingThreshold;
 const STANDARD_SHIPPING = storeSettings.standardShipping;
+const FREE_GIFT_PRODUCT = products.find((product) => product.id === storeSettings.freeGift?.productId);
 const fallbackRates = {
     GBP: 1,
     USD: 1.27,
@@ -84,6 +85,20 @@ function isActiveOffer(offer) {
     return offer.enabled && startsAt <= now && now <= endsAt;
 }
 
+function normalizeOffer(offer) {
+    if (!offer) return offer;
+    const isLegacyStorewideSale = Number(offer.discount_percent) === 45
+        && String(offer.name || "").toLowerCase().includes("45% off everything");
+
+    if (!isLegacyStorewideSale) return offer;
+
+    return {
+        ...offer,
+        name: "30% off everything",
+        discount_percent: 30
+    };
+}
+
 async function loadCheckoutProducts() {
     try {
         const [remoteProducts, offers] = await Promise.all([
@@ -91,7 +106,7 @@ async function loadCheckoutProducts() {
             supabaseRequest("store_offers?select=name,discount_percent,scope,enabled,starts_at,ends_at&enabled=eq.true&limit=20")
         ]);
         const mergedProducts = [...products, ...remoteProducts.map(normalizeRemoteProduct)];
-        const activeOffers = offers.filter(isActiveOffer);
+        const activeOffers = offers.filter(isActiveOffer).map(normalizeOffer);
         const offersToApply = activeOffers.length ? activeOffers : [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
         const bestOffer = offersToApply
             .filter((offer) => offer.scope === "all")
@@ -203,6 +218,7 @@ export async function handler(event) {
         }
 
         const subtotal = cart.reduce((total, { product, quantity }) => total + product.price * quantity, 0);
+        const freeGift = storeSettings.freeGift?.enabled && FREE_GIFT_PRODUCT ? FREE_GIFT_PRODUCT : null;
         const reward = bestCartReward(itemCount(cart));
         const rewardDiscount = reward ? Number((subtotal * Number(reward.discountPercent || 0) / 100).toFixed(2)) : 0;
         const shippingAmount = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING;
@@ -242,6 +258,11 @@ export async function handler(event) {
                     }
                 }
             ],
+            custom_text: freeGift ? {
+                submit: {
+                    message: `Buy one, get one free gift included: ${freeGift.name}.`
+                }
+            } : undefined,
             line_items: cart.map(({ product, quantity }) => ({
                 quantity,
                 price_data: {
@@ -264,7 +285,9 @@ export async function handler(event) {
                 exchange_rate: String(rates[currency] || fallbackRates[currency] || 1),
                 item_count: String(cart.reduce((total, item) => total + item.quantity, 0)),
                 room_reward: reward ? `${reward.discountPercent}%` : "0%",
-                room_reward_discount_gbp: String(rewardDiscount)
+                room_reward_discount_gbp: String(rewardDiscount),
+                free_gift_product_id: freeGift?.id || "",
+                free_gift_product_name: freeGift?.name || ""
             },
             success_url: `${origin}/cart.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/cart.html?checkout=cancelled`
