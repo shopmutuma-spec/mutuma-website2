@@ -246,6 +246,23 @@ img {
     background: rgba(255, 255, 255, 0.1);
 }
 
+.icon-button[data-wishlist].active {
+    color: #ff2f4f;
+    border-color: rgba(255, 47, 79, 0.55);
+    background: rgba(255, 47, 79, 0.12);
+}
+
+.icon-button[data-wishlist].active svg {
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.button[data-wishlist-product].active,
+.button[data-qv-wishlist].active {
+    color: #ff2f4f;
+    border-color: rgba(255, 47, 79, 0.55);
+}
+
 .mobile-menu a.active {
     color: #090909;
     background: #ffffff;
