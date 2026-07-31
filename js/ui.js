@@ -1,10 +1,10 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260731c";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260731c";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260731c";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260731c";
-import { trackEvent } from "./analytics.js?v=20260731c";
-import { storeSettings } from "./site-settings.js?v=20260731c";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260731c";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260731d";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260731d";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260731d";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260731d";
+import { trackEvent } from "./analytics.js?v=20260731d";
+import { storeSettings } from "./site-settings.js?v=20260731d";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260731d";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -80,6 +80,10 @@ export function renderHeader() {
                 <a class="icon-button${page === "index.html" ? " active" : ""}" href="index.html" aria-label="Home"${page === "index.html" ? ' aria-current="page"' : ""}>${icons.home}</a>
                 <a class="icon-button${page === "shop.html" ? " active" : ""}" href="shop.html" aria-label="Shop"${page === "shop.html" ? ' aria-current="page"' : ""}>${icons.shop}</a>
                 <a class="icon-button${page === "categories.html" ? " active" : ""}" href="categories.html" aria-label="Categories"${page === "categories.html" ? ' aria-current="page"' : ""}>${icons.grid}</a>
+                <a class="nav-link" href="categories.html">Collections</a>
+                <a class="nav-link" href="shop.html?sort=newest">New Arrivals</a>
+                <a class="nav-link" href="shop.html?tag=best-seller">Best Sellers</a>
+                <a class="nav-link" href="index.html#shop-room">Room Setups</a>
             </div>
             <a class="logo" href="index.html">Roomfinds</a>
             <div class="nav-group nav-right">

@@ -4,53 +4,55 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Roomfinds | Your Room. Your Culture.</title>
-    <meta name="description" content="Premium black-and-white room finds for modern street culture spaces.">
+    <meta name="description" content="Premium room finds for street culture, gaming, music, anime and modern setup culture.">
     <link rel="preload" as="image" href="images/hero/home-room-1.webp" fetchpriority="high">
-    <link rel="stylesheet" href="css/style.css?v=20260731c">
+    <link rel="stylesheet" href="css/style.css?v=20260731d">
     <script type="application/ld+json">
-        {"@context":"https://schema.org","@type":"Store","name":"Roomfinds","slogan":"YOUR ROOM. YOUR CULTURE.","priceRange":"££"}
+        {"@context":"https://schema.org","@type":"Store","name":"Roomfinds","slogan":"YOUR ROOM. YOUR CULTURE.","priceRange":"GBP"}
     </script>
 </head>
-<body class="home-page">
+<body class="home-page redesigned-home">
     <div class="loading-screen" data-loader aria-hidden="true">
         <div class="loading-logo">Roomfinds</div>
     </div>
-    <script src="js/ambient-theme.js?v=20260731c"></script>
-    <script src="js/loader.js?v=20260731c"></script>
+    <script src="js/ambient-theme.js?v=20260731d"></script>
+    <script src="js/loader.js?v=20260731d"></script>
     <header class="site-header" data-header></header>
 
     <main>
-        <!-- Hero -->
-        <section class="hero">
+        <!-- Cinematic Hero -->
+        <section class="hero home-hero" data-home-hero>
             <div class="hero-media" aria-hidden="true">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
-            <div class="hero-content" data-reveal>
-                <span class="eyebrow">Roomfinds</span>
-                <h1>YOUR ROOM.<br>YOUR CULTURE.</h1>
-                <p>Premium objects, lighting, tech and wall pieces for rooms that feel intentional.</p>
-                <div class="hero-actions">
-                    <a class="button primary" href="shop.html">Shop Now</a>
-                    <a class="button secondary" href="#featured">Explore</a>
+            <div class="hero-lighting" aria-hidden="true"></div>
+            <div class="home-hero-inner">
+                <div class="home-hero-copy" data-reveal>
+                    <span class="eyebrow">Roomfinds / Room Culture</span>
+                    <h1>Build the room people remember.</h1>
+                    <p>Street-led room finds, rugs, lighting, posters and objects that make your setup feel collected, personal and impossible to ignore.</p>
+                    <div class="hero-actions">
+                        <a class="button primary" href="shop.html">Shop the edit</a>
+                        <a class="button secondary" href="#trending">Explore rooms</a>
+                    </div>
+                    <div class="hero-discovery" aria-label="Popular room edits">
+                        <a href="shop.html?sort=newest">New Arrivals</a>
+                        <a href="shop.html?tag=best-seller">Best Sellers</a>
+                        <a href="categories.html">Collections</a>
+                        <a href="#shop-room">Room Setups</a>
+                        <a href="shop.html?category=Posters">Posters</a>
+                        <a href="shop.html?category=Rugs">Rugs</a>
+                    </div>
                 </div>
-                <div class="hero-discovery" aria-label="Popular room edits">
-                    <a href="shop.html?sort=newest">New In</a>
-                    <a href="shop.html?category=Lighting">Lighting</a>
-                    <a href="shop.html?type=Decor">Desk Setup</a>
-                    <a href="shop.html?category=Rugs">Rugs</a>
-                    <a href="shop.html?category=Posters">Wall Decor</a>
-                    <a href="shop.html?style=Gaming">Gaming</a>
-                    <a href="shop.html?category=Organisation">Storage</a>
-                    <a href="shop.html?style=Collector">Collectibles</a>
-                </div>
+                <div class="hero-showcase" data-hero-showcase aria-label="Featured room finds"></div>
             </div>
-            <a class="scroll-cue" href="#featured" aria-label="Scroll to products"></a>
+            <a class="scroll-cue" href="#trending" aria-label="Scroll to products"></a>
         </section>
 
         <!-- Trust Strip -->
-        <section class="trust-strip container" aria-label="Store promises" data-reveal>
+        <section class="trust-strip container home-trust" aria-label="Store promises" data-reveal>
             <span>Secure checkout</span>
             <span>Easy returns</span>
             <span>Europe and US delivery</span>
@@ -59,52 +61,104 @@
 
         <section class="spend-banner container" data-spend-banner data-reveal></section>
 
-        <!-- Featured Products -->
-        <section class="section container" id="featured" data-reveal>
+        <!-- Trending -->
+        <section class="section container home-section" id="trending" data-reveal>
             <div class="section-head">
-                <h2>Featured Products</h2>
-                <a href="shop.html">View all</a>
+                <div>
+                    <span class="eyebrow">Trending now</span>
+                    <h2>The room pieces getting attention.</h2>
+                </div>
+                <a href="shop.html?tag=trending">Shop trending</a>
             </div>
-            <div class="product-grid" data-featured-products></div>
+            <div class="product-grid premium-product-grid home-product-rail" data-trending-products></div>
         </section>
-
-        <section class="section container" data-home-bundles data-reveal></section>
 
         <!-- Categories -->
-        <section class="section container" id="categories" data-reveal>
+        <section class="section container home-section" id="categories" data-reveal>
             <div class="section-head">
-                <h2>Shop by Category</h2>
-                <p>Start with the piece your room needs most.</p>
+                <div>
+                    <span class="eyebrow">Collections</span>
+                    <h2>Shop by the part of the room.</h2>
+                </div>
+                <a href="categories.html">View categories</a>
             </div>
-            <div class="category-grid" data-category-grid></div>
+            <div class="category-grid cinematic-category-grid" data-category-grid></div>
         </section>
-
-        <!-- Best Sellers -->
-        <section class="section container" data-reveal>
-            <div class="section-head">
-                <h2>Best Sellers</h2>
-                <a href="shop.html?tag=best-seller">Shop best sellers</a>
-            </div>
-            <div class="product-grid" data-best-sellers></div>
-        </section>
-
-        <!-- Discovery Rails -->
-        <section class="section container discovery-section" data-discovery-sections data-reveal></section>
-
-        <!-- Shop by Feeling -->
-        <section class="section container" data-feeling-section data-reveal></section>
 
         <!-- Shop the Room -->
-        <section class="section container" data-room-section data-reveal></section>
+        <section class="section container home-section" id="shop-room" data-room-section data-reveal></section>
 
-        <!-- About -->
-        <section class="about-section container" id="about" data-about data-reveal></section>
+        <!-- Best Sellers -->
+        <section class="section container home-section" data-reveal>
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Best sellers</span>
+                    <h2>Easy wins for your setup.</h2>
+                </div>
+                <a href="shop.html?tag=best-seller">Shop best sellers</a>
+            </div>
+            <div class="product-grid premium-product-grid home-product-rail" data-best-sellers></div>
+        </section>
+
+        <!-- Customer Favourites -->
+        <section class="section container home-section" data-reveal>
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Customer favourites</span>
+                    <h2>Saved, shared and added often.</h2>
+                </div>
+                <a href="wishlist.html">Open wishlist</a>
+            </div>
+            <div class="product-grid premium-product-grid home-product-rail" data-customer-favourites></div>
+        </section>
+
+        <!-- New Arrivals + Limited Drops -->
+        <section class="section container home-section split-showcase" data-reveal>
+            <div class="home-split-panel">
+                <span class="eyebrow">New arrivals</span>
+                <h2>Fresh finds for the next room edit.</h2>
+                <p>Recently added pieces, poster drops and setup objects from the live catalogue.</p>
+                <a class="button secondary" href="shop.html?sort=newest">Shop new in</a>
+            </div>
+            <div class="home-split-products" data-new-arrivals></div>
+        </section>
+
+        <section class="section container home-section limited-drop" data-reveal>
+            <div>
+                <span class="eyebrow">Limited drops</span>
+                <h2>Small details. Big room energy.</h2>
+                <p>Graphic rugs, posters and display pieces that make the room feel like yours.</p>
+            </div>
+            <a class="button primary" href="shop.html?tag=new">Shop the drop</a>
+        </section>
+
+        <!-- Interactive Carousel -->
+        <section class="section container home-section" data-reveal>
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Product carousel</span>
+                    <h2>Keep discovering.</h2>
+                </div>
+                <a href="shop.html">Open shop</a>
+            </div>
+            <div class="home-carousel" data-home-carousel tabindex="0" aria-label="Interactive product carousel"></div>
+        </section>
+
+        <!-- Room Inspiration -->
+        <section class="section container home-section inspiration-board" data-inspiration data-reveal></section>
+
+        <!-- Why Roomfinds -->
+        <section class="about-section container why-roomfinds" id="about" data-about data-reveal></section>
+
+        <!-- FAQ -->
+        <section class="section container home-section home-faq" data-home-faq data-reveal></section>
 
         <!-- Newsletter -->
-        <section class="newsletter container" data-reveal>
+        <section class="newsletter container home-newsletter" data-reveal>
             <div>
-                <span class="eyebrow">Private Drop List</span>
+                <span class="eyebrow">Private drop list</span>
                 <h2>Get the next room edit first.</h2>
+                <p>Drop alerts, restocks and early access to new room finds.</p>
             </div>
             <form name="mutuma-email-list" data-newsletter>
                 <input type="hidden" name="form-name" value="mutuma-email-list">
@@ -113,9 +167,6 @@
                 <button class="button primary">Join</button>
             </form>
         </section>
-
-        <!-- Room Inspiration -->
-        <section class="section container" data-inspiration data-reveal></section>
     </main>
 
     <form name="mutuma-email-list" netlify netlify-honeypot="bot-field" hidden>
@@ -127,7 +178,6 @@
 
     <footer class="site-footer" data-footer></footer>
     <div data-modal></div>
-    <script type="module" src="js/main.js?v=20260731c"></script>
+    <script type="module" src="js/main.js?v=20260731d"></script>
 </body>
 </html>
-

@@ -222,6 +222,28 @@ img {
     gap: 8px;
 }
 
+.nav-link {
+    min-height: 38px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+}
+
 .nav-right {
     justify-content: flex-end;
 }
@@ -3362,5 +3384,585 @@ textarea {
         flex-direction: column;
         gap: 5px;
         font-size: 0.68rem;
+    }
+}
+
+/* Redesigned Roomfinds homepage */
+.redesigned-home main {
+    overflow: hidden;
+}
+
+.redesigned-home .site-header {
+    top: 12px;
+}
+
+.redesigned-home .nav {
+    width: min(100% - 24px, 1320px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 22px;
+    padding: 0 10px;
+    background: rgba(9, 9, 9, 0.58);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+    backdrop-filter: blur(22px);
+}
+
+.home-hero {
+    min-height: 100svh;
+    align-items: center;
+    padding: calc(var(--nav-height) + 44px) 0 54px;
+}
+
+.home-hero .hero-media {
+    inset: 0;
+    left: 0;
+}
+
+.home-hero .hero-media span {
+    background-position: center;
+}
+
+.home-hero::before {
+    background:
+        linear-gradient(90deg, rgba(5, 5, 5, 0.96), rgba(5, 5, 5, 0.62), rgba(5, 5, 5, 0.88)),
+        linear-gradient(180deg, rgba(9, 9, 9, 0.08), #090909 92%);
+}
+
+.hero-lighting {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.13), transparent 28%),
+        linear-gradient(245deg, rgba(255, 47, 79, 0.16), transparent 34%),
+        linear-gradient(180deg, transparent 58%, #090909 100%);
+    opacity: 0.8;
+    animation: home-light-sweep 8s ease-in-out infinite alternate;
+}
+
+.home-hero-inner {
+    position: relative;
+    z-index: 2;
+    width: min(100% - 32px, 1320px);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.76fr);
+    gap: clamp(28px, 5vw, 84px);
+    align-items: center;
+}
+
+.home-hero-copy h1 {
+    max-width: 980px;
+    margin: 18px 0 20px;
+    font-size: clamp(4.6rem, 11vw, 11.5rem);
+    line-height: 0.82;
+    letter-spacing: 0;
+}
+
+.home-hero-copy p {
+    max-width: 690px;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: clamp(1rem, 1.4vw, 1.26rem);
+    line-height: 1.72;
+}
+
+.hero-showcase {
+    min-height: 560px;
+    position: relative;
+}
+
+.hero-stats {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 28%;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.hero-stats span {
+    min-height: 86px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px;
+    padding: 14px;
+    display: grid;
+    align-content: center;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(18px);
+}
+
+.hero-stats strong {
+    display: block;
+    color: var(--text);
+    font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+    line-height: 1;
+}
+
+.hero-floating-products {
+    position: absolute;
+    inset: 88px 0 0;
+}
+
+.hero-floating-card {
+    position: absolute;
+    width: min(48%, 240px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(12, 12, 12, 0.56);
+    box-shadow: 0 36px 100px rgba(0, 0, 0, 0.46);
+    backdrop-filter: blur(18px);
+    animation: home-card-float 6s ease-in-out infinite;
+}
+
+.hero-floating-card img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+}
+
+.hero-floating-card span {
+    display: block;
+    min-height: 58px;
+    padding: 12px;
+    font-weight: 900;
+    line-height: 1.15;
+}
+
+.hero-floating-card.card-1 {
+    top: 12%;
+    left: 2%;
+}
+
+.hero-floating-card.card-2 {
+    top: 30%;
+    right: 2%;
+    animation-delay: 800ms;
+}
+
+.hero-floating-card.card-3 {
+    bottom: 0;
+    left: 25%;
+    animation-delay: 1500ms;
+}
+
+.home-trust {
+    margin-top: -28px;
+    position: relative;
+    z-index: 4;
+    background: rgba(15, 15, 15, 0.86);
+    backdrop-filter: blur(18px);
+}
+
+.home-section {
+    position: relative;
+}
+
+.redesigned-home .section-head {
+    align-items: end;
+}
+
+.redesigned-home .section-head h2 {
+    max-width: 850px;
+    font-size: clamp(2.4rem, 6.6vw, 7.4rem);
+    line-height: 0.9;
+}
+
+.premium-product-grid .product-card {
+    border-radius: 20px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03)),
+        #111111;
+}
+
+.premium-product-grid .product-image {
+    aspect-ratio: 1 / 1.12;
+}
+
+.premium-product-grid .product-card:hover {
+    transform: translateY(-8px) scale(1.01);
+}
+
+.redesigned-home .home-product-rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(250px, 24vw);
+    grid-template-columns: none;
+    gap: 16px;
+    margin-inline: calc(var(--gutter) * -0.3);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding: 2px calc(var(--gutter) * 0.3) 18px;
+    scroll-padding-inline: calc(var(--gutter) * 0.3);
+    scroll-snap-type: inline mandatory;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+    scrollbar-width: thin;
+}
+
+.redesigned-home .home-product-rail::-webkit-scrollbar {
+    height: 8px;
+}
+
+.redesigned-home .home-product-rail::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 999px;
+}
+
+.redesigned-home .home-product-rail::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+}
+
+.redesigned-home .home-product-rail .product-card {
+    scroll-snap-align: start;
+}
+
+.cinematic-category-grid .category-card {
+    min-height: 360px;
+    border-radius: 22px;
+    padding: 22px;
+}
+
+.cinematic-category-grid .category-card span {
+    font-size: clamp(1.4rem, 2.8vw, 2.5rem);
+}
+
+.redesigned-home #categories .cinematic-category-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(300px, 31vw);
+    grid-template-columns: none;
+    gap: 16px;
+    margin-inline: calc(var(--gutter) * -0.3);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding: 2px calc(var(--gutter) * 0.3) 18px;
+    scroll-padding-inline: calc(var(--gutter) * 0.3);
+    scroll-snap-type: inline mandatory;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+    scrollbar-width: thin;
+}
+
+.redesigned-home #categories .cinematic-category-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.redesigned-home #categories .cinematic-category-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 999px;
+}
+
+.redesigned-home #categories .cinematic-category-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+}
+
+.redesigned-home #categories .cinematic-category-grid .category-card {
+    scroll-snap-align: start;
+}
+
+.split-showcase {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.7fr) minmax(0, 1.3fr);
+    gap: 16px;
+    align-items: stretch;
+}
+
+.home-split-panel,
+.limited-drop {
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: clamp(22px, 4vw, 44px);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.035)),
+        #101010;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.home-split-panel h2,
+.limited-drop h2 {
+    margin: 12px 0;
+    font-size: clamp(2.6rem, 6vw, 6.8rem);
+    line-height: 0.88;
+}
+
+.home-split-panel p,
+.limited-drop p,
+.home-newsletter p {
+    color: var(--muted);
+    line-height: 1.65;
+}
+
+.home-split-products {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.arrival-card,
+.carousel-card {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.045);
+    transition: transform 220ms ease, border-color 220ms ease;
+}
+
+.arrival-card:hover,
+.carousel-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.32);
+}
+
+.arrival-card img,
+.carousel-card img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+}
+
+.arrival-card span,
+.arrival-card strong,
+.carousel-card span,
+.carousel-card strong {
+    display: block;
+    padding: 0 12px;
+}
+
+.arrival-card span,
+.carousel-card span {
+    padding-top: 12px;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.arrival-card strong,
+.carousel-card strong {
+    min-height: 58px;
+    padding-bottom: 12px;
+    line-height: 1.15;
+}
+
+.limited-drop {
+    min-height: 420px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    background:
+        linear-gradient(90deg, rgba(9, 9, 9, 0.92), rgba(9, 9, 9, 0.42)),
+        url("../images/hero/home-room-2.webp") center / cover no-repeat;
+}
+
+.home-carousel {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 24vw);
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+}
+
+.carousel-card {
+    scroll-snap-align: start;
+}
+
+.why-roomfinds {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+    gap: clamp(24px, 5vw, 72px);
+    align-items: end;
+}
+
+.why-roomfinds::after {
+    content: "Secure checkout / easy returns / real catalogue / fast discovery";
+    min-height: 280px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    align-items: end;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: clamp(1.4rem, 3vw, 3rem);
+    font-weight: 900;
+    line-height: 1.04;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+        #111111;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.faq-grid details {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.faq-grid summary {
+    cursor: pointer;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.faq-grid p {
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.home-newsletter {
+    border-radius: 24px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035)),
+        #101010;
+}
+
+@keyframes home-light-sweep {
+    from {
+        opacity: 0.58;
+        transform: translate3d(-1.5%, 0, 0);
+    }
+
+    to {
+        opacity: 0.9;
+        transform: translate3d(1.5%, 0, 0);
+    }
+}
+
+@keyframes home-card-float {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    50% {
+        transform: translate3d(0, -12px, 0);
+    }
+}
+
+@media (max-width: 980px) {
+    .home-hero-inner,
+    .split-showcase,
+    .why-roomfinds,
+    .limited-drop {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-showcase {
+        min-height: 360px;
+    }
+
+    .hero-stats {
+        left: 0;
+    }
+
+    .hero-floating-products {
+        inset: 108px 0 0;
+    }
+
+    .home-split-products,
+    .faq-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .redesigned-home .nav {
+        width: min(100% - 18px, 1320px);
+        border-radius: 18px;
+    }
+
+    .home-hero {
+        min-height: auto;
+        padding-top: calc(var(--nav-height) + 34px);
+    }
+
+    .home-hero-copy h1 {
+        font-size: clamp(3.6rem, 17vw, 6rem);
+    }
+
+    .home-hero-inner {
+        width: min(100% - 24px, 1320px);
+        gap: 22px;
+    }
+
+    .hero-showcase {
+        min-height: 315px;
+    }
+
+    .hero-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .hero-stats span {
+        min-height: 68px;
+        padding: 10px;
+        font-size: 0.68rem;
+    }
+
+    .hero-floating-card {
+        width: 42%;
+        border-radius: 14px;
+    }
+
+    .hero-floating-card span {
+        min-height: 46px;
+        padding: 8px;
+        font-size: 0.72rem;
+    }
+
+    .redesigned-home .section-head {
+        align-items: flex-start;
+    }
+
+    .redesigned-home .section-head h2,
+    .home-split-panel h2,
+    .limited-drop h2 {
+        font-size: clamp(2.5rem, 12vw, 4rem);
+    }
+
+    .redesigned-home .home-product-rail {
+        grid-auto-columns: minmax(210px, 70vw);
+        margin-inline: calc(var(--gutter) * -0.5);
+        padding-inline: calc(var(--gutter) * 0.5);
+        scroll-padding-inline: calc(var(--gutter) * 0.5);
+    }
+
+    .cinematic-category-grid .category-card {
+        min-height: 210px;
+    }
+
+    .redesigned-home #categories .cinematic-category-grid {
+        grid-auto-columns: minmax(238px, 76vw);
+        margin-inline: calc(var(--gutter) * -0.5);
+        padding-inline: calc(var(--gutter) * 0.5);
+        scroll-padding-inline: calc(var(--gutter) * 0.5);
+    }
+
+    .home-split-products {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-carousel {
+        grid-auto-columns: minmax(145px, 42vw);
+    }
+
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .why-roomfinds::after {
+        min-height: 190px;
     }
 }

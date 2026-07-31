@@ -1,9 +1,9 @@
-import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260731c";
-import { initCurrency } from "./currency.js?v=20260731c";
-import { addToCart } from "./store.js?v=20260731c";
-import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260731c";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260731c";
-import { homepageBundles } from "./merchandising.js?v=20260731c";
+import { findProductById, products, getProductsByTag, loadStoreCatalog } from "./products.js?v=20260731d";
+import { initCurrency } from "./currency.js?v=20260731d";
+import { addToCart } from "./store.js?v=20260731d";
+import { aboutRoomfinds, discoveryMoods, inspirationGallery, roomEdit } from "./site-content.js?v=20260731d";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260731d";
+import { homepageBundles } from "./merchandising.js?v=20260731d";
 
 boot().catch((error) => {
     console.error("Roomfinds homepage failed to start.", error);
@@ -16,16 +16,19 @@ initCurrency().catch(() => {});
 
 let activeRailUsage = null;
 
-renderProductGrid("[data-featured-products]", getRotatingFeaturedProducts());
-renderProductGrid("[data-best-sellers]", getProductsByTag("best-seller", 4));
+const rotatingFeatured = getRotatingFeaturedProducts();
+renderHeroShowcase(rotatingFeatured);
+    renderProductGrid("[data-trending-products]", getTrendingRoomProducts(10));
+renderProductGrid("[data-best-sellers]", getHomeProductSet("best-seller", 8));
+renderProductGrid("[data-customer-favourites]", getCustomerFavourites());
+renderNewArrivals();
+renderHomeCarousel();
 renderCategories("[data-category-grid]");
 renderSpendBanner();
-renderHomeBundles();
-renderDiscoverySections();
-renderFeelings();
 renderRoomEdit();
 renderAbout();
 renderInspiration();
+renderHomeFaq();
 startHeroRotation();
 
 function threeHourSeed(date = new Date()) {
@@ -62,6 +65,70 @@ function getRotatingFeaturedProducts() {
     const pool = uniqueProducts([...featured, ...fallback]);
 
     return seededShuffle(pool, threeHourSeed()).slice(0, 4);
+}
+
+function getHomeProductSet(tag, limit = 8) {
+    const tagged = products.filter((product) => product.images?.[0] && product.tags.includes(tag));
+    const backup = products.filter((product) => product.images?.[0] && (product.featured || product.family));
+
+    return seededShuffle(uniqueProducts([...tagged, ...backup]), threeHourSeed() + tag.length).slice(0, limit);
+}
+
+function getTrendingRoomProducts(limit = 10) {
+    const isRugOrPoster = (product) => {
+        const category = product.category?.toLowerCase() || "";
+        const tags = product.tags?.map((tag) => tag.toLowerCase()) || [];
+
+        return category.includes("rug")
+            || category.includes("poster")
+            || tags.includes("rugs")
+            || tags.includes("poster")
+            || tags.includes("posters");
+    };
+
+    const coreTrending = products.filter((product) => (
+        product.images?.[0]
+        && product.tags.includes("trending")
+        && isRugOrPoster(product)
+    ));
+
+    const coreFallback = products.filter((product) => product.images?.[0] && isRugOrPoster(product));
+    const widerFallback = products.filter((product) => product.images?.[0] && product.tags.includes("trending"));
+
+    return seededShuffle(
+        uniqueProducts([...coreTrending, ...coreFallback, ...widerFallback]),
+        threeHourSeed() + 88
+    ).slice(0, limit);
+}
+
+function getCustomerFavourites() {
+    const favourites = products.filter((product) => product.images?.[0] && (product.rating >= 4.8 || product.tags.includes("best-seller")));
+    return seededShuffle(uniqueProducts(favourites), threeHourSeed() + 141).slice(0, 8);
+}
+
+function renderHeroShowcase(heroProducts) {
+    const target = document.querySelector("[data-hero-showcase]");
+    if (!target) return;
+
+    const showcaseProducts = imageProducts(heroProducts).slice(0, 3);
+    const productCount = products.filter((product) => product.images?.[0]).length;
+    const categoryCount = new Set(products.map((product) => product.category).filter(Boolean)).size;
+
+    target.innerHTML = `
+        <div class="hero-stats" aria-label="Roomfinds catalogue snapshot">
+            <span><strong>${productCount}</strong> room finds</span>
+            <span><strong>${categoryCount}</strong> collections</span>
+            <span><strong>30%</strong> live sale</span>
+        </div>
+        <div class="hero-floating-products">
+            ${showcaseProducts.map((product, index) => `
+                <a class="hero-floating-card card-${index + 1}" href="product.html?id=${product.id}" aria-label="View ${product.name}">
+                    <img src="${product.images[0]}" alt="${product.name}" loading="${index === 0 ? "eager" : "lazy"}" decoding="async">
+                    <span>${product.name}</span>
+                </a>
+            `).join("")}
+        </div>
+    `;
 }
 
 function imageProducts(list) {
@@ -146,6 +213,72 @@ function renderHomeBundles() {
             notify("Room bundle added to cart");
         });
     });
+}
+
+function renderNewArrivals() {
+    const target = document.querySelector("[data-new-arrivals]");
+    if (!target) return;
+
+    const newProducts = seededShuffle(
+        imageProducts([...products].reverse()).filter((product) => product.tags.includes("new") || product.family || product.featured),
+        threeHourSeed() + 223
+    ).slice(0, 4);
+
+    target.innerHTML = newProducts.map((product) => `
+        <a class="arrival-card" href="product.html?id=${product.id}">
+            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async">
+            <span>${product.category}</span>
+            <strong>${product.name}</strong>
+        </a>
+    `).join("");
+}
+
+function renderHomeCarousel() {
+    const target = document.querySelector("[data-home-carousel]");
+    if (!target) return;
+
+    const carouselProducts = seededShuffle(
+        imageProducts(products).filter((product) => product.tags.includes("trending") || product.tags.includes("new") || product.category === "Posters"),
+        threeHourSeed() + 307
+    ).slice(0, 14);
+
+    target.innerHTML = carouselProducts.map((product) => `
+        <a class="carousel-card" href="product.html?id=${product.id}">
+            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async">
+            <span>${product.category}</span>
+            <strong>${product.name}</strong>
+        </a>
+    `).join("");
+}
+
+function renderHomeFaq() {
+    const target = document.querySelector("[data-home-faq]");
+    if (!target) return;
+
+    const faqs = [
+        ["How does the free poster offer work?", "Add any paid product to cart and the free poster is included automatically while the offer is active."],
+        ["Where do you deliver?", "Roomfinds currently supports Europe and US delivery through checkout."],
+        ["Can I save products for later?", "Yes. Tap the heart on any product card and it stays in your wishlist on this device."],
+        ["Are prices converted automatically?", "Yes. The site detects location and shows supported local currencies automatically."]
+    ];
+
+    target.innerHTML = `
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">FAQ</span>
+                <h2>Quick answers before checkout.</h2>
+            </div>
+            <a href="faq.html">More help</a>
+        </div>
+        <div class="faq-grid">
+            ${faqs.map(([question, answer]) => `
+                <details>
+                    <summary>${question}</summary>
+                    <p>${answer}</p>
+                </details>
+            `).join("")}
+        </div>
+    `;
 }
 
 function productRail(title, link, list, options = {}) {

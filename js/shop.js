@@ -1,7 +1,7 @@
-import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260731c";
-import { initCurrency } from "./currency.js?v=20260731c";
-import { trackEvent } from "./analytics.js?v=20260731c";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260731c";
+import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260731d";
+import { initCurrency } from "./currency.js?v=20260731d";
+import { trackEvent } from "./analytics.js?v=20260731d";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260731d";
 
 boot().catch((error) => {
     console.error("Roomfinds shop failed to start.", error);
