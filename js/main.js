@@ -16,8 +16,6 @@ initCurrency().catch(() => {});
 
 let activeRailUsage = null;
 
-const rotatingFeatured = getRotatingFeaturedProducts();
-renderHeroShowcase(rotatingFeatured);
     renderProductGrid("[data-trending-products]", getTrendingRoomProducts(10));
 renderProductGrid("[data-best-sellers]", getHomeProductSet("best-seller", 8));
 renderProductGrid("[data-customer-favourites]", getCustomerFavourites());
@@ -59,14 +57,6 @@ function seededShuffle(list, seed) {
     return shuffled;
 }
 
-function getRotatingFeaturedProducts() {
-    const featured = products.filter((product) => product.featured && product.images?.[0]);
-    const fallback = products.filter((product) => product.images?.[0] && (product.tags.includes("trending") || product.tags.includes("best-seller")));
-    const pool = uniqueProducts([...featured, ...fallback]);
-
-    return seededShuffle(pool, threeHourSeed()).slice(0, 4);
-}
-
 function getHomeProductSet(tag, limit = 8) {
     const tagged = products.filter((product) => product.images?.[0] && product.tags.includes(tag));
     const backup = products.filter((product) => product.images?.[0] && (product.featured || product.family));
@@ -104,31 +94,6 @@ function getTrendingRoomProducts(limit = 10) {
 function getCustomerFavourites() {
     const favourites = products.filter((product) => product.images?.[0] && (product.rating >= 4.8 || product.tags.includes("best-seller")));
     return seededShuffle(uniqueProducts(favourites), threeHourSeed() + 141).slice(0, 8);
-}
-
-function renderHeroShowcase(heroProducts) {
-    const target = document.querySelector("[data-hero-showcase]");
-    if (!target) return;
-
-    const showcaseProducts = imageProducts(heroProducts).slice(0, 3);
-    const productCount = products.filter((product) => product.images?.[0]).length;
-    const categoryCount = new Set(products.map((product) => product.category).filter(Boolean)).size;
-
-    target.innerHTML = `
-        <div class="hero-stats" aria-label="Roomfinds catalogue snapshot">
-            <span><strong>${productCount}</strong> room finds</span>
-            <span><strong>${categoryCount}</strong> collections</span>
-            <span><strong>30%</strong> live sale</span>
-        </div>
-        <div class="hero-floating-products">
-            ${showcaseProducts.map((product, index) => `
-                <a class="hero-floating-card card-${index + 1}" href="product.html?id=${product.id}" aria-label="View ${product.name}">
-                    <img src="${product.images[0]}" alt="${product.name}" loading="${index === 0 ? "eager" : "lazy"}" decoding="async">
-                    <span>${product.name}</span>
-                </a>
-            `).join("")}
-        </div>
-    `;
 }
 
 function imageProducts(list) {
