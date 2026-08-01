@@ -3284,6 +3284,7 @@ textarea {
     }
 
     .product-card {
+        position: relative;
         border-radius: 16px;
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
@@ -3296,7 +3297,7 @@ textarea {
     }
 
     .product-info {
-        padding: 10px;
+        padding: 9px;
     }
 
     .product-info p,
@@ -3309,7 +3310,7 @@ textarea {
 
     .product-meta {
         display: block;
-        font-size: 0.68rem;
+        font-size: 0.62rem;
         line-height: 1.2;
     }
 
@@ -3318,9 +3319,9 @@ textarea {
     }
 
     .product-info h3 {
-        min-height: 2.45em;
-        margin: 6px 0 8px;
-        font-size: 0.84rem;
+        min-height: 2.35em;
+        margin: 5px 0 7px;
+        font-size: 0.78rem;
         line-height: 1.22;
     }
 
@@ -3331,42 +3332,49 @@ textarea {
     }
 
     .price-row strong {
-        font-size: 0.96rem;
+        font-size: 0.9rem;
     }
 
     .price-row s {
-        font-size: 0.78rem;
+        font-size: 0.72rem;
     }
 
     .card-actions {
-        display: grid;
-        grid-template-columns: 38px minmax(0, 1fr) 38px;
-        margin-top: 8px;
-        padding-top: 0;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 3;
+        display: flex;
         gap: 6px;
+        margin: 0;
+        padding: 0;
     }
 
     .card-actions .quick-add-button {
-        grid-column: 1;
-        min-width: 38px;
+        min-width: 34px;
     }
 
     .card-actions .icon-button {
-        grid-column: 3;
-        grid-row: 1;
-        width: 100%;
-        min-width: 38px;
-        border-radius: 12px;
+        width: 34px;
+        min-width: 34px;
+        border-radius: 11px;
     }
 
-    .card-actions .button {
-        min-height: 38px;
-        padding: 0 8px;
-        font-size: 0.68rem;
-    }
-
+    .card-actions .button,
     .card-actions .icon-button {
-        height: 38px;
+        width: 34px;
+        height: 34px;
+        min-height: 34px;
+        border-color: rgba(255, 255, 255, 0.24);
+        color: #ffffff;
+        background: rgba(9, 9, 9, 0.7);
+        backdrop-filter: blur(14px);
+    }
+
+    .card-actions .quick-add-button svg,
+    .card-actions .icon-button svg {
+        width: 18px;
+        height: 18px;
     }
 
     .category-grid {
@@ -4012,7 +4020,7 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .product-info {
-        padding: 12px;
+        padding: 10px;
     }
 
     .redesigned-home .home-product-rail .product-meta {
@@ -4028,19 +4036,26 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .card-actions {
-        grid-template-columns: 38px minmax(0, 1fr) 38px;
-        margin-top: 8px;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        margin: 0;
         gap: 6px;
     }
 
     .redesigned-home .home-product-rail .card-actions .button {
-        min-height: 38px;
-        font-size: 0.64rem;
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
+        min-height: 36px;
+        padding: 0;
     }
 
     .redesigned-home .home-product-rail .card-actions .icon-button {
-        min-width: 38px;
-        height: 38px;
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
     }
 
     .cinematic-category-grid .category-card {

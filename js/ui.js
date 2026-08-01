@@ -36,7 +36,7 @@ export function placeholderImage(productName) {
 export function productImage(image, alt, options = {}) {
     const loading = options.eager ? "eager" : "lazy";
     const priority = options.eager ? ' fetchpriority="high"' : "";
-    const sizes = options.sizes || "(max-width: 620px) 33vw, (max-width: 980px) 50vw, 25vw";
+    const sizes = options.sizes || "(max-width: 620px) 50vw, (max-width: 980px) 50vw, 25vw";
 
     return `<img src="${image}" alt="${alt}" loading="${loading}" decoding="async"${priority} width="900" height="1125" sizes="${sizes}" onerror="this.onerror=null;const card=this.closest('[data-product-card], .gallery-thumbs button');if(card){card.remove();}else{this.remove();}">`;
 }
