@@ -1,7 +1,7 @@
 export const aboutRoomfinds = {
-    eyebrow: "About Roomfinds",
-    title: "Room finds with culture built in.",
-    body: "Roomfinds curates sharp room pieces for people who want their space to feel intentional, personal and current. The edit is product-first: lighting, rugs, wall pieces, tech and objects that make a room feel more like you."
+    eyebrow: "Roomfinds",
+    title: "Finds for rooms with taste.",
+    body: "Culture-led rugs, posters and objects. Nothing boring."
 };
 
 export const inspirationGallery = {
@@ -13,8 +13,8 @@ export const inspirationGallery = {
 
 export const roomEdit = {
     eyebrow: "Shop the Room",
-    title: "Build the corner that changes everything.",
-    body: "Start with a statement rug, add one object with personality, then finish the setup with a practical detail.",
+    title: "Build the corner.",
+    body: "",
     image: "images/hero/shop-room.jpg",
     productIds: [
         "red-web-mask-rug",

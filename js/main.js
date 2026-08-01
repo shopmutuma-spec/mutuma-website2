@@ -115,9 +115,8 @@ function renderSpendBanner() {
 
     target.innerHTML = `
         <div>
-            <span class="eyebrow">Live room deal</span>
-            <strong>Buy one, get one free.</strong>
-            <p>Buy anything and your free poster is added automatically. Sale prices are still 30% off across the store.</p>
+            <span class="eyebrow">Live deal</span>
+            <strong>Buy one. Get a free poster.</strong>
         </div>
         <a class="button primary" href="shop.html">Shop the deal</a>
     `;
@@ -342,7 +341,7 @@ function renderRoomEdit() {
             <div class="room-edit-content">
                 <span class="eyebrow">${roomEdit.eyebrow}</span>
                 <h2>${roomEdit.title}</h2>
-                <p>${roomEdit.body}</p>
+                ${roomEdit.body ? `<p>${roomEdit.body}</p>` : ""}
                 <div class="room-edit-products">
                     ${roomProducts.map((product) => `
                         <a href="product.html?id=${product.id}">
@@ -370,7 +369,7 @@ function renderAbout() {
     about.innerHTML = `
         <span class="eyebrow">${aboutRoomfinds.eyebrow}</span>
         <h2>${aboutRoomfinds.title}</h2>
-        <p>${aboutRoomfinds.body}</p>
+        ${aboutRoomfinds.body ? `<p>${aboutRoomfinds.body}</p>` : ""}
         <a class="button secondary" href="shop.html">Shop the edit</a>
     `;
 }
