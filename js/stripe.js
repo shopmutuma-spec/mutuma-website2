@@ -12,10 +12,23 @@ export function isStripeLink(link) {
     return typeof link === "string" && /^https:\/\/(buy|checkout)\.stripe\.com\//.test(link.trim());
 }
 
+function preconnectStripe() {
+    ["https://checkout.stripe.com", "https://js.stripe.com"].forEach((href) => {
+        if (document.querySelector(`link[rel="preconnect"][href="${href}"]`)) return;
+
+        const link = document.createElement("link");
+        link.rel = "preconnect";
+        link.href = href;
+        link.crossOrigin = "";
+        document.head.append(link);
+    });
+}
+
 export function prewarmCheckout() {
     if (checkoutWarmupStarted || !stripeConfig.checkoutEndpoint) return;
 
     checkoutWarmupStarted = true;
+    preconnectStripe();
     fetch(stripeConfig.checkoutEndpoint, {
         method: "GET",
         cache: "no-store",

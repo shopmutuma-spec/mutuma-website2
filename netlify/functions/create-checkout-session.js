@@ -7,6 +7,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 const FREE_SHIPPING_THRESHOLD = storeSettings.freeShippingThreshold;
 const STANDARD_SHIPPING = storeSettings.standardShipping;
 const FREE_GIFT_PRODUCT = products.find((product) => product.id === storeSettings.freeGift?.productId);
+const CHECKOUT_CATALOG_TTL = 1000 * 60 * 2;
+const CHECKOUT_RATES_TTL = 1000 * 60 * 30;
+
+let checkoutCatalogCache = {
+    expiresAt: 0,
+    promise: null,
+    value: null
+};
+
+let checkoutRatesCache = {
+    expiresAt: 0,
+    promise: null,
+    value: null
+};
 const fallbackRates = {
     GBP: 1,
     USD: 1.27,
@@ -136,6 +150,27 @@ async function loadCheckoutProducts() {
     }
 }
 
+function cachedCheckoutProducts() {
+    const now = Date.now();
+    if (checkoutCatalogCache.value && checkoutCatalogCache.expiresAt > now) {
+        return Promise.resolve(checkoutCatalogCache.value);
+    }
+
+    if (checkoutCatalogCache.promise) return checkoutCatalogCache.promise;
+
+    checkoutCatalogCache.promise = loadCheckoutProducts()
+        .then((catalogProducts) => {
+            checkoutCatalogCache.value = catalogProducts;
+            checkoutCatalogCache.expiresAt = Date.now() + CHECKOUT_CATALOG_TTL;
+            return catalogProducts;
+        })
+        .finally(() => {
+            checkoutCatalogCache.promise = null;
+        });
+
+    return checkoutCatalogCache.promise;
+}
+
 function sanitizeCart(cart, catalogProducts) {
     if (!Array.isArray(cart)) return [];
 
@@ -178,6 +213,27 @@ async function loadRates() {
     }
 }
 
+function cachedRates() {
+    const now = Date.now();
+    if (checkoutRatesCache.value && checkoutRatesCache.expiresAt > now) {
+        return Promise.resolve(checkoutRatesCache.value);
+    }
+
+    if (checkoutRatesCache.promise) return checkoutRatesCache.promise;
+
+    checkoutRatesCache.promise = loadRates()
+        .then((rates) => {
+            checkoutRatesCache.value = rates;
+            checkoutRatesCache.expiresAt = Date.now() + CHECKOUT_RATES_TTL;
+            return rates;
+        })
+        .finally(() => {
+            checkoutRatesCache.promise = null;
+        });
+
+    return checkoutRatesCache.promise;
+}
+
 function stripeAmount(gbpAmount, currency, rates) {
     if (gbpAmount <= 0) return 0;
 
@@ -197,6 +253,12 @@ function bestCartReward(count) {
 }
 
 export async function handler(event) {
+    if (event.httpMethod === "GET" || event.httpMethod === "HEAD") {
+        cachedCheckoutProducts().catch(() => {});
+        cachedRates().catch(() => {});
+        return json(200, { ok: true, warmed: true });
+    }
+
     if (event.httpMethod !== "POST") {
         return json(405, { error: "Method not allowed" });
     }
@@ -207,11 +269,13 @@ export async function handler(event) {
 
     try {
         const payload = JSON.parse(event.body || "{}");
-        const catalogProducts = await loadCheckoutProducts();
+        const [catalogProducts, rates] = await Promise.all([
+            cachedCheckoutProducts(),
+            cachedRates()
+        ]);
         const cart = sanitizeCart(payload.cart, catalogProducts);
         const currency = sanitizeCurrency(payload.currency);
         const stripeCurrency = currency.toLowerCase();
-        const rates = await loadRates();
 
         if (!cart.length) {
             return json(400, { error: "Cart is empty." });

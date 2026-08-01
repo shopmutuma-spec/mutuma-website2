@@ -852,6 +852,7 @@ export function initBaseLayout() {
     updateCounts();
     updatePrices();
     initEmailOffer();
+    prewarmCheckout();
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
