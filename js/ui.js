@@ -1,10 +1,10 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260731d";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260731d";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260731d";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260731d";
-import { trackEvent } from "./analytics.js?v=20260731d";
-import { storeSettings } from "./site-settings.js?v=20260731d";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260731d";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260801b";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260801b";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260801b";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260801b";
+import { trackEvent } from "./analytics.js?v=20260801b";
+import { storeSettings } from "./site-settings.js?v=20260801b";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260801b";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -19,6 +19,17 @@ export const icons = {
     menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
     close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>'
 };
+
+function syncViewportHeight() {
+    const setHeight = () => {
+        document.documentElement.style.setProperty("--app-height", `${window.innerHeight}px`);
+    };
+
+    setHeight();
+    window.addEventListener("resize", setHeight, { passive: true });
+    window.addEventListener("orientationchange", () => window.setTimeout(setHeight, 250), { passive: true });
+    document.documentElement.classList.toggle("in-app-browser", /tiktok|musical_ly|instagram|fbav|fban/i.test(navigator.userAgent));
+}
 
 export function placeholderImage(productName) {
     const svg = `
@@ -846,6 +857,7 @@ function trapFocus(event, root) {
 }
 
 export function initBaseLayout() {
+    syncViewportHeight();
     document.documentElement.classList.remove("no-js");
     renderHeader();
     renderFooter();

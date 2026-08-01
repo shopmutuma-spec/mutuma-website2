@@ -1,10 +1,10 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260731d";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260731d";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260731d";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260731d";
-import { trackEvent } from "./analytics.js?v=20260731d";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260731d";
-import { setupBundleForProduct } from "./merchandising.js?v=20260731d";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260801b";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260801b";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260801b";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260801b";
+import { trackEvent } from "./analytics.js?v=20260801b";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260801b";
+import { setupBundleForProduct } from "./merchandising.js?v=20260801b";
 
 boot().catch((error) => {
     console.error("Roomfinds product page failed to start.", error);

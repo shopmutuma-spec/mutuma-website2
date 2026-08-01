@@ -1,8 +1,8 @@
-import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260731d";
-import { initCurrency } from "./currency.js?v=20260731d";
-import { addToCart } from "./store.js?v=20260731d";
-import { aboutRoomfinds, roomEdit } from "./site-content.js?v=20260731d";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260731d";
+import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260801b";
+import { initCurrency } from "./currency.js?v=20260801b";
+import { addToCart } from "./store.js?v=20260801b";
+import { aboutRoomfinds, roomEdit } from "./site-content.js?v=20260801b";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260801b";
 
 boot().catch((error) => {
     console.error("Roomfinds homepage failed to start.", error);

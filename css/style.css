@@ -17,6 +17,8 @@
     --ambient-shop-opacity: 0.62;
     --ambient-bg-filter: none;
     --brand-font: Impact, Haettenschweiler, "Arial Black", "Franklin Gothic Heavy", "Arial Narrow", sans-serif;
+    --app-height: 100vh;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .theme-day {
@@ -54,7 +56,7 @@ html {
 
 body {
     margin: 0;
-    min-height: 100vh;
+    min-height: var(--app-height);
     overflow-x: hidden;
     background:
         radial-gradient(circle at 20% -10%, var(--ambient-warmth), transparent 30rem),
@@ -364,7 +366,9 @@ img {
     left: 0;
     z-index: 520;
     width: min(88vw, 390px);
+    height: var(--app-height);
     padding: 22px;
+    padding-bottom: max(22px, calc(22px + var(--safe-bottom)));
     border-right: 1px solid var(--line);
     overflow-y: auto;
     background: #090909;
@@ -382,6 +386,7 @@ img {
     top: 0;
     right: 0;
     bottom: 0;
+    height: var(--app-height);
     z-index: 530;
     width: min(92vw, 430px);
     border-left: 1px solid var(--line);
@@ -400,7 +405,7 @@ img {
 .checkout-fallback {
     position: fixed;
     left: 50%;
-    bottom: 18px;
+    bottom: max(18px, calc(12px + var(--safe-bottom)));
     z-index: 950;
     width: min(calc(100% - 24px), 520px);
     border: 1px solid rgba(255, 255, 255, 0.22);
@@ -695,7 +700,7 @@ main {
 /* Hero */
 .hero {
     position: relative;
-    min-height: calc(100vh - var(--nav-height));
+    min-height: calc(var(--app-height) - var(--nav-height));
     display: grid;
     align-items: end;
     padding: clamp(56px, 8vw, 104px) 0 34px;
@@ -2662,7 +2667,7 @@ textarea {
 
 .modal-panel {
     width: min(760px, 100%);
-    max-height: min(720px, calc(100vh - 40px));
+    max-height: min(720px, calc(var(--app-height) - 40px - var(--safe-bottom)));
     overflow: auto;
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -3452,13 +3457,13 @@ textarea {
     }
 
     .product-layout {
-        padding-bottom: 116px;
+        padding-bottom: calc(116px + var(--safe-bottom));
     }
 
     .mobile-sticky-add {
         position: fixed;
         right: 10px;
-        bottom: 10px;
+        bottom: max(10px, calc(10px + var(--safe-bottom)));
         left: 10px;
         z-index: 180;
         border: 1px solid var(--line);

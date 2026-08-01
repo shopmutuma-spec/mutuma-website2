@@ -1,6 +1,6 @@
-import { initCurrency } from "./currency.js?v=20260731d";
-import { initBaseLayout } from "./ui.js?v=20260731d";
-import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260731d";
+import { initCurrency } from "./currency.js?v=20260801b";
+import { initBaseLayout } from "./ui.js?v=20260801b";
+import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260801b";
 
 initBaseLayout();
 initCurrency().catch(() => {});
