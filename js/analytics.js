@@ -221,7 +221,16 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 document.addEventListener("click", trackClick, { passive: true });
-window.addEventListener("scroll", () => requestAnimationFrame(trackScrollDepth), { passive: true });
+
+let scrollFrameRequested = false;
+window.addEventListener("scroll", () => {
+    if (scrollFrameRequested) return;
+    scrollFrameRequested = true;
+    requestAnimationFrame(() => {
+        trackScrollDepth();
+        scrollFrameRequested = false;
+    });
+}, { passive: true });
 trackSessionStarted();
 trackPageViewed();
 trackWebVitals();

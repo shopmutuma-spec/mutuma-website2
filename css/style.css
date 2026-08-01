@@ -3303,7 +3303,6 @@ textarea {
     .product-info p,
     .product-badges,
     .option-row,
-    .card-actions .buy-now-button,
     .card-actions .quick-view-button {
         display: none;
     }
@@ -3340,21 +3339,22 @@ textarea {
     }
 
     .card-actions {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        z-index: 3;
-        display: flex;
+        position: static;
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) 34px;
         gap: 6px;
-        margin: 0;
+        margin-top: 8px;
         padding: 0;
     }
 
     .card-actions .quick-add-button {
+        grid-column: 1;
         min-width: 34px;
     }
 
     .card-actions .icon-button {
+        grid-column: 3;
+        grid-row: 1;
         width: 34px;
         min-width: 34px;
         border-radius: 11px;
@@ -3362,13 +3362,26 @@ textarea {
 
     .card-actions .button,
     .card-actions .icon-button {
-        width: 34px;
         height: 34px;
         min-height: 34px;
         border-color: rgba(255, 255, 255, 0.24);
+    }
+
+    .card-actions .quick-add-button,
+    .card-actions .icon-button {
+        width: 34px;
+        padding: 0;
         color: #ffffff;
-        background: rgba(9, 9, 9, 0.7);
-        backdrop-filter: blur(14px);
+        background: rgba(255, 255, 255, 0.075);
+    }
+
+    .card-actions .buy-now-button {
+        grid-column: 2;
+        width: 100%;
+        padding: 0 8px;
+        color: #090909;
+        background: #ffffff;
+        font-size: 0.64rem;
     }
 
     .card-actions .quick-add-button svg,
@@ -3630,6 +3643,7 @@ textarea {
     scroll-snap-type: inline proximity;
     scrollbar-width: none;
     align-items: start;
+    contain: layout paint;
 }
 
 .redesigned-home .home-product-rail::-webkit-scrollbar {
@@ -3640,6 +3654,7 @@ textarea {
 
 .redesigned-home .home-product-rail .product-card {
     scroll-snap-align: start;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
 }
 
 .redesigned-home .home-product-rail .product-image {
@@ -4002,10 +4017,15 @@ textarea {
     }
 
     .redesigned-home .home-product-rail {
-        grid-auto-columns: clamp(210px, 68vw, 260px);
+        grid-auto-columns: clamp(178px, 54vw, 228px);
+        gap: 10px;
         margin-inline: calc(var(--gutter) * -0.5);
-        padding-inline: calc(var(--gutter) * 0.5);
+        padding: 2px calc(var(--gutter) * 0.5) 14px;
         scroll-padding-inline: calc(var(--gutter) * 0.5);
+    }
+
+    .redesigned-home .home-product-rail .product-image {
+        aspect-ratio: 1 / 0.86;
     }
 
     .redesigned-home .home-product-rail .product-badges {
@@ -4020,7 +4040,7 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .product-info {
-        padding: 10px;
+        padding: 9px;
     }
 
     .redesigned-home .home-product-rail .product-meta {
@@ -4029,33 +4049,49 @@ textarea {
 
     .redesigned-home .home-product-rail .product-info h3 {
         font-size: 0.92rem;
+        min-height: 2.2em;
+        margin: 6px 0;
     }
 
     .redesigned-home .home-product-rail .option-row {
+        margin: 4px 0 6px;
         font-size: 0.72rem;
     }
 
+    .redesigned-home .home-product-rail .price-row strong {
+        font-size: 0.94rem;
+    }
+
+    .redesigned-home .home-product-rail .price-row s {
+        font-size: 0.75rem;
+    }
+
     .redesigned-home .home-product-rail .card-actions {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        display: flex;
-        margin: 0;
+        position: static;
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) 34px;
+        margin-top: 7px;
         gap: 6px;
     }
 
     .redesigned-home .home-product-rail .card-actions .button {
-        min-width: 36px;
-        width: 36px;
-        height: 36px;
-        min-height: 36px;
-        padding: 0;
+        min-width: 0;
+        height: 34px;
+        min-height: 34px;
+        border-radius: 11px;
     }
 
     .redesigned-home .home-product-rail .card-actions .icon-button {
-        min-width: 36px;
-        width: 36px;
-        height: 36px;
+        min-width: 34px;
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+    }
+
+    .redesigned-home .home-product-rail .card-actions .quick-add-button svg,
+    .redesigned-home .home-product-rail .card-actions .icon-button svg {
+        width: 18px;
+        height: 18px;
     }
 
     .cinematic-category-grid .category-card {
