@@ -1,5 +1,5 @@
-import { initCurrency } from "./currency.js?v=20260801b";
-import { initBaseLayout, notify } from "./ui.js?v=20260801b";
+import { initCurrency } from "./currency.js?v=20260802a";
+import { initBaseLayout, notify } from "./ui.js?v=20260802a";
 
 initBaseLayout();
 initCurrency().catch(() => {});

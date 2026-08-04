@@ -153,6 +153,9 @@ let currencyState = {
     rates: fallbackRates
 };
 
+let currencyInitPromise = null;
+let currencyInitialized = false;
+
 function safeGet(key) {
     try {
         return localStorage.getItem(key);
@@ -493,24 +496,54 @@ async function loadRates() {
 }
 
 export async function initCurrency() {
-    const [currency, rates] = await Promise.all([
-        detectCurrency().catch(() => countryToCurrency(browserCountry()) || getStoredCurrency() || "GBP"),
-        loadRates().catch(() => fallbackRates)
-    ]);
-    currencyState = { currency, rates };
-    window.RoomfindsCurrency = {
-        currency,
-        rates,
-        country: safeJsonGet(GEO_KEY)?.country || "",
-        debug: () => window.RoomfindsCurrencyDebug,
-        refresh: async () => {
-            safeSet(GEO_KEY, "");
-            safeSet(CURRENCY_KEY, "");
-            await initCurrency();
-            return currentCurrency();
-        }
-    };
-    window.dispatchEvent(new CustomEvent("currencychange", { detail: currencyState }));
+    if (currencyInitialized) return currencyState;
+    if (currencyInitPromise) return currencyInitPromise;
+
+    currencyInitPromise = (async () => {
+        const [currency, rates] = await Promise.all([
+            detectCurrency().catch(() => countryToCurrency(browserCountry()) || getStoredCurrency() || "GBP"),
+            loadRates().catch(() => fallbackRates)
+        ]);
+        currencyState = { currency, rates };
+        window.RoomfindsCurrency = {
+            currency,
+            rates,
+            country: safeJsonGet(GEO_KEY)?.country || "",
+            debug: () => window.RoomfindsCurrencyDebug,
+            refresh: async () => {
+                safeSet(GEO_KEY, "");
+                safeSet(CURRENCY_KEY, "");
+                currencyInitialized = false;
+                currencyInitPromise = null;
+                await initCurrency();
+                return currentCurrency();
+            }
+        };
+        currencyInitialized = true;
+        window.dispatchEvent(new CustomEvent("currencychange", { detail: currencyState }));
+        return currencyState;
+    })().finally(() => {
+        currencyInitPromise = null;
+    });
+
+    return currencyInitPromise;
+}
+
+export async function readyCurrency(timeout = 1600) {
+    if (currencyInitialized) return currentCurrency();
+
+    const waitForCurrency = currencyInitPromise || initCurrency();
+
+    try {
+        await Promise.race([
+            waitForCurrency,
+            new Promise((resolve) => window.setTimeout(resolve, timeout))
+        ]);
+    } catch (error) {
+        return currentCurrency();
+    }
+
+    return currentCurrency();
 }
 
 export function currentCurrency() {
