@@ -1,11 +1,11 @@
-import { initCurrency, formatPrice } from "./currency.js?v=20260802a";
-import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260802a";
-import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260802a";
-import { trackEvent } from "./analytics.js?v=20260802a";
-import { storeSettings } from "./site-settings.js?v=20260802a";
-import { loadStoreCatalog } from "./products.js?v=20260802a";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260802a";
-import { freeGiftProduct, initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260802a";
+import { initCurrency, formatPrice } from "./currency.js?v=20260806b";
+import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260806b";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260806b";
+import { trackEvent } from "./analytics.js?v=20260806b";
+import { storeSettings } from "./site-settings.js?v=20260806b";
+import { loadStoreCatalog } from "./products.js?v=20260806b";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260806b";
+import { freeGiftProduct, initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260806b";
 
 const cartItems = document.querySelector("[data-cart-items]");
 const summary = document.querySelector("[data-cart-summary]");
@@ -126,6 +126,11 @@ function renderCart() {
             <div><span>Tax</span><strong>Calculated by Stripe</strong></div>
             <div class="total"><span>Total incl. shipping</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
             <button class="button primary wide" data-checkout>Checkout with Stripe - ${formatPrice(total)}</button>
+            <div class="checkout-trust-row">
+                <span>Secure Stripe checkout</span>
+                <span>Europe & US delivery</span>
+                <span>Free poster included</span>
+            </div>
             ${upsells.length ? `
                 <div class="cart-upsell-list">
                     <strong>${subtotal < FREE_SHIPPING_THRESHOLD ? "Get closer to free delivery" : "Complete your setup"}</strong>

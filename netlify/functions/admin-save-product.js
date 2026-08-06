@@ -52,7 +52,7 @@ export async function handler(event) {
             category: cleanText(payload.category, 80) || "Decor",
             price,
             old_price: payload.oldPrice ? cleanNumber(payload.oldPrice) : null,
-            currency: "GBP",
+            currency: "USD",
             image_url: imageUrl,
             tags: cleanTags(payload.tags),
             stock: payload.stock ? Math.round(cleanNumber(payload.stock)) : null,

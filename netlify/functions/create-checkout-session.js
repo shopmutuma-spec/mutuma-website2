@@ -9,6 +9,8 @@ const STANDARD_SHIPPING = storeSettings.standardShipping;
 const FREE_GIFT_PRODUCT = products.find((product) => product.id === storeSettings.freeGift?.productId);
 const CHECKOUT_CATALOG_TTL = 1000 * 60 * 2;
 const CHECKOUT_RATES_TTL = 1000 * 60 * 30;
+const BASE_CURRENCY = "USD";
+const LEGACY_GBP_TO_USD_RATE = 1.27;
 
 let checkoutCatalogCache = {
     expiresAt: 0,
@@ -22,39 +24,39 @@ let checkoutRatesCache = {
     value: null
 };
 const fallbackRates = {
-    GBP: 1,
-    USD: 1.27,
-    EUR: 1.18,
-    CAD: 1.73,
-    AUD: 1.92,
-    NZD: 2.08,
-    JPY: 203,
-    CHF: 1.14,
-    CNY: 9.22,
-    HKD: 9.94,
-    SGD: 1.71,
-    INR: 106.2,
-    AED: 4.66,
-    SAR: 4.76,
-    ZAR: 23.1,
-    SEK: 13.35,
-    NOK: 13.42,
-    DKK: 8.8,
-    PLN: 5.03,
-    MXN: 22.9,
-    BRL: 7.05,
-    KRW: 1760,
-    THB: 46.3,
-    TRY: 42.1,
-    ILS: 4.76,
-    CZK: 29.4,
-    HUF: 463,
-    RON: 5.87,
-    BGN: 2.31,
-    ISK: 176,
-    IDR: 20700,
-    MYR: 5.98,
-    PHP: 74.3
+    USD: 1,
+    GBP: 0.79,
+    EUR: 0.93,
+    CAD: 1.36,
+    AUD: 1.51,
+    NZD: 1.64,
+    JPY: 160,
+    CHF: 0.9,
+    CNY: 7.26,
+    HKD: 7.83,
+    SGD: 1.35,
+    INR: 83.62,
+    AED: 3.67,
+    SAR: 3.75,
+    ZAR: 18.19,
+    SEK: 10.51,
+    NOK: 10.57,
+    DKK: 6.93,
+    PLN: 3.96,
+    MXN: 18.03,
+    BRL: 5.55,
+    KRW: 1386,
+    THB: 36.46,
+    TRY: 33.15,
+    ILS: 3.75,
+    CZK: 23.15,
+    HUF: 364.57,
+    RON: 4.62,
+    BGN: 1.82,
+    ISK: 138.58,
+    IDR: 16299,
+    MYR: 4.71,
+    PHP: 58.5
 };
 
 const supportedCurrencies = new Set(Object.keys(fallbackRates));
@@ -79,17 +81,27 @@ function getOrigin(event) {
 }
 
 function normalizeRemoteProduct(product) {
+    const currency = product.currency || BASE_CURRENCY;
+
     return {
         id: product.id,
         name: product.name,
         description: product.description || "",
         category: product.category || "Decor",
-        price: Number(product.price || 0),
-        oldPrice: product.old_price ? Number(product.old_price) : null,
-        currency: product.currency || "GBP",
+        price: toUsdAmount(product.price, currency),
+        oldPrice: product.old_price ? toUsdAmount(product.old_price, currency) : null,
+        currency: BASE_CURRENCY,
         images: [product.image_url].filter(Boolean),
         tags: Array.isArray(product.tags) ? product.tags : []
     };
+}
+
+function toUsdAmount(value, currency = BASE_CURRENCY) {
+    const number = Number(value || 0);
+    if (!number) return number;
+    return String(currency || "").toUpperCase() === "GBP"
+        ? Number((number * LEGACY_GBP_TO_USD_RATE).toFixed(2))
+        : number;
 }
 
 function isActiveOffer(offer) {
@@ -191,12 +203,12 @@ function sanitizeCart(cart, catalogProducts) {
 
 function sanitizeCurrency(currency) {
     const code = String(currency || "").toUpperCase();
-    return supportedCurrencies.has(code) ? code : "GBP";
+    return supportedCurrencies.has(code) ? code : BASE_CURRENCY;
 }
 
 async function loadRates() {
     try {
-        const response = await fetch("https://api.frankfurter.app/latest?from=GBP", {
+        const response = await fetch(`https://api.frankfurter.app/latest?from=${BASE_CURRENCY}`, {
             headers: {
                 Accept: "application/json"
             }
@@ -207,7 +219,7 @@ async function loadRates() {
         }
 
         const data = await response.json();
-        return { ...fallbackRates, GBP: 1, ...(data.rates || {}) };
+        return { ...fallbackRates, [BASE_CURRENCY]: 1, ...(data.rates || {}) };
     } catch (error) {
         return fallbackRates;
     }
@@ -234,10 +246,10 @@ function cachedRates() {
     return checkoutRatesCache.promise;
 }
 
-function stripeAmount(gbpAmount, currency, rates) {
-    if (gbpAmount <= 0) return 0;
+function stripeAmount(baseAmount, currency, rates) {
+    if (baseAmount <= 0) return 0;
 
-    const convertedAmount = gbpAmount * (rates[currency] || fallbackRates[currency] || 1);
+    const convertedAmount = baseAmount * (rates[currency] || fallbackRates[currency] || 1);
     const multiplier = zeroDecimalCurrencies.has(currency) ? 1 : 100;
     return Math.max(1, Math.round(convertedAmount * multiplier));
 }
@@ -343,13 +355,13 @@ export async function handler(event) {
                 }
             })),
             metadata: {
-                brand: "Roomfinds",
-                base_currency: "GBP",
+                brand: "MUTUMA",
+                base_currency: BASE_CURRENCY,
                 display_currency: currency,
                 exchange_rate: String(rates[currency] || fallbackRates[currency] || 1),
                 item_count: String(cart.reduce((total, item) => total + item.quantity, 0)),
                 room_reward: reward ? `${reward.discountPercent}%` : "0%",
-                room_reward_discount_gbp: String(rewardDiscount),
+                room_reward_discount_usd: String(rewardDiscount),
                 free_gift_product_id: freeGift?.id || "",
                 free_gift_product_name: freeGift?.name || ""
             },

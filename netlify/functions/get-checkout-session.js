@@ -62,7 +62,7 @@ async function saveOrder(session) {
             name: item.description || item.price?.product?.name || "",
             quantity: item.quantity || 1,
             amount_total: item.amount_total ? item.amount_total / 100 : null,
-            currency: String(item.currency || session.currency || "gbp").toUpperCase(),
+            currency: String(item.currency || session.currency || "usd").toUpperCase(),
             product_id: item.price?.product?.metadata?.product_id || ""
         }));
         const freeGiftProductId = session.metadata?.free_gift_product_id || "";
@@ -73,7 +73,7 @@ async function saveOrder(session) {
                 name: freeGiftProductName,
                 quantity: 1,
                 amount_total: 0,
-                currency: String(session.currency || "gbp").toUpperCase(),
+                currency: String(session.currency || "usd").toUpperCase(),
                 product_id: freeGiftProductId,
                 gift: true
             });
@@ -87,7 +87,7 @@ async function saveOrder(session) {
                 email,
                 name: session.customer_details?.name || "",
                 total: session.amount_total ? session.amount_total / 100 : null,
-                currency: String(session.currency || "gbp").toUpperCase(),
+                currency: String(session.currency || "usd").toUpperCase(),
                 status: session.payment_status,
                 order_items: orderItems,
                 customer_details: session.customer_details || {}

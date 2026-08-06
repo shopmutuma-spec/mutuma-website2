@@ -54,7 +54,7 @@ function normalizeCountry(country) {
 function countryToCurrency(countryCode) {
     const country = normalizeCountry(countryCode);
     if (euroCountries.includes(country)) return "EUR";
-    return countryCurrencyMap[country] || "GBP";
+    return countryCurrencyMap[country] || "USD";
 }
 
 function header(event, name) {

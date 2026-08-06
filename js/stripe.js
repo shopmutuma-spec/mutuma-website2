@@ -1,4 +1,4 @@
-import { currentCurrency, readyCurrency } from "./currency.js?v=20260802a";
+import { currentCurrency, readyCurrency } from "./currency.js?v=20260806b";
 
 export const stripeConfig = {
     cartCheckoutLink: "",
@@ -94,7 +94,7 @@ function redirectToCheckout(url) {
 }
 
 async function createStripeCheckout(cart) {
-    const checkoutCurrency = await readyCurrency();
+    const checkoutCurrency = await readyCurrency(450);
     const response = await fetch(stripeConfig.checkoutEndpoint, {
         method: "POST",
         headers: {

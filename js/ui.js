@@ -1,10 +1,10 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260802a";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260802a";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260802a";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260802a";
-import { trackEvent } from "./analytics.js?v=20260802a";
-import { storeSettings } from "./site-settings.js?v=20260802a";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260802a";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260806b";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260806b";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260806b";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260806b";
+import { trackEvent } from "./analytics.js?v=20260806b";
+import { storeSettings } from "./site-settings.js?v=20260806b";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260806b";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -38,7 +38,7 @@ export function placeholderImage(productName) {
             <rect x="60" y="60" width="780" height="1005" rx="28" fill="#090909" stroke="#ffffff" stroke-opacity=".14"/>
             <circle cx="450" cy="470" r="180" fill="#ffffff" fill-opacity=".88"/>
             <text x="80" y="980" fill="#ffffff" font-family="Arial" font-size="56" font-weight="900">${productName}</text>
-            <text x="80" y="1040" fill="#bdbdbd" font-family="Arial" font-size="26" font-weight="700">Roomfinds</text>
+            <text x="80" y="1040" fill="#bdbdbd" font-family="Arial" font-size="26" font-weight="700">MUTUMA</text>
         </svg>
     `;
     return `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -97,7 +97,7 @@ export function renderHeader() {
                 <a class="nav-link" href="shop.html?tag=best-seller">Best Sellers</a>
                 <a class="nav-link" href="index.html#shop-room">Room Setups</a>
             </div>
-            <a class="logo" href="index.html">Roomfinds</a>
+            <a class="logo" href="index.html">MUTUMA</a>
             <div class="nav-group nav-right">
                 <a class="icon-button" href="shop.html?tag=trending" aria-label="Trending">${icons.fire}</a>
                 <button class="icon-button" data-search-open aria-label="Search">${icons.search}</button>
@@ -111,7 +111,7 @@ export function renderHeader() {
         <div class="drawer-backdrop" data-menu-close></div>
         <aside class="mobile-menu" data-mobile-menu aria-hidden="true">
             <div class="mobile-menu-head">
-                <strong>Roomfinds</strong>
+                <strong>MUTUMA</strong>
                 <button class="icon-button" data-menu-close aria-label="Close menu">${icons.close}</button>
             </div>
             <a href="index.html"${activeAttr("index.html")}>${icons.home} Home</a>
@@ -198,7 +198,7 @@ export function renderFooter() {
     footer.innerHTML = `
         <div class="container footer-grid">
             <div>
-                <strong>Roomfinds</strong>
+                <strong>MUTUMA</strong>
                 <p>YOUR ROOM. YOUR CULTURE.</p>
                 <p>Premium room finds for sharp modern spaces.</p>
             </div>
@@ -262,10 +262,10 @@ export function productCard(product) {
                     ${product.oldPrice ? `<s data-price="${product.oldPrice}">${formatPrice(product.oldPrice)}</s>` : ""}
                 </div>
                 <div class="card-actions">
-                    <button class="button secondary quick-add-button" data-add-cart="${product.id}" aria-label="Quick add ${product.name}">${icons.cartPlus}<span>Quick Add</span></button>
+                    <button class="button secondary quick-add-button" data-add-cart="${product.id}" aria-label="Add ${product.name} to bag" title="Add to bag">${icons.cartPlus}<span>Add to bag</span></button>
                     <button class="button primary buy-now-button" data-buy-now="${product.id}">Buy Now</button>
                     <button class="button secondary quick-view-button" data-quick-view="${product.id}">Quick View</button>
-                    <button class="icon-button ${wished ? "active" : ""}" data-wishlist="${product.id}" aria-label="Add ${product.name} to wishlist">${icons.heart}</button>
+                    <button class="icon-button ${wished ? "active" : ""}" data-wishlist="${product.id}" aria-pressed="${wished}" aria-label="Add ${product.name} to wishlist">${icons.heart}</button>
                 </div>
             </div>
         </article>
@@ -297,13 +297,16 @@ export function bindProductActions(root = document) {
         }
 
         if (buyNowButton && root.contains(buyNowButton)) {
+            const originalText = buyNowButton.textContent;
             buyNowButton.disabled = true;
+            buyNowButton.classList.add("is-loading");
             buyNowButton.textContent = "Opening...";
             trackEvent("checkout_started", { source: "product_card", productId: buyNowButton.dataset.buyNow, currency: currentCurrency() });
             checkoutProduct(buyNowButton.dataset.buyNow, 1).then((result) => {
                 if (!result.ok) notify(result.message);
                 buyNowButton.disabled = false;
-                buyNowButton.textContent = "Buy Now";
+                buyNowButton.classList.remove("is-loading");
+                buyNowButton.textContent = originalText;
             });
             return;
         }
@@ -311,6 +314,7 @@ export function bindProductActions(root = document) {
         if (wishlistButton && root.contains(wishlistButton)) {
             const active = toggleWishlist(wishlistButton.dataset.wishlist);
             wishlistButton.classList.toggle("active", active);
+            wishlistButton.setAttribute("aria-pressed", String(active));
             notify(active ? "Saved to wishlist" : "Removed from wishlist");
         }
 
@@ -431,6 +435,12 @@ export function renderCartDrawer() {
         ${gift ? `<div><span>${escapeHtml(storeSettings.freeGift.label)}</span><strong>Free</strong></div>` : ""}
         <div><span>Shipping</span><strong>${shipping ? formatPrice(shipping) : "Included"}</strong></div>
         <div class="drawer-total"><span>Total incl. shipping</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
+        <button class="button primary wide" data-drawer-checkout>Checkout - ${formatPrice(total)}</button>
+        <div class="checkout-trust-row">
+            <span>Secure Stripe checkout</span>
+            <span>Europe & US delivery</span>
+            <span>Free poster included</span>
+        </div>
         ${upsells.length ? `
             <div class="drawer-recommendations drawer-upsells">
                 <strong>${subtotal < freeShippingThreshold ? "Add one to unlock more value" : "Complete the room"}</strong>
@@ -443,7 +453,6 @@ export function renderCartDrawer() {
             </div>
         ` : ""}
         <small>Buy one, get one free gift is active. 30% off is already applied to product prices.</small>
-        <button class="button primary wide" data-drawer-checkout>Checkout - ${formatPrice(total)}</button>
         <button class="button secondary wide" data-cart-close>Continue Shopping</button>
         <a class="button secondary wide" href="cart.html">View Full Cart</a>
     `;
@@ -629,7 +638,7 @@ export function openSearch() {
         <div class="modal open" role="dialog" aria-modal="true" aria-label="Product search">
             <div class="modal-panel">
                 <div class="modal-head">
-                    <strong>Search Roomfinds</strong>
+                    <strong>Search MUTUMA</strong>
                     <button class="icon-button" data-modal-close aria-label="Close search">${icons.close}</button>
                 </div>
                 <input class="search-input" data-global-search placeholder="Search lighting, desk, wall art..." aria-label="Search products">
@@ -904,11 +913,11 @@ function initEmailOffer() {
             <div class="modal offer-modal open" data-offer-modal>
                 <div class="modal-panel offer-panel">
                     <div class="modal-head">
-                        <span class="eyebrow">Current Roomfinds offer</span>
+                        <span class="eyebrow">Current MUTUMA offer</span>
                         <button class="icon-button" data-offer-close aria-label="Close offer">${icons.close}</button>
                     </div>
                     <h2>Buy one, get one free.</h2>
-                    <p>Buy anything and your free poster is added automatically. Join the Roomfinds drop list before you shop for new room edits, restocks and private deals.</p>
+                    <p>Buy anything and your free poster is added automatically. Join the MUTUMA drop list before you shop for new room edits, restocks and private deals.</p>
                     <form class="offer-form" name="mutuma-email-list" data-offer-form>
                         <input type="hidden" name="form-name" value="mutuma-email-list">
                         <input type="hidden" name="source" value="first-visit-offer">
@@ -951,7 +960,7 @@ function initEmailOffer() {
                 <div class="offer-success">
                     <span class="eyebrow">You're on the list</span>
                     <h2>Buy one, get one free is live.</h2>
-                    <p>No code needed. Your free gift unlocks when you buy anything, and 30% sale prices are already applied across Roomfinds.</p>
+                    <p>No code needed. Your free gift unlocks when you buy anything, and 30% sale prices are already applied across MUTUMA.</p>
                     <button class="button primary wide" data-offer-close>Shop Now</button>
                 </div>
             `;

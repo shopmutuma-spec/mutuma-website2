@@ -1,8 +1,8 @@
-# Roomfinds Analytics Command Centre
+# MUTUMA Analytics Command Centre
 
 ## What Was Added
 
-The admin dashboard now uses the existing Supabase, Netlify Functions, Stripe and product data structure to create a richer ecommerce intelligence dashboard. It includes KPI cards, comparison periods, date and channel filters, product performance, conversion funnel, revenue and estimated profit, acquisition reports, live activity, alerts, diagnostics, campaign link generation and CSV exports.
+The admin dashboard now uses the existing Supabase, Netlify Functions, Stripe and product data structure to create a richer ecommerce intelligence dashboard. It includes KPI cards, comparison periods, date and channel filters, product performance, conversion funnel, revenue, source-status checks, acquisition reports, live activity, alerts, diagnostics, campaign link generation and CSV exports.
 
 ## Architecture
 
@@ -48,17 +48,14 @@ Never expose `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` or `STRIPE_WEBHOOK
 
 ## Profit Calculation
 
-Profit is marked estimated unless exact product costs are entered.
+Profit is not guessed. Gross profit is shown only when every sold line item in the selected period has a real cost row in `product_costs`.
 
-Estimated net profit =
+Gross profit =
 
 revenue
-- estimated product costs
-- estimated Stripe fees
-- estimated fulfilment cost
-- estimated shipping cost
+- real product costs from `product_costs`
 
-Current fallback assumptions are stored server-side in `admin-data.js`. Add exact costs to `product_costs` before using profit as final accounting data.
+Net profit stays unavailable until real product costs, Stripe fees, shipping costs, fulfilment costs and refund data are connected. The dashboard intentionally marks incomplete cost metrics as unavailable instead of showing fake estimates.
 
 ## Stripe Setup
 

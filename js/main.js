@@ -1,11 +1,11 @@
-import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260802a";
-import { initCurrency } from "./currency.js?v=20260802a";
-import { addToCart } from "./store.js?v=20260802a";
-import { aboutRoomfinds, roomEdit } from "./site-content.js?v=20260802a";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260802a";
+import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260806b";
+import { initCurrency } from "./currency.js?v=20260806b";
+import { addToCart } from "./store.js?v=20260806b";
+import { aboutMutuma, roomEdit } from "./site-content.js?v=20260806b";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260806b";
 
 boot().catch((error) => {
-    console.error("Roomfinds homepage failed to start.", error);
+    console.error("MUTUMA homepage failed to start.", error);
 });
 
 async function boot() {
@@ -158,7 +158,7 @@ function renderRoomEdit() {
     target.innerHTML = `
         <div class="room-edit">
             <div class="room-edit-image">
-                <img src="${roomEdit.image}" alt="Roomfinds room setup" loading="lazy" decoding="async" width="1200" height="900">
+                <img src="${roomEdit.image}" alt="MUTUMA room setup" loading="lazy" decoding="async" width="1200" height="900">
             </div>
             <div class="room-edit-content">
                 <span class="eyebrow">${roomEdit.eyebrow}</span>
@@ -189,9 +189,9 @@ function renderAbout() {
     if (!about) return;
 
     about.innerHTML = `
-        <span class="eyebrow">${aboutRoomfinds.eyebrow}</span>
-        <h2>${aboutRoomfinds.title}</h2>
-        ${aboutRoomfinds.body ? `<p>${aboutRoomfinds.body}</p>` : ""}
+        <span class="eyebrow">${aboutMutuma.eyebrow}</span>
+        <h2>${aboutMutuma.title}</h2>
+        ${aboutMutuma.body ? `<p>${aboutMutuma.body}</p>` : ""}
         <a class="button secondary" href="shop.html">Shop the edit</a>
     `;
 }
@@ -208,7 +208,7 @@ if (newsletterForm) {
         try {
             await submitEmailSignup(email, "homepage-newsletter");
             localStorage.setItem("mutuma.emailSubscribed", "true");
-            newsletterForm.innerHTML = "<strong>You're on the list. Buy one, get one free is live across Roomfinds.</strong>";
+            newsletterForm.innerHTML = "<strong>You're on the list. Buy one, get one free is live across MUTUMA.</strong>";
         } catch (error) {
             notify(error.message);
             button.disabled = false;

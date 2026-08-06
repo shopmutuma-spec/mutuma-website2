@@ -19,6 +19,7 @@
     --brand-font: Impact, Haettenschweiler, "Arial Black", "Franklin Gothic Heavy", "Arial Narrow", sans-serif;
     --app-height: 100vh;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --gutter: clamp(16px, 4vw, 48px);
 }
 
 .theme-day {
@@ -530,6 +531,22 @@ img {
     background: rgba(255, 255, 255, 0.05);
 }
 
+.checkout-trust-row {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-start !important;
+}
+
+.checkout-trust-row span {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 9px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1;
+}
+
 .drawer-line {
     margin-bottom: 10px;
     border: 1px solid var(--line);
@@ -829,6 +846,10 @@ main {
     padding: clamp(58px, 8vw, 112px) 0;
 }
 
+.home-page .section {
+    padding: clamp(42px, 6vw, 78px) 0;
+}
+
 .categories-page .page-hero {
     position: relative;
     width: 100%;
@@ -983,11 +1004,11 @@ main {
 }
 
 .section-head {
-    margin-bottom: 26px;
+    margin-bottom: clamp(18px, 3vw, 28px);
     display: flex;
     align-items: end;
     justify-content: space-between;
-    gap: 24px;
+    gap: clamp(12px, 2.4vw, 28px);
 }
 
 .section-head h2 {
@@ -1269,7 +1290,7 @@ main {
 
 /* Newsletter */
 .newsletter {
-    margin-bottom: clamp(58px, 8vw, 112px);
+    margin-bottom: clamp(44px, 7vw, 92px);
     padding: clamp(28px, 5vw, 54px);
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -1809,6 +1830,30 @@ textarea {
     border-top: 1px solid var(--line);
 }
 
+.product-offer-strip {
+    margin: 14px 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius);
+    padding: 12px;
+    display: grid;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.055);
+}
+
+.product-offer-strip strong,
+.product-offer-strip span {
+    display: block;
+}
+
+.product-offer-strip span {
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+.product-trust-row {
+    margin: 10px 0;
+}
+
 .details details {
     padding: 14px 0;
     border-bottom: 1px solid var(--line);
@@ -2039,11 +2084,34 @@ textarea {
     color: var(--muted);
 }
 
+.analytics-kpi-card em {
+    display: inline-flex;
+    margin-left: 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 7px;
+    color: var(--text);
+    font-size: 0.62rem;
+    font-style: normal;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 .analytics-kpi-card strong {
     display: block;
     margin: 8px 0;
     font-size: clamp(1.35rem, 3vw, 2.1rem);
     line-height: 1;
+}
+
+.analytics-kpi-card.is-unavailable {
+    border-style: dashed;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.analytics-kpi-card.is-unavailable strong {
+    color: var(--muted);
+    font-size: clamp(1rem, 2vw, 1.28rem);
 }
 
 .analytics-kpi-card .positive {
@@ -2281,10 +2349,56 @@ textarea {
 }
 
 .analytics-rankings-card,
-.analytics-levers-card {
+.analytics-levers-card,
+.analytics-quality-card {
     background:
         radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.08), transparent 24rem),
         rgba(255, 255, 255, 0.04);
+}
+
+.analytics-quality-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.analytics-quality-grid article {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.analytics-quality-grid span,
+.analytics-quality-grid small,
+.analytics-quality-grid p {
+    color: var(--muted);
+}
+
+.analytics-quality-grid span {
+    display: inline-flex;
+    margin-bottom: 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.analytics-quality-grid strong {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: 1.1rem;
+}
+
+.analytics-quality-grid p {
+    margin: 0 0 12px;
+}
+
+.analytics-quality-grid .quality-complete span {
+    color: var(--text);
 }
 
 .analytics-product-spotlight {
@@ -2896,11 +3010,10 @@ textarea {
 /* Motion */
 @keyframes hero-image-cycle {
     0% {
-        opacity: 0;
+        opacity: 1;
         transform: scale(1.04);
     }
 
-    7%,
     31% {
         opacity: 1;
     }
@@ -3120,6 +3233,7 @@ textarea {
     .analytics-executive-strip,
     .analytics-product-spotlight-grid,
     .analytics-lever-grid,
+    .analytics-quality-grid,
     .analytics-kpi-grid,
     .analytics-toolbar {
         grid-template-columns: 1fr;
@@ -3330,9 +3444,10 @@ textarea {
     }
 
     .price-row {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 1px;
+        min-height: 21px;
+        align-items: center;
+        flex-direction: row;
+        gap: 6px;
     }
 
     .price-row strong {
@@ -3346,35 +3461,35 @@ textarea {
     .card-actions {
         position: static;
         display: grid;
-        grid-template-columns: 34px minmax(0, 1fr) 34px;
+        grid-template-columns: 36px minmax(0, 1fr) 36px;
         gap: 6px;
-        margin-top: 8px;
+        margin-top: 7px;
         padding: 0;
     }
 
     .card-actions .quick-add-button {
         grid-column: 1;
-        min-width: 34px;
+        min-width: 36px;
     }
 
     .card-actions .icon-button {
         grid-column: 3;
         grid-row: 1;
-        width: 34px;
-        min-width: 34px;
+        width: 36px;
+        min-width: 36px;
         border-radius: 11px;
     }
 
     .card-actions .button,
     .card-actions .icon-button {
-        height: 34px;
-        min-height: 34px;
+        height: 36px;
+        min-height: 36px;
         border-color: rgba(255, 255, 255, 0.24);
     }
 
     .card-actions .quick-add-button,
     .card-actions .icon-button {
-        width: 34px;
+        width: 36px;
         padding: 0;
         color: #ffffff;
         background: rgba(255, 255, 255, 0.075);
@@ -3516,8 +3631,9 @@ textarea {
     }
 }
 
-/* Redesigned Roomfinds homepage */
+/* Redesigned MUTUMA homepage */
 .redesigned-home main {
+    padding-top: 0;
     overflow: hidden;
 }
 
@@ -3536,7 +3652,7 @@ textarea {
 }
 
 .home-hero {
-    min-height: 92svh;
+    min-height: min(90svh, 920px);
     align-items: center;
     padding: calc(var(--nav-height) + 34px) 0 48px;
 }
@@ -3548,13 +3664,13 @@ textarea {
 
 .home-hero .hero-media span {
     background-position: center;
-    filter: var(--ambient-bg-filter) saturate(1.08) brightness(1.12) contrast(1.06);
+    filter: var(--ambient-bg-filter) saturate(1.12) brightness(1.18) contrast(1.04);
 }
 
 .home-hero::before {
     background:
-        linear-gradient(90deg, rgba(5, 5, 5, 0.82), rgba(5, 5, 5, 0.34), rgba(5, 5, 5, 0.54)),
-        linear-gradient(180deg, rgba(9, 9, 9, 0.02), rgba(9, 9, 9, 0.2) 58%, #090909 96%);
+        linear-gradient(90deg, rgba(5, 5, 5, 0.66), rgba(5, 5, 5, 0.2), rgba(5, 5, 5, 0.42)),
+        linear-gradient(180deg, rgba(9, 9, 9, 0), rgba(9, 9, 9, 0.12) 58%, #090909 96%);
 }
 
 .hero-lighting {
@@ -3607,14 +3723,27 @@ textarea {
     position: relative;
 }
 
+.redesigned-home .home-section + .home-section {
+    margin-top: clamp(4px, 1.5vw, 18px);
+}
+
 .redesigned-home .section-head {
     align-items: end;
 }
 
 .redesigned-home .section-head h2 {
-    max-width: 850px;
-    font-size: clamp(2.4rem, 6.6vw, 7.4rem);
-    line-height: 0.9;
+    max-width: 780px;
+    font-size: clamp(2.15rem, 5.6vw, 6.4rem);
+    line-height: 0.92;
+}
+
+.redesigned-home .section-head a {
+    flex: 0 0 auto;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .premium-product-grid .product-card {
@@ -3635,18 +3764,19 @@ textarea {
 .redesigned-home .home-product-rail {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: clamp(230px, 18vw, 310px);
+    grid-auto-columns: clamp(232px, 17vw, 296px);
     grid-template-columns: none;
     gap: 14px;
-    margin-inline: calc(var(--gutter) * -0.3);
+    margin-inline: calc(var(--gutter) * -0.35);
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     -webkit-overflow-scrolling: touch;
-    padding: 2px calc(var(--gutter) * 0.3) 20px;
-    scroll-padding-inline: calc(var(--gutter) * 0.3);
+    padding: 2px calc(var(--gutter) * 0.35) 18px;
+    scroll-padding-inline: calc(var(--gutter) * 0.35);
     scroll-behavior: smooth;
     scroll-snap-type: inline proximity;
     scrollbar-width: none;
+    scrollbar-color: transparent transparent;
     align-items: start;
     contain: layout paint;
 }
@@ -3658,6 +3788,9 @@ textarea {
 }
 
 .redesigned-home .home-product-rail .product-card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
     scroll-snap-align: start;
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
 }
@@ -3669,6 +3802,7 @@ textarea {
 .redesigned-home .home-product-rail .product-info {
     display: flex;
     flex-direction: column;
+    min-height: 188px;
     padding: 12px;
 }
 
@@ -3705,7 +3839,7 @@ textarea {
 }
 
 .redesigned-home .home-product-rail .card-actions {
-    margin-top: 10px;
+    margin-top: auto;
     grid-template-columns: 42px minmax(0, 1fr) 42px;
     gap: 8px;
 }
@@ -3753,12 +3887,12 @@ textarea {
     grid-auto-columns: minmax(300px, 31vw);
     grid-template-columns: none;
     gap: 16px;
-    margin-inline: calc(var(--gutter) * -0.3);
+    margin-inline: calc(var(--gutter) * -0.35);
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     -webkit-overflow-scrolling: touch;
-    padding: 2px calc(var(--gutter) * 0.3) 18px;
-    scroll-padding-inline: calc(var(--gutter) * 0.3);
+    padding: 2px calc(var(--gutter) * 0.35) 16px;
+    scroll-padding-inline: calc(var(--gutter) * 0.35);
     scroll-behavior: smooth;
     scroll-snap-type: inline proximity;
     scrollbar-width: none;
@@ -3777,7 +3911,7 @@ textarea {
 .split-showcase {
     display: grid;
     grid-template-columns: minmax(280px, 0.7fr) minmax(0, 1.3fr);
-    gap: 16px;
+    gap: clamp(12px, 2vw, 18px);
     align-items: stretch;
 }
 
@@ -3785,7 +3919,7 @@ textarea {
 .limited-drop {
     border: 1px solid var(--line);
     border-radius: 24px;
-    padding: clamp(22px, 4vw, 44px);
+    padding: clamp(20px, 3.6vw, 40px);
     background:
         linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.035)),
         #101010;
@@ -3809,7 +3943,7 @@ textarea {
 .home-split-products {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
+    gap: clamp(10px, 1.5vw, 14px);
 }
 
 .arrival-card,
@@ -3852,16 +3986,16 @@ textarea {
 
 .arrival-card strong,
 .carousel-card strong {
-    min-height: 58px;
+    min-height: 54px;
     padding-bottom: 12px;
     line-height: 1.15;
 }
 
 .limited-drop {
-    min-height: 420px;
+    min-height: clamp(320px, 42vw, 420px);
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 24px;
+    gap: clamp(14px, 2.4vw, 28px);
     align-items: end;
     background:
         linear-gradient(90deg, rgba(9, 9, 9, 0.92), rgba(9, 9, 9, 0.42)),
@@ -3883,16 +4017,16 @@ textarea {
     scroll-snap-align: start;
 }
 
-.why-roomfinds {
+.why-mutuma {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-    gap: clamp(24px, 5vw, 72px);
+    gap: clamp(18px, 4vw, 56px);
     align-items: end;
 }
 
-.why-roomfinds::after {
+.why-mutuma::after {
     content: "Secure checkout / easy returns / real catalogue / fast discovery";
-    min-height: 280px;
+    min-height: clamp(220px, 26vw, 280px);
     border: 1px solid var(--line);
     border-radius: 24px;
     padding: 24px;
@@ -3932,6 +4066,8 @@ textarea {
 }
 
 .home-newsletter {
+    margin-top: clamp(4px, 1.4vw, 16px);
+    padding: clamp(22px, 4vw, 42px);
     border-radius: 24px;
     background:
         linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035)),
@@ -3952,7 +4088,7 @@ textarea {
 
 @media (max-width: 980px) {
     .split-showcase,
-    .why-roomfinds,
+    .why-mutuma,
     .limited-drop {
         grid-template-columns: 1fr;
     }
@@ -3964,6 +4100,10 @@ textarea {
 }
 
 @media (max-width: 620px) {
+    .home-page .section {
+        padding: clamp(30px, 9vw, 48px) 0;
+    }
+
     .redesigned-home .nav {
         width: min(100% - 18px, 1320px);
         border-radius: 18px;
@@ -3971,7 +4111,7 @@ textarea {
 
     .home-hero {
         min-height: auto;
-        padding: calc(var(--nav-height) + 28px) 0 38px;
+        padding: calc(var(--nav-height) + 22px) 0 34px;
     }
 
     .home-hero .hero-media span {
@@ -3981,14 +4121,15 @@ textarea {
 
     .home-hero::before {
         background:
-            linear-gradient(180deg, rgba(5, 5, 5, 0.42), rgba(5, 5, 5, 0.3) 54%, #090909 96%),
-            linear-gradient(90deg, rgba(5, 5, 5, 0.78), rgba(5, 5, 5, 0.22));
+            linear-gradient(180deg, rgba(5, 5, 5, 0.18), rgba(5, 5, 5, 0.24) 54%, #090909 96%),
+            linear-gradient(90deg, rgba(5, 5, 5, 0.62), rgba(5, 5, 5, 0.12));
     }
 
     .home-hero-copy h1 {
         max-width: 92vw;
-        font-size: clamp(2.9rem, 12.5vw, 4.7rem);
+        font-size: clamp(2.75rem, 11.6vw, 4.35rem);
         line-height: 0.94;
+        margin: 12px 0 14px;
     }
 
     .home-hero-copy p {
@@ -4002,9 +4143,9 @@ textarea {
     }
 
     .home-hero .hero-actions .button {
-        min-height: 54px;
-        padding-inline: 18px;
-        font-size: 0.9rem;
+        min-height: 48px;
+        padding-inline: 15px;
+        font-size: 0.82rem;
     }
 
     .home-hero-inner {
@@ -4013,24 +4154,29 @@ textarea {
 
     .redesigned-home .section-head {
         align-items: flex-start;
+        margin-bottom: 16px;
     }
 
     .redesigned-home .section-head h2,
     .home-split-panel h2,
     .limited-drop h2 {
-        font-size: clamp(2.5rem, 12vw, 4rem);
+        font-size: clamp(2.2rem, 10vw, 3.6rem);
+    }
+
+    .redesigned-home .section-head a {
+        font-size: 0.68rem;
     }
 
     .redesigned-home .home-product-rail {
-        grid-auto-columns: clamp(178px, 54vw, 228px);
-        gap: 10px;
-        margin-inline: calc(var(--gutter) * -0.5);
-        padding: 2px calc(var(--gutter) * 0.5) 14px;
-        scroll-padding-inline: calc(var(--gutter) * 0.5);
+        grid-auto-columns: clamp(168px, 52vw, 218px);
+        gap: 9px;
+        margin-inline: -12px;
+        padding: 2px 12px 12px;
+        scroll-padding-inline: 12px;
     }
 
     .redesigned-home .home-product-rail .product-image {
-        aspect-ratio: 1 / 0.86;
+        aspect-ratio: 1 / 0.78;
     }
 
     .redesigned-home .home-product-rail .product-badges {
@@ -4045,26 +4191,31 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .product-info {
-        padding: 9px;
+        min-height: 152px;
+        padding: 8px;
     }
 
     .redesigned-home .home-product-rail .product-meta {
-        font-size: 0.72rem;
+        display: block;
+        font-size: 0.68rem;
+    }
+
+    .redesigned-home .home-product-rail .product-meta span + span {
+        display: none;
     }
 
     .redesigned-home .home-product-rail .product-info h3 {
-        font-size: 0.92rem;
-        min-height: 2.2em;
-        margin: 6px 0;
+        font-size: 0.82rem;
+        min-height: 2.05em;
+        margin: 5px 0 7px;
     }
 
     .redesigned-home .home-product-rail .option-row {
-        margin: 4px 0 6px;
-        font-size: 0.72rem;
+        display: none;
     }
 
     .redesigned-home .home-product-rail .price-row strong {
-        font-size: 0.94rem;
+        font-size: 0.9rem;
     }
 
     .redesigned-home .home-product-rail .price-row s {
@@ -4074,22 +4225,23 @@ textarea {
     .redesigned-home .home-product-rail .card-actions {
         position: static;
         display: grid;
-        grid-template-columns: 34px minmax(0, 1fr) 34px;
-        margin-top: 7px;
-        gap: 6px;
+        grid-template-columns: 36px minmax(0, 1fr) 36px;
+        margin-top: auto;
+        gap: 5px;
     }
 
     .redesigned-home .home-product-rail .card-actions .button {
         min-width: 0;
-        height: 34px;
-        min-height: 34px;
+        height: 36px;
+        min-height: 36px;
         border-radius: 11px;
+        font-size: 0.62rem;
     }
 
     .redesigned-home .home-product-rail .card-actions .icon-button {
-        min-width: 34px;
-        width: 34px;
-        height: 34px;
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
         border-radius: 11px;
     }
 
@@ -4105,13 +4257,39 @@ textarea {
 
     .redesigned-home #categories .cinematic-category-grid {
         grid-auto-columns: minmax(238px, 76vw);
-        margin-inline: calc(var(--gutter) * -0.5);
-        padding-inline: calc(var(--gutter) * 0.5);
-        scroll-padding-inline: calc(var(--gutter) * 0.5);
+        margin-inline: -12px;
+        padding-inline: 12px;
+        scroll-padding-inline: 12px;
     }
 
     .home-split-products {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .home-split-panel,
+    .limited-drop,
+    .home-newsletter {
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .arrival-card,
+    .carousel-card {
+        border-radius: 16px;
+    }
+
+    .arrival-card span,
+    .carousel-card span {
+        padding-top: 9px;
+        font-size: 0.68rem;
+    }
+
+    .arrival-card strong,
+    .carousel-card strong {
+        min-height: 44px;
+        padding: 0 9px 9px;
+        font-size: 0.78rem;
     }
 
     .home-carousel {
@@ -4122,7 +4300,7 @@ textarea {
         grid-template-columns: 1fr;
     }
 
-    .why-roomfinds::after {
+    .why-mutuma::after {
         min-height: 190px;
     }
 }

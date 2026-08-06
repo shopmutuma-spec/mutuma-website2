@@ -1,4 +1,4 @@
-import { storeSettings } from "./site-settings.js?v=20260802a";
+import { storeSettings } from "./site-settings.js?v=20260806b";
 
 const baseProducts = [
     {
@@ -3470,19 +3470,42 @@ const baseProducts = [
     }
 ];
 
-export const products = baseProducts;
+const LEGACY_GBP_TO_USD_RATE = 1.27;
+const BASE_CURRENCY = "USD";
+
+function toUsdAmount(value, currency = BASE_CURRENCY) {
+    const number = Number(value || 0);
+    if (!number) return number;
+    return String(currency || "").toUpperCase() === "GBP"
+        ? Number((number * LEGACY_GBP_TO_USD_RATE).toFixed(2))
+        : number;
+}
+
+function normalizeBaseProduct(product) {
+    return {
+        ...product,
+        price: toUsdAmount(product.price, product.currency),
+        oldPrice: product.oldPrice ? toUsdAmount(product.oldPrice, product.currency) : product.oldPrice,
+        basePrice: product.basePrice ? toUsdAmount(product.basePrice, product.currency) : product.basePrice,
+        currency: BASE_CURRENCY
+    };
+}
+
+export const products = baseProducts.map(normalizeBaseProduct);
 export let activeStoreOffers = [];
 let catalogLoaded = false;
 
 function normalizeRemoteProduct(product) {
+    const currency = product.currency || BASE_CURRENCY;
+
     return {
         id: product.id,
         name: product.name,
         description: product.description || "",
         category: product.category || "Decor",
-        price: Number(product.price || 0),
-        oldPrice: product.old_price ? Number(product.old_price) : null,
-        currency: product.currency || "GBP",
+        price: toUsdAmount(product.price, currency),
+        oldPrice: product.old_price ? toUsdAmount(product.old_price, currency) : null,
+        currency: BASE_CURRENCY,
         rating: 4.8,
         reviews: 0,
         stock: product.stock || null,

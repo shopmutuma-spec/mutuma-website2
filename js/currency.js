@@ -1,44 +1,45 @@
 const CURRENCY_KEY = "mutuma.currency";
-const RATES_KEY = "mutuma.exchangeRates";
+const RATES_KEY = "mutuma.exchangeRates.usd.v1";
 const GEO_KEY = "mutuma.location";
-const GEO_VERSION = 7;
+const GEO_VERSION = 8;
 const RATE_TTL = 1000 * 60 * 60 * 6;
 const GEO_TTL = 1000 * 60 * 15;
+const BASE_CURRENCY = "USD";
 
 const fallbackRates = {
-    GBP: 1,
-    USD: 1.27,
-    EUR: 1.18,
-    CAD: 1.73,
-    AUD: 1.92,
-    NZD: 2.08,
-    JPY: 203,
-    CHF: 1.14,
-    CNY: 9.22,
-    HKD: 9.94,
-    SGD: 1.71,
-    INR: 106.2,
-    AED: 4.66,
-    SAR: 4.76,
-    ZAR: 23.1,
-    SEK: 13.35,
-    NOK: 13.42,
-    DKK: 8.8,
-    PLN: 5.03,
-    MXN: 22.9,
-    BRL: 7.05,
-    KRW: 1760,
-    THB: 46.3,
-    TRY: 42.1,
-    ILS: 4.76,
-    CZK: 29.4,
-    HUF: 463,
-    RON: 5.87,
-    BGN: 2.31,
-    ISK: 176,
-    IDR: 20700,
-    MYR: 5.98,
-    PHP: 74.3
+    USD: 1,
+    GBP: 0.79,
+    EUR: 0.93,
+    CAD: 1.36,
+    AUD: 1.51,
+    NZD: 1.64,
+    JPY: 160,
+    CHF: 0.9,
+    CNY: 7.26,
+    HKD: 7.83,
+    SGD: 1.35,
+    INR: 83.62,
+    AED: 3.67,
+    SAR: 3.75,
+    ZAR: 18.19,
+    SEK: 10.51,
+    NOK: 10.57,
+    DKK: 6.93,
+    PLN: 3.96,
+    MXN: 18.03,
+    BRL: 5.55,
+    KRW: 1386,
+    THB: 36.46,
+    TRY: 33.15,
+    ILS: 3.75,
+    CZK: 23.15,
+    HUF: 364.57,
+    RON: 4.62,
+    BGN: 1.82,
+    ISK: 138.58,
+    IDR: 16299,
+    MYR: 4.71,
+    PHP: 58.5
 };
 
 const europeanUnion = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
@@ -149,7 +150,7 @@ const timeZoneCountryMap = {
 };
 
 let currencyState = {
-    currency: normalizeCurrency(safeGet(CURRENCY_KEY)) || "GBP",
+    currency: normalizeCurrency(safeGet(CURRENCY_KEY)) || BASE_CURRENCY,
     rates: fallbackRates
 };
 
@@ -218,11 +219,11 @@ function countryToCurrency(countryCode) {
     const country = String(countryCode || "").toUpperCase();
     if (euroCountries.includes(country)) return "EUR";
     if (countryCurrencyMap[country]) return countryCurrencyMap[country];
-    return "GBP";
+    return BASE_CURRENCY;
 }
 
 function localeCountry() {
-    const locales = navigator.languages?.length ? navigator.languages : [navigator.language || "en-GB"];
+    const locales = navigator.languages?.length ? navigator.languages : [navigator.language || "en-US"];
 
     for (const locale of locales) {
         try {
@@ -235,7 +236,7 @@ function localeCountry() {
         }
     }
 
-    return "GB";
+    return "US";
 }
 
 function timeZoneCountry() {
@@ -254,7 +255,7 @@ function browserCountry() {
     if (zoneCountry) return zoneCountry;
     if (languageCountry) return languageCountry;
 
-    return "GB";
+    return "US";
 }
 
 function normalizeCurrency(currency) {
@@ -441,8 +442,8 @@ function bestSignal(signals) {
     const validSignals = signals.filter((signal) => signal.country && signal.currency);
 
     return validSignals.sort((first, second) => second.priority - first.priority)[0] || {
-        country: "GB",
-        currency: normalizeCurrency(countryToCurrency(browserCountry())) || getStoredCurrency() || "GBP",
+        country: "US",
+        currency: normalizeCurrency(countryToCurrency(browserCountry())) || getStoredCurrency() || BASE_CURRENCY,
         source: "fallback",
         priority: 0
     };
@@ -464,7 +465,7 @@ async function detectCurrency() {
     const signal = bestSignal([...serviceSignals, ...textSignals, ...localSignals]);
     const { country, currency } = signal;
 
-    window.RoomfindsCurrencyDebug = {
+    window.MUTUMACurrencyDebug = {
         chosen: signal,
         signals: [...serviceSignals, ...textSignals, ...localSignals],
         stored: {
@@ -486,8 +487,8 @@ async function loadRates() {
     }
 
     try {
-        const data = await fetchJson("https://api.frankfurter.app/latest?from=GBP");
-        const rates = { ...fallbackRates, GBP: 1, ...data.rates };
+        const data = await fetchJson(`https://api.frankfurter.app/latest?from=${BASE_CURRENCY}`);
+        const rates = { ...fallbackRates, [BASE_CURRENCY]: 1, ...data.rates };
         safeSet(RATES_KEY, JSON.stringify({ time: Date.now(), rates }));
         return rates;
     } catch (error) {
@@ -501,15 +502,15 @@ export async function initCurrency() {
 
     currencyInitPromise = (async () => {
         const [currency, rates] = await Promise.all([
-            detectCurrency().catch(() => countryToCurrency(browserCountry()) || getStoredCurrency() || "GBP"),
+            detectCurrency().catch(() => countryToCurrency(browserCountry()) || getStoredCurrency() || BASE_CURRENCY),
             loadRates().catch(() => fallbackRates)
         ]);
         currencyState = { currency, rates };
-        window.RoomfindsCurrency = {
+        window.MUTUMACurrency = {
             currency,
             rates,
             country: safeJsonGet(GEO_KEY)?.country || "",
-            debug: () => window.RoomfindsCurrencyDebug,
+            debug: () => window.MUTUMACurrencyDebug,
             refresh: async () => {
                 safeSet(GEO_KEY, "");
                 safeSet(CURRENCY_KEY, "");
@@ -550,21 +551,21 @@ export function currentCurrency() {
     return currencyState.currency;
 }
 
-export function convertPrice(gbpAmount) {
-    return gbpAmount * (currencyState.rates[currencyState.currency] || fallbackRates[currencyState.currency] || 1);
+export function convertPrice(baseAmount) {
+    return baseAmount * (currencyState.rates[currencyState.currency] || fallbackRates[currencyState.currency] || 1);
 }
 
-export function formatPrice(gbpAmount) {
+export function formatPrice(baseAmount) {
     try {
         return new Intl.NumberFormat(undefined, {
             style: "currency",
             currency: currencyState.currency,
             maximumFractionDigits: ["JPY", "KRW"].includes(currencyState.currency) ? 0 : 2
-        }).format(convertPrice(gbpAmount));
+        }).format(convertPrice(baseAmount));
     } catch (error) {
-        return new Intl.NumberFormat("en-GB", {
+        return new Intl.NumberFormat("en-US", {
             style: "currency",
-            currency: "GBP"
-        }).format(gbpAmount);
+            currency: BASE_CURRENCY
+        }).format(baseAmount);
     }
 }

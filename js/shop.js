@@ -1,10 +1,10 @@
-import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260802a";
-import { initCurrency } from "./currency.js?v=20260802a";
-import { trackEvent } from "./analytics.js?v=20260802a";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260802a";
+import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260806b";
+import { initCurrency } from "./currency.js?v=20260806b";
+import { trackEvent } from "./analytics.js?v=20260806b";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260806b";
 
 boot().catch((error) => {
-    console.error("Roomfinds shop failed to start.", error);
+    console.error("MUTUMA shop failed to start.", error);
 });
 
 async function boot() {

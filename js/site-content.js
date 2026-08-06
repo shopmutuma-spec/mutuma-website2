@@ -1,5 +1,5 @@
-export const aboutRoomfinds = {
-    eyebrow: "Roomfinds",
+export const aboutMutuma = {
+    eyebrow: "MUTUMA",
     title: "Finds for rooms with taste.",
     body: "Culture-led rugs, posters and objects. Nothing boring."
 };

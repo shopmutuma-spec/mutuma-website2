@@ -1,13 +1,13 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260802a";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260802a";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260802a";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260802a";
-import { trackEvent } from "./analytics.js?v=20260802a";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260802a";
-import { setupBundleForProduct } from "./merchandising.js?v=20260802a";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260806b";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260806b";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260806b";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260806b";
+import { trackEvent } from "./analytics.js?v=20260806b";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260806b";
+import { setupBundleForProduct } from "./merchandising.js?v=20260806b";
 
 boot().catch((error) => {
-    console.error("Roomfinds product page failed to start.", error);
+    console.error("MUTUMA product page failed to start.", error);
 });
 
 async function boot() {
@@ -69,6 +69,10 @@ ${galleryThumbs}
                 ${product.oldPrice ? `<s data-price="${product.oldPrice}">${formatPrice(product.oldPrice)}</s>` : ""}
             </div>
             <p class="stock">${product.stock <= 8 ? "Low stock" : "In stock"} / estimated dispatch in 2-4 business days</p>
+            <div class="product-offer-strip">
+                <strong>Buy one, get a free poster.</strong>
+                <span>30% off is already applied. Shipping is included in the checkout total.</span>
+            </div>
             <div class="quantity">
                 <button data-qty-minus>-</button>
                 <input value="1" data-quantity aria-label="Quantity" inputmode="numeric">
@@ -88,9 +92,14 @@ ${galleryThumbs}
                     <button class="button secondary wide" data-add-setup-bundle>Add Full Setup</button>
                 </div>
             ` : ""}
-            <button class="button primary wide" data-add-product>Add to Cart</button>
+            <button class="button primary wide" data-add-product>Add to Bag</button>
             <button class="button secondary wide" data-buy-stripe>Buy Now</button>
-            <button class="button secondary wide ${getWishlist().includes(product.id) ? "active" : ""}" data-wishlist-product>Wishlist</button>
+            <div class="checkout-trust-row product-trust-row">
+                <span>Secure Stripe checkout</span>
+                <span>Europe & US delivery</span>
+                <span>Easy returns</span>
+            </div>
+            <button class="button secondary wide ${getWishlist().includes(product.id) ? "active" : ""}" data-wishlist-product aria-pressed="${getWishlist().includes(product.id)}">Wishlist</button>
             <div class="details">
                 <details open><summary>Description</summary><p>${product.description}</p></details>
                 <details><summary>Specifications</summary><p>Category: ${product.category}. Sizes: ${sizeList}. Variations: ${variationList}. Style: ${options.styles.join(", ")}.</p></details>
@@ -100,8 +109,8 @@ ${galleryThumbs}
         </aside>
     </section>
     <div class="mobile-sticky-add">
-        <span>${product.name}</span>
-        <button class="button primary" data-mobile-add>Quick Add</button>
+        <span><b data-price="${product.price}">${formatPrice(product.price)}</b> / ${product.name}</span>
+        <button class="button primary" data-mobile-add>Add</button>
         <button class="button secondary" data-mobile-buy>Buy Now</button>
     </div>
 `;
@@ -222,6 +231,7 @@ document.querySelector("[data-mobile-buy]").addEventListener("click", async (eve
 document.querySelector("[data-wishlist-product]").addEventListener("click", (event) => {
     const active = toggleWishlist(product.id);
     event.currentTarget.classList.toggle("active", active);
+    event.currentTarget.setAttribute("aria-pressed", String(active));
     notify(active ? "Saved to wishlist" : "Removed from wishlist");
 });
 

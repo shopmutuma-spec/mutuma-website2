@@ -1,10 +1,11 @@
-import { initCurrency } from "./currency.js?v=20260802a";
-import { initBaseLayout } from "./ui.js?v=20260802a";
-import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260802a";
+import { initCurrency } from "./currency.js?v=20260806b";
+import { initBaseLayout } from "./ui.js?v=20260806b";
+import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260806b";
 
 initBaseLayout();
 initCurrency().catch(() => {});
 
+const ANALYTICS_CURRENCY = "GBP";
 const form = document.querySelector("[data-admin-login]");
 const message = document.querySelector("[data-admin-message]");
 const panel = document.querySelector("[data-admin-panel]");
@@ -31,7 +32,7 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
-function money(value, currency = "GBP") {
+function money(value, currency = ANALYTICS_CURRENCY) {
     try {
         return new Intl.NumberFormat("en-GB", {
             style: "currency",
@@ -111,8 +112,9 @@ function signedPercent(value) {
 }
 
 function metricValue(key, value) {
-    if (["grossRevenue", "netRevenue", "netProfit", "averageOrderValue", "revenuePerVisitor", "refundAmount"].includes(key)) {
-        return money(value, "GBP");
+    if (value === null || value === undefined) return "Needs data";
+    if (["grossRevenue", "netRevenue", "grossProfit", "netProfit", "averageOrderValue", "revenuePerVisitor", "refundAmount"].includes(key)) {
+        return money(value, ANALYTICS_CURRENCY);
     }
     if (["conversionRate", "returningCustomerRate", "cartAbandonmentRate", "checkoutCompletionRate", "paymentSuccessRate", "refundRate"].includes(key)) {
         return percent(value);
@@ -184,7 +186,7 @@ function analyticsToolbar(data) {
                 </select>
             </label>
             <div class="analytics-toolbar-actions">
-                <span>GBP</span>
+                <span>${ANALYTICS_CURRENCY}</span>
                 <button class="button secondary" type="submit">Apply</button>
                 <button class="button secondary" type="button" data-refresh-admin>Refresh</button>
                 <button class="button secondary" type="button" data-export-report>Export Report</button>
@@ -198,11 +200,12 @@ function kpiGrid(data) {
     return `
         <section class="analytics-kpi-grid">
             ${(data.metrics.kpis || []).map((kpi) => `
-                <a class="analytics-kpi-card" href="#report-${escapeHtml(kpi.key)}" title="${escapeHtml(kpi.tooltip)}">
-                    <span>${escapeHtml(kpi.label)}${kpi.estimated ? " (estimated)" : ""}</span>
+                <a class="analytics-kpi-card ${kpi.available ? "" : "is-unavailable"}" href="#report-${escapeHtml(kpi.key)}" title="${escapeHtml(kpi.tooltip)}">
+                    <span>${escapeHtml(kpi.label)} <em>${escapeHtml(kpi.status || "complete")}</em></span>
                     <strong>${escapeHtml(metricValue(kpi.key, kpi.value))}</strong>
                     <small class="${Number(kpi.comparison.change || 0) >= 0 ? "positive" : "negative"}">${escapeHtml(signedPercent(kpi.comparison.change))} vs previous</small>
                     <i style="width:${Math.min(100, Math.max(6, Math.abs(Number(kpi.comparison.change || 0)) * 100))}%"></i>
+                    <small>${escapeHtml(kpi.source || "")}</small>
                 </a>
             `).join("")}
         </section>
@@ -320,7 +323,7 @@ function sourceTable(rows) {
                             <td>${source.productViews}</td>
                             <td>${source.cartAdds}</td>
                             <td>${source.orders}</td>
-                            <td>${money(source.revenue, "GBP")}</td>
+                            <td>${money(source.revenue, ANALYTICS_CURRENCY)}</td>
                             <td>${percent(source.conversionRate)}</td>
                         </tr>
                     `).join("")}
@@ -542,9 +545,35 @@ function productRankingsPanel(data) {
             </div>
             <div class="analytics-product-spotlight-grid">
                 ${productSpotlightCard(rankings.mostViewed?.[0], "Most viewed", (product) => `${product.views} views / ${percent(product.cartRate)} cart rate`)}
-                ${productSpotlightCard(rankings.highestRevenue?.[0], "Highest revenue", (product) => `${money(product.revenue, "GBP")} revenue`)}
-                ${productSpotlightCard(rankings.highestProfit?.[0], "Highest profit", (product) => `${money(product.estimatedProfit, "GBP")} estimated profit`)}
+                ${productSpotlightCard(rankings.highestRevenue?.[0], "Highest revenue", (product) => `${money(product.revenue, ANALYTICS_CURRENCY)} revenue`)}
+                ${productSpotlightCard(rankings.highestGrossProfit?.[0], "Highest gross profit", (product) => `${money(product.grossProfit, ANALYTICS_CURRENCY)} gross profit`)}
                 ${productSpotlightCard(rankings.highViewsLowSales?.[0], "Fix this first", (product) => `${product.views} views / ${percent(product.purchaseRate)} purchase rate`)}
+            </div>
+        </section>
+    `;
+}
+
+function dataQualityPanel(data) {
+    const rows = data.metrics.dataQuality || [];
+
+    return `
+        <section class="admin-card analytics-quality-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Data Integrity</span>
+                    <h3>Metric Source Status</h3>
+                </div>
+                <span class="status-pill">No fake data</span>
+            </div>
+            <div class="analytics-quality-grid">
+                ${rows.map((row) => `
+                    <article class="quality-${escapeHtml(row.status)}">
+                        <span>${escapeHtml(row.status)}</span>
+                        <strong>${escapeHtml(row.label)}</strong>
+                        <p>${escapeHtml(row.detail)}</p>
+                        <small>${escapeHtml(row.source)} / updated ${escapeHtml(formatDate(row.lastUpdated))}</small>
+                    </article>
+                `).join("")}
             </div>
         </section>
     `;
@@ -636,8 +665,8 @@ function productPerformanceTable(products) {
                             <td>${product.addToCart}</td>
                             <td>${product.checkoutStarts}</td>
                             <td>${product.purchases}</td>
-                            <td>${money(product.revenue, "GBP")}</td>
-                            <td>${money(product.estimatedProfit, "GBP")} <span class="muted">est.</span></td>
+                            <td>${money(product.revenue, ANALYTICS_CURRENCY)}</td>
+                            <td>${product.grossProfitAvailable ? money(product.grossProfit, ANALYTICS_CURRENCY) : '<span class="muted">Needs costs</span>'}</td>
                             <td>${percent(product.cartRate)}</td>
                         </tr>
                     `).join("")}
@@ -668,6 +697,7 @@ function analyticsCommandCentre(data) {
                 ${signalCard("Single-page sessions", percent(data.metrics.singlePageRate || 0), "watch this if it rises")}
             </div>
             ${analyticsExecutiveStrip(data)}
+            ${dataQualityPanel(data)}
             ${lineChart("Traffic and Product Interest", dailySeries, [
                 { key: "visitors", label: "Visitors", className: "chart-line-primary" },
                 { key: "pageViews", label: "Page views", className: "chart-line-secondary" },
@@ -770,8 +800,8 @@ function productManagerPanel() {
                 <datalist id="admin-category-list">
                     ${["Rugs", "Posters", "Lighting", "Lego", "Organisation", "Mirrors", "Furniture", "Decor"].map((category) => `<option value="${category}"></option>`).join("")}
                 </datalist>
-                <label>Price GBP<input name="price" type="number" min="0" step="0.01" required></label>
-                <label>Previous price GBP<input name="oldPrice" type="number" min="0" step="0.01"></label>
+                <label>Price USD<input name="price" type="number" min="0" step="0.01" required></label>
+                <label>Previous price USD<input name="oldPrice" type="number" min="0" step="0.01"></label>
                 <label>Image URL<input name="imageUrl" required placeholder="https://... or images/products/name.webp"></label>
                 <label>Tags<input name="tags" placeholder="featured, trending, rugs"></label>
                 <label>Stock<input name="stock" type="number" min="0" step="1"></label>
@@ -850,7 +880,7 @@ function customerRows(customers) {
                         <tr>
                             <td>${escapeHtml(customer.email)}</td>
                             <td>${escapeHtml(customer.orders)}</td>
-                            <td>${money(customer.totalSpent, adminData.orders[0]?.currency || "GBP")}</td>
+                            <td>${money(customer.totalSpent, ANALYTICS_CURRENCY)}</td>
                             <td>${formatDate(customer.lastOrder)}</td>
                             <td>${escapeHtml(customer.source)}</td>
                         </tr>
@@ -873,7 +903,7 @@ function productRows(products) {
                         <tr>
                             <td><strong>${escapeHtml(product.name)}</strong><br><span class="muted">${escapeHtml(product.id)}</span></td>
                             <td>${escapeHtml(product.category)}</td>
-                            <td>${money(product.price, "GBP")}</td>
+                            <td>${money(product.price, "USD")}</td>
                             <td>${product.image ? "Visible" : "Missing image"}</td>
                         </tr>
                     `).join("")}
@@ -959,12 +989,12 @@ function renderAdmin(user, selectedOrderNumber = "") {
             ${metricCard("subscribers", data.counts.subscribers)}
             ${metricCard("visitors / 30 days", data.counts.visitors)}
             ${metricCard("page views / 30 days", data.counts.pageViews)}
-            ${metricCard("revenue", money(data.metrics.revenue || 0, data.orders[0]?.currency || "GBP"))}
+            ${metricCard("revenue", money(data.metrics.grossRevenue || 0, ANALYTICS_CURRENCY))}
         </div>
         <section class="admin-card">
             <h3>Store Signals</h3>
             <div class="admin-mini-list admin-signal-grid">
-                <div><span>Average order value</span><strong>${money(data.metrics.averageOrderValue || 0, data.orders[0]?.currency || "GBP")}</strong></div>
+                <div><span>Average order value</span><strong>${money(data.metrics.averageOrderValue || 0, ANALYTICS_CURRENCY)}</strong></div>
                 <div><span>Product views</span><strong>${data.metrics.productViews || 0}</strong></div>
                 <div><span>Checkout starts</span><strong>${data.metrics.checkoutStarts || 0}</strong></div>
                 <div><span>Searches</span><strong>${data.metrics.searches || 0}</strong></div>
@@ -1166,7 +1196,7 @@ panel.addEventListener("click", (event) => {
     }
 
     if (event.target.closest("[data-export-report]") && adminData) {
-        downloadCsv("roomfinds-analytics-report.csv", [
+        downloadCsv("mutuma-analytics-report.csv", [
             { label: "Metric", key: "label" },
             { label: "Value", key: "value" },
             { label: "Previous", key: "previous" },
@@ -1182,7 +1212,7 @@ panel.addEventListener("click", (event) => {
     }
 
     if (event.target.closest("[data-export-subscribers]") && adminData) {
-        downloadCsv("roomfinds-subscribers.csv", [
+        downloadCsv("mutuma-subscribers.csv", [
             { label: "Email", key: "email" },
             { label: "Source", key: "source" },
             { label: "Joined", key: "subscribed_at" }
@@ -1190,14 +1220,14 @@ panel.addEventListener("click", (event) => {
     }
 
     if (event.target.closest("[data-export-product-analytics]") && adminData) {
-        downloadCsv("roomfinds-product-analytics.csv", [
+        downloadCsv("mutuma-product-analytics.csv", [
             { label: "Product", key: "name" },
             { label: "Category", key: "category" },
             { label: "Views", key: "views" },
             { label: "Cart Adds", key: "addToCart" },
             { label: "Checkout Starts", key: "checkoutStarts" },
             { label: "Purchases", key: "purchases" },
-            { label: "Revenue", key: "revenue" },
+            { label: `Revenue ${ANALYTICS_CURRENCY}`, key: "revenue" },
             { label: "View To Cart Rate", key: "cartRate" },
             { label: "Purchase Rate", key: "purchaseRate" }
         ], adminData.metrics.productPerformance || []);
