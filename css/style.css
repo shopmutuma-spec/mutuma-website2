@@ -4168,7 +4168,7 @@ textarea {
     }
 
     .redesigned-home .home-product-rail {
-        grid-auto-columns: clamp(168px, 52vw, 218px);
+        grid-auto-columns: clamp(156px, 48vw, 204px);
         gap: 9px;
         margin-inline: -12px;
         padding: 2px 12px 12px;
@@ -4176,7 +4176,7 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .product-image {
-        aspect-ratio: 1 / 0.78;
+        aspect-ratio: 1 / 0.82;
     }
 
     .redesigned-home .home-product-rail .product-badges {
@@ -4191,7 +4191,7 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .product-info {
-        min-height: 152px;
+        min-height: 0;
         padding: 8px;
     }
 
@@ -4206,8 +4206,8 @@ textarea {
 
     .redesigned-home .home-product-rail .product-info h3 {
         font-size: 0.82rem;
-        min-height: 2.05em;
-        margin: 5px 0 7px;
+        min-height: 0;
+        margin: 4px 0 6px;
     }
 
     .redesigned-home .home-product-rail .option-row {
@@ -4215,7 +4215,7 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .price-row strong {
-        font-size: 0.9rem;
+        font-size: 0.88rem;
     }
 
     .redesigned-home .home-product-rail .price-row s {
@@ -4226,7 +4226,7 @@ textarea {
         position: static;
         display: grid;
         grid-template-columns: 36px minmax(0, 1fr) 36px;
-        margin-top: auto;
+        margin-top: 7px;
         gap: 5px;
     }
 
@@ -4249,6 +4249,39 @@ textarea {
     .redesigned-home .home-product-rail .card-actions .icon-button svg {
         width: 18px;
         height: 18px;
+    }
+
+    .in-app-browser .redesigned-home .home-product-rail {
+        grid-auto-columns: clamp(148px, 45vw, 190px);
+    }
+
+    .in-app-browser .redesigned-home .home-product-rail .product-image {
+        aspect-ratio: 1 / 0.76;
+    }
+
+    .in-app-browser .redesigned-home .home-product-rail .product-info {
+        padding: 7px;
+    }
+
+    .in-app-browser .redesigned-home .home-product-rail .product-meta {
+        font-size: 0.62rem;
+    }
+
+    .in-app-browser .redesigned-home .home-product-rail .product-info h3 {
+        font-size: 0.76rem;
+        margin: 3px 0 5px;
+    }
+
+    .in-app-browser .redesigned-home .home-product-rail .card-actions {
+        grid-template-columns: 34px minmax(0, 1fr) 34px;
+        gap: 4px;
+        margin-top: 6px;
+    }
+
+    .in-app-browser .redesigned-home .home-product-rail .card-actions .button,
+    .in-app-browser .redesigned-home .home-product-rail .card-actions .icon-button {
+        height: 34px;
+        min-height: 34px;
     }
 
     .cinematic-category-grid .category-card {
