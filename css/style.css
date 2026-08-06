@@ -3789,8 +3789,9 @@ textarea {
 
 .redesigned-home .home-product-rail .product-card {
     display: grid;
-    grid-template-rows: auto 1fr;
-    height: 100%;
+    grid-template-rows: auto auto;
+    align-self: start;
+    height: auto;
     scroll-snap-align: start;
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
 }
@@ -4191,6 +4192,7 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .product-info {
+        display: block;
         min-height: 0;
         padding: 8px;
     }
@@ -4228,6 +4230,11 @@ textarea {
         grid-template-columns: 36px minmax(0, 1fr) 36px;
         margin-top: 7px;
         gap: 5px;
+    }
+
+    .redesigned-home .home-product-rail .product-card {
+        display: block;
+        height: auto;
     }
 
     .redesigned-home .home-product-rail .card-actions .button {
