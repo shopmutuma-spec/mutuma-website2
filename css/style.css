@@ -3727,6 +3727,14 @@ textarea {
     margin-top: clamp(4px, 1.5vw, 18px);
 }
 
+.redesigned-home #trending {
+    padding-bottom: clamp(18px, 2.4vw, 34px);
+}
+
+.redesigned-home #categories {
+    padding-top: clamp(16px, 2.2vw, 30px);
+}
+
 .redesigned-home .section-head {
     align-items: end;
 }
