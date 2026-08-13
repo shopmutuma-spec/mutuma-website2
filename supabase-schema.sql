@@ -197,9 +197,9 @@ for each row
 execute function public.set_updated_at();
 
 insert into public.store_offers (name, discount_percent, scope, enabled)
-select '30% off everything', 30, 'all', true
+select '25% off everything', 25, 'all', true
 where not exists (
-    select 1 from public.store_offers where name = '30% off everything'
+    select 1 from public.store_offers where name = '25% off everything'
 );
 
 drop policy if exists "No public analytics reads" on public.analytics_events;

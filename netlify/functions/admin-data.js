@@ -77,15 +77,16 @@ function cleanText(value, fallback = "") {
 
 function normalizeOffer(offer) {
     if (!offer) return offer;
-    const isLegacyStorewideSale = Number(offer.discount_percent) === 45
-        && String(offer.name || "").toLowerCase().includes("45% off everything");
+    const offerName = String(offer.name || "").toLowerCase();
+    const isLegacyStorewideSale = [30, 45].includes(Number(offer.discount_percent))
+        && (offerName.includes("30% off everything") || offerName.includes("45% off everything"));
 
     if (!isLegacyStorewideSale) return offer;
 
     return {
         ...offer,
-        name: "30% off everything",
-        discount_percent: 30
+        name: "25% off everything",
+        discount_percent: 25
     };
 }
 
@@ -260,7 +261,7 @@ function buildDailySeries(events, orders, from, to) {
             addToCart: 0,
             checkoutStarts: 0,
             purchases: 0,
-            revenue: 0
+        revenue: 0
         });
         cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
@@ -283,6 +284,7 @@ function buildDailySeries(events, orders, from, to) {
         if (!bucket) return;
         const total = orderTotal(order);
         bucket.purchases += 1;
+        bucket.orders += 1;
         bucket.revenue += total;
     });
 
@@ -1040,7 +1042,7 @@ export async function handler(event) {
                 price: product.price,
                 oldPrice: product.oldPrice || null,
                 image: product.images?.[0] || "",
-                stock: product.stock || null
+                stock: product.stock ?? null
             })),
             analyticsEvents: currentRows.events.slice(0, 250)
         });

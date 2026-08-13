@@ -1,8 +1,8 @@
-import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260806e";
-import { initCurrency } from "./currency.js?v=20260806e";
-import { addToCart } from "./store.js?v=20260806e";
-import { aboutMutuma, roomEdit } from "./site-content.js?v=20260806e";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260806e";
+import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260813a";
+import { initCurrency } from "./currency.js?v=20260813a";
+import { addToCart } from "./store.js?v=20260813a";
+import { aboutMutuma, roomEdit } from "./site-content.js?v=20260813a";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260813a";
 
 boot().catch((error) => {
     console.error("MUTUMA homepage failed to start.", error);
@@ -208,7 +208,7 @@ if (newsletterForm) {
         try {
             await submitEmailSignup(email, "homepage-newsletter");
             localStorage.setItem("mutuma.emailSubscribed", "true");
-            newsletterForm.innerHTML = "<strong>You're on the list. Buy one, get one free is live across MUTUMA.</strong>";
+            newsletterForm.innerHTML = "<strong>You're on the list. 25% off is live across MUTUMA.</strong>";
         } catch (error) {
             notify(error.message);
             button.disabled = false;

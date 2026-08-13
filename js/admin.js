@@ -1,6 +1,6 @@
-import { initCurrency } from "./currency.js?v=20260806e";
-import { initBaseLayout } from "./ui.js?v=20260806e";
-import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260806e";
+import { initCurrency } from "./currency.js?v=20260813a";
+import { initBaseLayout } from "./ui.js?v=20260813a";
+import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260813a";
 
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -10,6 +10,8 @@ const form = document.querySelector("[data-admin-login]");
 const message = document.querySelector("[data-admin-message]");
 const panel = document.querySelector("[data-admin-panel]");
 const layout = document.querySelector(".admin-layout");
+let currentAdminUser = null;
+let commandOpen = false;
 
 let adminData = null;
 let adminState = {
@@ -22,6 +24,28 @@ let adminState = {
     product: "",
     category: ""
 };
+
+const adminRoutes = [
+    { path: "overview", label: "Overview", group: "Command" },
+    { path: "analytics", label: "Analytics", group: "Command" },
+    { path: "live", label: "Live Activity", group: "Command" },
+    { path: "orders", label: "Orders", group: "Commerce" },
+    { path: "customers", label: "Customers", group: "Commerce" },
+    { path: "products", label: "Products", group: "Commerce" },
+    { path: "inventory", label: "Inventory", group: "Commerce" },
+    { path: "marketing", label: "Marketing", group: "Growth" },
+    { path: "acquisition", label: "Acquisition", group: "Growth" },
+    { path: "conversion", label: "Conversion", group: "Growth" },
+    { path: "geography", label: "Geography", group: "Growth" },
+    { path: "search", label: "Search", group: "Growth" },
+    { path: "discounts", label: "Discounts", group: "Operations" },
+    { path: "abandoned-carts", label: "Abandoned Carts", group: "Operations" },
+    { path: "finance", label: "Finance", group: "Operations" },
+    { path: "reports", label: "Reports", group: "Operations" },
+    { path: "site-health", label: "Site Health", group: "System" },
+    { path: "activity", label: "Activity Log", group: "System" },
+    { path: "settings", label: "Settings", group: "System" }
+];
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -86,6 +110,40 @@ function downloadCsv(filename, headers, rows) {
 
 function metricCard(label, value) {
     return `<span><strong>${escapeHtml(value)}</strong>${escapeHtml(label)}</span>`;
+}
+
+function adminEmpty(title, detail) {
+    return `
+        <div class="empty-state compact admin-empty">
+            <strong>${escapeHtml(title)}</strong>
+            <span>${escapeHtml(detail)}</span>
+        </div>
+    `;
+}
+
+function pageTitle(title, subtitle = "") {
+    return `
+        <div class="admin-page-title">
+            <div>
+                <span class="eyebrow">MUTUMA Command Centre</span>
+                <h1>${escapeHtml(title)}</h1>
+                ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
+            </div>
+        </div>
+    `;
+}
+
+function adminStatStrip(data) {
+    return `
+        <div class="admin-stats">
+            ${metricCard("products", data.counts.products)}
+            ${metricCard("orders", data.counts.orders)}
+            ${metricCard("subscribers", data.counts.subscribers)}
+            ${metricCard("visitors", data.counts.visitors)}
+            ${metricCard("page views", data.counts.pageViews)}
+            ${metricCard("revenue", money(data.metrics.grossRevenue || 0, ANALYTICS_CURRENCY))}
+        </div>
+    `;
 }
 
 function listMetric(title, rows) {
@@ -210,6 +268,146 @@ function kpiGrid(data) {
             `).join("")}
         </section>
     `;
+}
+
+function adminShell(user, activeRoute, content) {
+    const groups = groupedRoutes();
+    const active = routeMeta(activeRoute);
+    const alerts = adminData?.metrics?.alerts || [];
+    const unread = alerts.length;
+
+    return `
+        <div class="admin-app-shell" data-admin-shell>
+            <aside class="admin-sidebar">
+                <a class="admin-brand" href="${routeHref("overview")}">
+                    <span>MUTUMA</span>
+                    <small>Command Centre</small>
+                </a>
+                <nav class="admin-sidebar-nav" aria-label="Admin navigation">
+                    ${Object.entries(groups).map(([group, routes]) => `
+                        <div>
+                            <strong>${escapeHtml(group)}</strong>
+                            ${routes.map((route) => `
+                                <a href="${routeHref(route.path)}" class="${route.path === activeRoute ? "active" : ""}" ${route.path === activeRoute ? 'aria-current="page"' : ""}>
+                                    ${escapeHtml(route.label)}
+                                </a>
+                            `).join("")}
+                        </div>
+                    `).join("")}
+                </nav>
+            </aside>
+            <section class="admin-workspace">
+                <header class="admin-topbar">
+                    <button class="icon-button admin-nav-toggle" type="button" data-admin-nav-toggle aria-label="Toggle admin navigation">Menu</button>
+                    <div class="admin-breadcrumb">
+                        <span>Admin</span>
+                        <b>${escapeHtml(active.label)}</b>
+                    </div>
+                    <button class="admin-global-search" type="button" data-command-open>
+                        Search orders, products, customers
+                        <kbd>Ctrl K</kbd>
+                    </button>
+                    <div class="admin-topbar-actions">
+                        <button class="icon-button" type="button" data-refresh-admin aria-label="Refresh admin">↻</button>
+                        <a class="icon-button" href="${routeHref("site-health")}" aria-label="Notifications">${unread}</a>
+                        <a class="button secondary" href="account.html">${escapeHtml(user.email)}</a>
+                    </div>
+                </header>
+                <div class="admin-mobile-tabs" aria-label="Admin quick navigation">
+                    ${adminRoutes.slice(0, 8).map((route) => `
+                        <a href="${routeHref(route.path)}" class="${route.path === activeRoute ? "active" : ""}">${escapeHtml(route.label)}</a>
+                    `).join("")}
+                </div>
+                <section class="admin-page" data-admin-page>
+                    ${content}
+                </section>
+            </section>
+            ${commandPalette(activeRoute)}
+        </div>
+    `;
+}
+
+function commandPalette(activeRoute) {
+    return `
+        <div class="admin-command-palette ${commandOpen ? "open" : ""}" data-command-palette ${commandOpen ? "" : "hidden"}>
+            <div class="admin-command-panel" role="dialog" aria-modal="true" aria-label="Admin command palette">
+                <div class="admin-command-input">
+                    <span>K</span>
+                    <input data-command-input placeholder="Search pages, products, orders, customers" autocomplete="off">
+                    <button type="button" data-command-close aria-label="Close command palette">Close</button>
+                </div>
+                <div class="admin-command-results" data-command-results>
+                    ${commandResults("", activeRoute)}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function commandResults(query = "", activeRoute = currentRoute()) {
+    const search = query.trim().toLowerCase();
+    const commands = [
+        ...adminRoutes.map((route) => ({
+            type: "Page",
+            label: route.label,
+            detail: route.group,
+            href: routeHref(route.path)
+        })),
+        ...(adminData?.products || []).slice(0, 40).map((product) => ({
+            type: "Product",
+            label: product.name,
+            detail: product.category,
+            href: `${routeHref("products")}?product=${encodeURIComponent(product.id)}`
+        })),
+        ...(adminData?.orders || []).slice(0, 40).map((order) => ({
+            type: "Order",
+            label: order.order_number,
+            detail: order.email,
+            href: `${routeHref("orders")}?order=${encodeURIComponent(order.order_number)}`
+        })),
+        ...(adminData?.customers || []).slice(0, 40).map((customer) => ({
+            type: "Customer",
+            label: customer.email,
+            detail: `${customer.orders} orders`,
+            href: routeHref("customers")
+        }))
+    ];
+    const filtered = commands.filter((item) => !search || `${item.type} ${item.label} ${item.detail}`.toLowerCase().includes(search)).slice(0, 12);
+
+    if (!filtered.length) return adminEmpty("No matching command", "Try an order number, product name, customer email or admin page.");
+
+    return filtered.map((item) => `
+        <a href="${item.href}" data-command-result class="${item.href.includes(`#/${activeRoute}`) ? "active" : ""}">
+            <span>${escapeHtml(item.type)}</span>
+            <strong>${escapeHtml(item.label)}</strong>
+            <small>${escapeHtml(item.detail)}</small>
+        </a>
+    `).join("");
+}
+
+function currentRoute() {
+    const route = (String(location.hash || "#/overview").replace(/^#\/?/, "") || "overview").split("?")[0];
+    return adminRoutes.some((item) => item.path === route) ? route : "overview";
+}
+
+function navigateAdmin(path) {
+    location.hash = `/${path}`;
+}
+
+function routeMeta(route = currentRoute()) {
+    return adminRoutes.find((item) => item.path === route) || adminRoutes[0];
+}
+
+function routeHref(path) {
+    return `admin.html#/${path}`;
+}
+
+function groupedRoutes() {
+    return adminRoutes.reduce((groups, route) => {
+        groups[route.group] = groups[route.group] || [];
+        groups[route.group].push(route);
+        return groups;
+    }, {});
 }
 
 function insightCards(insights) {
@@ -765,8 +963,8 @@ function offersPanel(data) {
             </div>
             <form class="admin-update-form" data-offer-form>
                 <input type="hidden" name="id" value="${escapeHtml(activeOffer.id || "")}">
-                <label>Offer name<input name="name" value="${escapeHtml(activeOffer.name || "30% off everything")}" required></label>
-                <label>Discount percent<input name="discountPercent" type="number" min="0" max="90" step="1" value="${escapeHtml(activeOffer.discount_percent || 30)}" required></label>
+                <label>Offer name<input name="name" value="${escapeHtml(activeOffer.name || "25% off everything")}" required></label>
+                <label>Discount percent<input name="discountPercent" type="number" min="0" max="90" step="1" value="${escapeHtml(activeOffer.discount_percent || 25)}" required></label>
                 <label>Start date<input name="startsAt" type="datetime-local"></label>
                 <label>End date<input name="endsAt" type="datetime-local"></label>
                 <label class="check-row"><input name="enabled" type="checkbox" ${activeOffer.enabled !== false ? "checked" : ""}> Active on website</label>
@@ -965,67 +1163,359 @@ function orderDetail(order) {
     `;
 }
 
-function renderAdmin(user, selectedOrderNumber = "") {
-    const data = adminData;
-    const selectedOrder = data.orders.find((order) => order.order_number === selectedOrderNumber) || data.orders[0];
-
-    panel.innerHTML = `
-        <div class="admin-head">
-            <div>
-                <span class="eyebrow">Signed in as</span>
-                <h2>${escapeHtml(user.email)}</h2>
-            </div>
-            <div class="split-actions">
-                <button class="button secondary" data-export-subscribers>Email CSV</button>
-                <button class="button secondary" data-export-product-analytics>Product Analytics CSV</button>
-                <a class="button secondary" href="account.html">Account</a>
-            </div>
-        </div>
+function overviewPage(data) {
+    return `
+        ${pageTitle("Executive Overview", "A fast read on sales, traffic, conversion and operational risk.")}
         ${analyticsToolbar(data)}
         ${kpiGrid(data)}
-        <div class="admin-stats">
-            ${metricCard("products", data.counts.products)}
-            ${metricCard("orders", data.counts.orders)}
-            ${metricCard("subscribers", data.counts.subscribers)}
-            ${metricCard("visitors / 30 days", data.counts.visitors)}
-            ${metricCard("page views / 30 days", data.counts.pageViews)}
-            ${metricCard("revenue", money(data.metrics.grossRevenue || 0, ANALYTICS_CURRENCY))}
+        ${adminStatStrip(data)}
+        ${analyticsExecutiveStrip(data)}
+        <div class="admin-dashboard-grid">
+            ${lineChart("Revenue, Orders and Visitors", data.metrics.dailySeries || [], [
+                { key: "revenue", label: "Revenue", className: "chart-line-primary" },
+                { key: "orders", label: "Orders", className: "chart-line-secondary" },
+                { key: "visitors", label: "Visitors", className: "chart-line-tertiary" }
+            ], (value) => Number(value || 0).toFixed(0))}
+            ${insightCards(data.metrics.insights || [])}
+            ${alertCentre(data.metrics.alerts || [])}
+            ${productRankingsPanel(data)}
+            <section class="admin-card">
+                <div class="admin-card-head">
+                    <div><span class="eyebrow">Orders</span><h3>Recent Orders</h3></div>
+                    <a href="${routeHref("orders")}">View all</a>
+                </div>
+                ${orderRows((data.orders || []).slice(0, 8))}
+            </section>
+            <section class="admin-card">
+                <div class="admin-card-head">
+                    <div><span class="eyebrow">Traffic</span><h3>Sources</h3></div>
+                    <a href="${routeHref("acquisition")}">Analyse</a>
+                </div>
+                ${sourceTable(data.metrics.sourcePerformance || [])}
+            </section>
         </div>
-        <section class="admin-card">
-            <h3>Store Signals</h3>
-            <div class="admin-mini-list admin-signal-grid">
-                <div><span>Average order value</span><strong>${money(data.metrics.averageOrderValue || 0, ANALYTICS_CURRENCY)}</strong></div>
-                <div><span>Product views</span><strong>${data.metrics.productViews || 0}</strong></div>
-                <div><span>Checkout starts</span><strong>${data.metrics.checkoutStarts || 0}</strong></div>
-                <div><span>Searches</span><strong>${data.metrics.searches || 0}</strong></div>
-            </div>
-        </section>
-        <div class="admin-management-grid">
-            ${offersPanel(data)}
-            ${productManagerPanel()}
-        </div>
+    `;
+}
+
+function analyticsPage(data) {
+    return `
+        ${pageTitle("Analytics Workspace", "Revenue, behaviour, funnel, product demand and data quality in one serious workspace.")}
+        ${analyticsToolbar(data)}
+        ${kpiGrid(data)}
         ${analyticsCommandCentre(data)}
+    `;
+}
+
+function livePage(data) {
+    const live = data.metrics.live || {};
+    return `
+        ${pageTitle("Live Activity", "Near real-time activity from tracked customer events.")}
+        <div class="admin-live-grid">
+            ${signalCard("Active visitors", live.visitors || 0, "last 10 minutes")}
+            ${signalCard("Recent events", live.activity?.length || 0, "latest tracked actions")}
+            ${signalCard("Checkout starts", data.metrics.checkoutStarts || 0, "selected range")}
+            ${signalCard("Purchases", data.metrics.orders || 0, "selected range")}
+        </div>
+        ${liveActivityPanel(data)}
+        ${barChart("Products currently getting attention", data.metrics.topProducts || [])}
+    `;
+}
+
+function ordersPage(data, selectedOrderNumber = "") {
+    const selectedOrder = data.orders.find((order) => order.order_number === selectedOrderNumber) || data.orders[0];
+    return `
+        ${pageTitle("Orders", "Search, inspect and update real Stripe-synced orders.")}
         <div class="admin-split">
-            <section>
-                <h3>Recent Orders</h3>
+            <section class="admin-card">
+                <div class="admin-card-head">
+                    <div><span class="eyebrow">Orders</span><h3>Order Queue</h3></div>
+                    <button class="button secondary" data-export-report>Export Report</button>
+                </div>
                 <input class="admin-search" data-admin-search="orders" placeholder="Search orders by email, number or status">
-                ${orderSection(data.orders)}
+                ${orderSection(data.orders || [])}
             </section>
             ${orderDetail(selectedOrder)}
         </div>
-        <section>
-            <h3>Customers</h3>
+    `;
+}
+
+function customersPage(data) {
+    return `
+        ${pageTitle("Customers", "Customer value, repeat behaviour and email list growth using real order/subscriber data.")}
+        <div class="admin-live-grid">
+            ${signalCard("Customers", data.customers?.length || 0, "known emails")}
+            ${signalCard("New customers", data.metrics.newCustomers || 0, "selected range")}
+            ${signalCard("Repeat customers", data.metrics.repeatCustomers || 0, "selected range")}
+            ${signalCard("Returning rate", percent(data.metrics.returningCustomerRate || 0), "repeat customers / customers")}
+        </div>
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div><span class="eyebrow">Customers</span><h3>Customer Intelligence</h3></div>
+                <button class="button secondary" data-export-subscribers>Email CSV</button>
+            </div>
             ${customerRows(data.customers || [])}
         </section>
-        <section>
-            <h3>Product Catalogue</h3>
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div><span class="eyebrow">Email</span><h3>Email List</h3></div>
+            </div>
+            ${subscriberRows(data.subscribers || [])}
+        </section>
+    `;
+}
+
+function productsPage(data) {
+    return `
+        ${pageTitle("Products", "Manage the catalogue and understand which room finds are actually performing.")}
+        <div class="admin-management-grid">
+            ${productManagerPanel()}
+            ${productRankingsPanel(data)}
+        </div>
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div><span class="eyebrow">Catalogue</span><h3>Products</h3></div>
+                <button class="button secondary" data-export-product-analytics>Product Analytics CSV</button>
+            </div>
             <input class="admin-search" data-admin-search="products" placeholder="Search products by name or category">
             <div data-admin-products>${productRows(data.products || [])}</div>
         </section>
-        <section>
-            <h3>Email List</h3>
-            ${subscriberRows(data.subscribers)}
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div><span class="eyebrow">Performance</span><h3>Product Analytics</h3></div>
+            </div>
+            ${productPerformanceTable(data.metrics.productPerformance || [])}
         </section>
+    `;
+}
+
+function inventoryPage(data) {
+    const rows = (data.products || []).filter((product) => product.stock !== null && product.stock !== undefined);
+    const lowStock = rows.filter((product) => Number(product.stock) <= 3);
+    return `
+        ${pageTitle("Inventory", "Stock visibility based only on products with real stock values recorded.")}
+        <div class="admin-live-grid">
+            ${signalCard("Tracked SKUs", rows.length, "products with stock data")}
+            ${signalCard("Low stock", lowStock.length, "stock at 3 or below")}
+            ${signalCard("Untracked", (data.products || []).length - rows.length, "needs stock data")}
+            ${signalCard("Units sold", data.metrics.itemsSold || 0, "selected range")}
+        </div>
+        <section class="admin-card">
+            <div class="admin-card-head"><div><span class="eyebrow">Inventory</span><h3>Stock Watch</h3></div></div>
+            ${rows.length ? productRows(rows.sort((a, b) => Number(a.stock || 0) - Number(b.stock || 0))) : adminEmpty("No inventory data yet", "Add stock values to products before inventory alerts can be reliable.")}
+        </section>
+    `;
+}
+
+function acquisitionPage(data) {
+    return `
+        ${pageTitle("Traffic & Acquisition", "Which channels bring visitors, product interest, carts and revenue.")}
+        ${analyticsToolbar(data)}
+        <div class="admin-analytics-grid">
+            <section class="admin-card"><div class="admin-card-head"><div><span class="eyebrow">Sources</span><h3>Source Performance</h3></div></div>${sourceTable(data.metrics.sourcePerformance || [])}</section>
+            ${campaignLinkGenerator(data)}
+            ${barChart("Campaigns", data.metrics.campaignPerformance || [])}
+            ${barChart("Landing Pages", data.metrics.topPages || [])}
+        </div>
+    `;
+}
+
+function conversionPage(data) {
+    return `
+        ${pageTitle("Conversion", "Find exactly where shoppers move forward or drop off.")}
+        ${analyticsToolbar(data)}
+        ${funnelChart(data.metrics.funnel || [])}
+        ${conversionLeversPanel(data)}
+        ${lineChart("Conversion Over Time", data.metrics.dailySeries || [], [
+            { key: "productViews", label: "Views", className: "chart-line-primary" },
+            { key: "addToCart", label: "Cart adds", className: "chart-line-secondary" },
+            { key: "checkoutStarts", label: "Checkout", className: "chart-line-tertiary" }
+        ])}
+    `;
+}
+
+function geographyPage(data) {
+    return `
+        ${pageTitle("Geography", "Country-level demand from privacy-conscious analytics events.")}
+        ${analyticsToolbar(data)}
+        <div class="admin-analytics-grid">
+            ${barChart("Countries", data.metrics.topCountries || [])}
+            ${barChart("Devices by filtered geography", data.metrics.deviceSplit || [])}
+        </div>
+        ${adminEmpty("Map not connected yet", "Country analytics are available. A map can be added when a lightweight mapping library or geographic asset is approved.")}
+    `;
+}
+
+function searchPage(data) {
+    return `
+        ${pageTitle("Search Analytics", "What customers are trying to find on MUTUMA.")}
+        ${analyticsToolbar(data)}
+        <div class="admin-live-grid">
+            ${signalCard("Searches", data.metrics.searches || 0, "selected range")}
+            ${signalCard("Top query", data.metrics.topSearches?.[0]?.label || "No data yet", "tracked website search")}
+            ${signalCard("Zero-result searches", (data.metrics.topSearches || []).reduce((sum, row) => sum + Number(row.zeroResults || 0), 0), "needs product/category action")}
+            ${signalCard("Search terms", data.metrics.topSearches?.length || 0, "unique tracked queries")}
+        </div>
+        ${barChart("Top Searches", data.metrics.topSearches || [])}
+    `;
+}
+
+function discountsPage(data) {
+    return `
+        ${pageTitle("Discounts", "Control storewide offers and measure promotion behaviour.")}
+        ${offersPanel(data)}
+        ${adminEmpty("Discount analytics need more order metadata", "Stripe coupon/code usage will appear here after discount identifiers are synced into orders.")}
+    `;
+}
+
+function abandonedCartsPage(data) {
+    return `
+        ${pageTitle("Abandoned Carts", "Understand cart demand that does not reach purchase.")}
+        <div class="admin-live-grid">
+            ${signalCard("Cart adds", data.metrics.cartAdds || 0, "selected range")}
+            ${signalCard("Checkout starts", data.metrics.checkoutStarts || 0, "selected range")}
+            ${signalCard("Abandonment", percent(data.metrics.cartAbandonmentRate || 0), "cart adds not reaching checkout")}
+            ${signalCard("Checkout completion", percent(data.metrics.checkoutCompletionRate || 0), "orders / checkout starts")}
+        </div>
+        ${funnelChart(data.metrics.funnel || [])}
+        ${barChart("Products Commonly Abandoned", (data.metrics.productPerformance || []).filter((product) => product.addToCart && !product.purchases).map((product) => ({ label: product.name, count: product.addToCart })))}
+    `;
+}
+
+function financePage(data) {
+    return `
+        ${pageTitle("Finance", "Revenue visibility without pretending profit exists before true costs and fees are connected.")}
+        <div class="admin-live-grid">
+            ${signalCard("Gross sales", money(data.metrics.grossRevenue || 0, ANALYTICS_CURRENCY), "synced paid orders")}
+            ${signalCard("AOV", money(data.metrics.averageOrderValue || 0, ANALYTICS_CURRENCY), "revenue / orders")}
+            ${signalCard("Refund rate", percent(data.metrics.refundRate || 0), "based on order status")}
+            ${signalCard("Net profit", "Needs data", "costs, fees, shipping")}
+        </div>
+        ${lineChart("Revenue Trend", data.metrics.dailySeries || [], [
+            { key: "revenue", label: "Revenue", className: "chart-line-primary" },
+            { key: "purchases", label: "Purchases", className: "chart-line-secondary" }
+        ], (value) => money(value, ANALYTICS_CURRENCY))}
+        ${dataQualityPanel(data)}
+    `;
+}
+
+function reportsPage(data) {
+    return `
+        ${pageTitle("Reports", "Export operational data without exposing fake or unsupported metrics.")}
+        <div class="admin-management-grid">
+            <section class="admin-card">
+                <h3>Sales Report</h3>
+                <p class="muted">Exports KPI values for the selected period.</p>
+                <button class="button primary" data-export-report>Export Sales CSV</button>
+            </section>
+            <section class="admin-card">
+                <h3>Product Report</h3>
+                <p class="muted">Exports product views, carts, checkout starts, purchases and revenue.</p>
+                <button class="button primary" data-export-product-analytics>Export Product CSV</button>
+            </section>
+            <section class="admin-card">
+                <h3>Email Report</h3>
+                <p class="muted">Exports the subscriber/customer email list.</p>
+                <button class="button primary" data-export-subscribers>Export Email CSV</button>
+            </section>
+        </div>
+    `;
+}
+
+function siteHealthPage(data) {
+    return `
+        ${pageTitle("Site Health", "Operational diagnostics for tracking, catalogue and checkout readiness.")}
+        ${diagnosticsPanel(data.metrics.diagnostics || [])}
+        ${dataQualityPanel(data)}
+        ${adminEmpty("External uptime is not connected", "Netlify uptime/deploy APIs are not connected in this project yet, so uptime is not shown.")}
+    `;
+}
+
+function activityPage(data) {
+    return `
+        ${pageTitle("Activity Log", "Real tracked business activity. Admin audit events can be added when the audit_log table is connected.")}
+        ${liveActivityPanel(data)}
+        ${adminEmpty("Admin audit log not connected yet", "Create an audit_log table and write admin mutations into it to track product edits, order status updates and settings changes.")}
+    `;
+}
+
+function settingsPage(data, user) {
+    return `
+        ${pageTitle("Settings", "Store, analytics, security and integration status.")}
+        <div class="admin-management-grid">
+            <section class="admin-card">
+                <h3>Store</h3>
+                <div class="admin-mini-list">
+                    <div><span>Brand</span><strong>MUTUMA</strong></div>
+                    <div><span>Storefront base currency</span><strong>USD</strong></div>
+                    <div><span>Analytics currency</span><strong>${ANALYTICS_CURRENCY}</strong></div>
+                    <div><span>Business timezone</span><strong>Europe/London</strong></div>
+                </div>
+            </section>
+            <section class="admin-card">
+                <h3>Security</h3>
+                <div class="admin-mini-list">
+                    <div><span>Signed in as</span><strong>${escapeHtml(user.email)}</strong></div>
+                    <div><span>Admin APIs</span><strong>Protected by Supabase auth</strong></div>
+                    <div><span>Stripe secret key</span><strong>Server-side only</strong></div>
+                </div>
+            </section>
+            <section class="admin-card">
+                <h3>Integrations</h3>
+                <div class="admin-mini-list">
+                    <div><span>Stripe Checkout</span><strong>Connected through Netlify functions</strong></div>
+                    <div><span>Supabase</span><strong>Auth, orders, subscribers, analytics</strong></div>
+                    <div><span>Ad spend</span><strong>Not connected</strong></div>
+                </div>
+            </section>
+        </div>
+    `;
+}
+
+function marketingPage(data) {
+    return `
+        ${pageTitle("Marketing", "Campaign links, list growth and channel performance.")}
+        <div class="admin-analytics-grid">
+            ${campaignLinkGenerator(data)}
+            ${barChart("Traffic Sources", data.metrics.sourcePerformance || [], "sessions")}
+            <section class="admin-card">
+                <h3>Email List</h3>
+                ${subscriberRows(data.subscribers || [])}
+            </section>
+            ${adminEmpty("Campaign cost not connected", "ROAS and CAC need ad spend data from TikTok, Meta, Google or manual campaign costs.")}
+        </div>
+    `;
+}
+
+function routeContent(user, selectedOrderNumber = "") {
+    const data = adminData;
+    const route = currentRoute();
+
+    if (route === "analytics") return analyticsPage(data);
+    if (route === "live") return livePage(data);
+    if (route === "orders") return ordersPage(data, selectedOrderNumber);
+    if (route === "customers") return customersPage(data);
+    if (route === "products") return productsPage(data);
+    if (route === "inventory") return inventoryPage(data);
+    if (route === "marketing") return marketingPage(data);
+    if (route === "acquisition") return acquisitionPage(data);
+    if (route === "conversion") return conversionPage(data);
+    if (route === "geography") return geographyPage(data);
+    if (route === "search") return searchPage(data);
+    if (route === "discounts") return discountsPage(data);
+    if (route === "abandoned-carts") return abandonedCartsPage(data);
+    if (route === "finance") return financePage(data);
+    if (route === "reports") return reportsPage(data);
+    if (route === "site-health") return siteHealthPage(data);
+    if (route === "activity") return activityPage(data);
+    if (route === "settings") return settingsPage(data, user);
+    return overviewPage(data);
+}
+
+function renderAdmin(user, selectedOrderNumber = "") {
+    const content = routeContent(user, selectedOrderNumber);
+
+    panel.innerHTML = `
+        ${adminShell(user, currentRoute(), content)}
     `;
 }
 
@@ -1041,6 +1531,7 @@ async function loadAdmin(options = {}) {
     const silent = Boolean(options.silent);
     const user = await getCurrentUser().catch(() => null);
     if (!user) {
+        currentAdminUser = null;
         layout?.classList.remove("is-signed-in");
         form.hidden = false;
         panel.hidden = true;
@@ -1048,6 +1539,7 @@ async function loadAdmin(options = {}) {
     }
 
     try {
+        currentAdminUser = user;
         if (!silent) message.textContent = "Loading admin data...";
         adminData = await adminFetch(adminDataUrl());
         form.hidden = true;
@@ -1061,6 +1553,23 @@ async function loadAdmin(options = {}) {
         panel.hidden = true;
         if (!silent) message.textContent = error.message;
     }
+}
+
+function rerenderAdmin(selectedOrderNumber = "") {
+    if (currentAdminUser && adminData) {
+        renderAdmin(currentAdminUser, selectedOrderNumber);
+    }
+}
+
+function openCommandPalette() {
+    commandOpen = true;
+    rerenderAdmin();
+    window.setTimeout(() => panel.querySelector("[data-command-input]")?.focus(), 0);
+}
+
+function closeCommandPalette() {
+    commandOpen = false;
+    rerenderAdmin();
 }
 
 async function saveOrder(formElement) {
@@ -1178,7 +1687,23 @@ form.addEventListener("submit", async (event) => {
 panel.addEventListener("click", (event) => {
     const row = event.target.closest("[data-order-row]");
     if (row && adminData) {
-        getCurrentUser().then((user) => renderAdmin(user, row.dataset.orderRow));
+        renderAdmin(currentAdminUser, row.dataset.orderRow);
+    }
+
+    if (event.target.closest("[data-admin-nav-toggle]")) {
+        panel.querySelector("[data-admin-shell]")?.classList.toggle("nav-open");
+    }
+
+    if (event.target.closest("[data-command-open]")) {
+        openCommandPalette();
+    }
+
+    if (event.target.closest("[data-command-close]") || event.target.classList.contains("admin-command-palette")) {
+        closeCommandPalette();
+    }
+
+    if (event.target.closest("[data-command-result]")) {
+        commandOpen = false;
     }
 
     if (event.target.closest("[data-refresh-admin]")) {
@@ -1235,6 +1760,13 @@ panel.addEventListener("click", (event) => {
 });
 
 panel.addEventListener("input", (event) => {
+    const commandInput = event.target.closest("[data-command-input]");
+    if (commandInput) {
+        const results = panel.querySelector("[data-command-results]");
+        if (results) results.innerHTML = commandResults(commandInput.value);
+        return;
+    }
+
     const search = event.target.closest("[data-admin-search]");
     if (!search || !adminData) return;
 
@@ -1278,6 +1810,22 @@ panel.addEventListener("submit", (event) => {
 });
 
 loadAdmin();
+
+window.addEventListener("hashchange", () => rerenderAdmin());
+
+window.addEventListener("keydown", (event) => {
+    const isCommandShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";
+    if (isCommandShortcut) {
+        event.preventDefault();
+        if (panel.hidden) return;
+        openCommandPalette();
+    }
+
+    if (event.key === "Escape" && commandOpen) {
+        event.preventDefault();
+        closeCommandPalette();
+    }
+});
 
 setInterval(() => {
     if (!panel.hidden && document.visibilityState === "visible") {
