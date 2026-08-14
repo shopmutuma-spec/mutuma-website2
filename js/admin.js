@@ -14,6 +14,7 @@ let currentAdminUser = null;
 let commandOpen = false;
 
 let adminData = null;
+let adminHealth = null;
 let adminState = {
     days: "30",
     compare: "previous_period",
@@ -1424,9 +1425,41 @@ function reportsPage(data) {
 function siteHealthPage(data) {
     return `
         ${pageTitle("Site Health", "Operational diagnostics for tracking, catalogue and checkout readiness.")}
+        ${healthStatusPanel()}
         ${diagnosticsPanel(data.metrics.diagnostics || [])}
         ${dataQualityPanel(data)}
         ${adminEmpty("External uptime is not connected", "Netlify uptime/deploy APIs are not connected in this project yet, so uptime is not shown.")}
+    `;
+}
+
+function healthStatusPanel() {
+    const checks = adminHealth?.checks || {};
+    const rows = [
+        ["Supabase", checks.supabase],
+        ["Stripe", checks.stripe],
+        ["Admin Auth", checks.adminAuth]
+    ];
+
+    return `
+        <section class="admin-card">
+            <div class="admin-card-head">
+                <div>
+                    <span class="eyebrow">Runtime</span>
+                    <h3>Backend Health</h3>
+                </div>
+                <button class="button secondary" type="button" data-refresh-health>Check Now</button>
+            </div>
+            <div class="analytics-quality-grid">
+                ${rows.map(([label, check]) => `
+                    <article class="quality-${check?.ok ? "complete" : "unavailable"}">
+                        <span>${escapeHtml(check?.status || "not checked")}</span>
+                        <strong>${escapeHtml(label)}</strong>
+                        <p>${escapeHtml(check?.detail || "Open Site Health to run this check.")}</p>
+                        <small>${adminHealth?.generatedAt ? `checked ${formatDate(adminHealth.generatedAt)}` : "No live check yet"}</small>
+                    </article>
+                `).join("")}
+            </div>
+        </section>
     `;
 }
 
@@ -1532,6 +1565,7 @@ async function loadAdmin(options = {}) {
     const user = await getCurrentUser().catch(() => null);
     if (!user) {
         currentAdminUser = null;
+        adminHealth = null;
         layout?.classList.remove("is-signed-in");
         form.hidden = false;
         panel.hidden = true;
@@ -1546,6 +1580,7 @@ async function loadAdmin(options = {}) {
         panel.hidden = false;
         layout?.classList.add("is-signed-in");
         renderAdmin(user);
+        maybeLoadRouteData();
         message.textContent = "";
     } catch (error) {
         layout?.classList.remove("is-signed-in");
@@ -1555,9 +1590,31 @@ async function loadAdmin(options = {}) {
     }
 }
 
+async function loadAdminHealth() {
+    try {
+        adminHealth = await adminFetch("/.netlify/functions/admin-health");
+    } catch (error) {
+        adminHealth = {
+            ok: false,
+            generatedAt: new Date().toISOString(),
+            checks: {
+                supabase: { ok: false, status: "unavailable", detail: error.message },
+                stripe: { ok: false, status: "unavailable", detail: "Health request failed." },
+                adminAuth: { ok: false, status: "unavailable", detail: "Health request failed." }
+            }
+        };
+    }
+}
+
 function rerenderAdmin(selectedOrderNumber = "") {
     if (currentAdminUser && adminData) {
         renderAdmin(currentAdminUser, selectedOrderNumber);
+    }
+}
+
+function maybeLoadRouteData() {
+    if (currentRoute() === "site-health" && !adminHealth) {
+        loadAdminHealth().then(() => rerenderAdmin());
     }
 }
 
@@ -1710,6 +1767,10 @@ panel.addEventListener("click", (event) => {
         loadAdmin();
     }
 
+    if (event.target.closest("[data-refresh-health]")) {
+        loadAdminHealth().then(() => rerenderAdmin());
+    }
+
     const copyLink = event.target.closest("[data-copy-link]");
     if (copyLink) {
         navigator.clipboard?.writeText(copyLink.dataset.copyLink).then(() => {
@@ -1811,7 +1872,10 @@ panel.addEventListener("submit", (event) => {
 
 loadAdmin();
 
-window.addEventListener("hashchange", () => rerenderAdmin());
+window.addEventListener("hashchange", () => {
+    rerenderAdmin();
+    maybeLoadRouteData();
+});
 
 window.addEventListener("keydown", (event) => {
     const isCommandShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";

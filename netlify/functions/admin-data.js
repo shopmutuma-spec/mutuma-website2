@@ -261,7 +261,8 @@ function buildDailySeries(events, orders, from, to) {
             addToCart: 0,
             checkoutStarts: 0,
             purchases: 0,
-        revenue: 0
+            orders: 0,
+            revenue: 0
         });
         cursor.setUTCDate(cursor.getUTCDate() + 1);
     }

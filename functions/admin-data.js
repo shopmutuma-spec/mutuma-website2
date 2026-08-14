@@ -261,6 +261,7 @@ function buildDailySeries(events, orders, from, to) {
             addToCart: 0,
             checkoutStarts: 0,
             purchases: 0,
+            orders: 0,
             revenue: 0
         });
         cursor.setUTCDate(cursor.getUTCDate() + 1);
@@ -284,6 +285,7 @@ function buildDailySeries(events, orders, from, to) {
         if (!bucket) return;
         const total = orderTotal(order);
         bucket.purchases += 1;
+        bucket.orders += 1;
         bucket.revenue += total;
     });
 
@@ -1041,7 +1043,7 @@ export async function handler(event) {
                 price: product.price,
                 oldPrice: product.oldPrice || null,
                 image: product.images?.[0] || "",
-                stock: product.stock || null
+                stock: product.stock ?? null
             })),
             analyticsEvents: currentRows.events.slice(0, 250)
         });

@@ -165,7 +165,7 @@ function trackClick(event) {
         clickWindow = [];
     }
 
-    if (!target) {
+    if (!target && event.target.closest("main, nav, footer")) {
         trackEvent("dead_click", { path: window.location.pathname });
         return;
     }
