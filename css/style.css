@@ -4788,6 +4788,19 @@ textarea {
         margin-top: 0;
     }
 
+    .in-app-browser .redesigned-home #trending {
+        padding-bottom: 0 !important;
+    }
+
+    .in-app-browser .redesigned-home #categories {
+        padding-top: 0 !important;
+        margin-top: -8px;
+    }
+
+    .in-app-browser .redesigned-home #trending + #categories {
+        transform: translateY(-8px);
+    }
+
     .cinematic-category-grid .category-card {
         min-height: 210px;
     }
