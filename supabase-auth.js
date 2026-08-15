@@ -24,28 +24,41 @@ function oauthRedirectUrl() {
     return url.toString();
 }
 
-function sessionFromHash() {
-    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-    const accessToken = params.get("access_token");
+function authUrlParams() {
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const searchParams = new URLSearchParams(window.location.search);
+    return { hashParams, searchParams };
+}
+
+function firstAuthValue(key) {
+    const { hashParams, searchParams } = authUrlParams();
+    return hashParams.get(key) || searchParams.get(key);
+}
+
+function sessionFromUrl() {
+    const accessToken = firstAuthValue("access_token");
     if (!accessToken) return null;
 
     return {
         access_token: accessToken,
-        refresh_token: params.get("refresh_token"),
-        expires_in: Number(params.get("expires_in") || 0),
-        expires_at: params.get("expires_at") ? Number(params.get("expires_at")) : null,
-        token_type: params.get("token_type") || "bearer",
-        provider_token: params.get("provider_token")
+        refresh_token: firstAuthValue("refresh_token"),
+        expires_in: Number(firstAuthValue("expires_in") || 0),
+        expires_at: firstAuthValue("expires_at") ? Number(firstAuthValue("expires_at")) : null,
+        token_type: firstAuthValue("token_type") || "bearer",
+        provider_token: firstAuthValue("provider_token")
     };
 }
 
 function oauthErrorFromUrl() {
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-    const searchParams = new URLSearchParams(window.location.search);
+    const { hashParams, searchParams } = authUrlParams();
     return hashParams.get("error_description")
         || hashParams.get("error")
         || searchParams.get("error_description")
         || searchParams.get("error");
+}
+
+function oauthCodeFromUrl() {
+    return firstAuthValue("code");
 }
 
 export function getSession() {
@@ -67,8 +80,15 @@ export function completeOAuthRedirect() {
         throw new Error(error);
     }
 
-    const session = sessionFromHash();
-    if (!session) return null;
+    const session = sessionFromUrl();
+    if (!session) {
+        if (oauthCodeFromUrl()) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            throw new Error("Google returned an auth code but not a login session. Check Supabase redirect settings, then try again.");
+        }
+
+        return null;
+    }
 
     saveSession(session);
     window.history.replaceState({}, document.title, window.location.pathname);
