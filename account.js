@@ -1,7 +1,7 @@
 import { initCurrency } from "./currency.js?v=20260813a";
 import { getCart, getWishlist } from "./store.js?v=20260813a";
 import { initBaseLayout, notify } from "./ui.js?v=20260813a";
-import { clearSession, getCurrentUser, signIn, signUp } from "./supabase-auth.js?v=20260813a";
+import { clearSession, completeOAuthRedirect, getCurrentUser, signIn, signInWithGoogle, signUp } from "./supabase-auth.js?v=20260813a";
 
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -9,6 +9,16 @@ initCurrency().catch(() => {});
 const form = document.querySelector("[data-auth-form]");
 const message = document.querySelector("[data-auth-message]");
 const panel = document.querySelector("[data-account-panel]");
+const googleButton = document.querySelector("[data-google-sign-in]");
+
+try {
+    const oauthSession = completeOAuthRedirect();
+    if (oauthSession) {
+        message.textContent = "You're signed in with Google.";
+    }
+} catch (error) {
+    message.textContent = error.message;
+}
 
 async function renderAccount() {
     const user = await getCurrentUser().catch(() => null);
@@ -69,6 +79,18 @@ form.addEventListener("submit", (event) => {
 
 form.querySelector("[data-sign-up]").addEventListener("click", () => {
     handleAuth("signup");
+});
+
+googleButton?.addEventListener("click", async () => {
+    googleButton.disabled = true;
+    message.textContent = "Opening Google...";
+
+    try {
+        await signInWithGoogle();
+    } catch (error) {
+        message.textContent = error.message;
+        googleButton.disabled = false;
+    }
 });
 
 renderAccount();

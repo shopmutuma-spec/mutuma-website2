@@ -1994,6 +1994,56 @@ textarea {
     gap: 10px;
 }
 
+.google-auth-button {
+    width: 100%;
+    display: inline-flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 4px 0 6px;
+}
+
+.google-mark {
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 999px;
+    display: inline-grid;
+    place-items: center;
+    color: #090909;
+    background: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 0.86rem;
+    font-weight: 900;
+}
+
+.auth-divider {
+    position: relative;
+    margin: 10px 0 2px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.auth-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--line);
+}
+
+.auth-divider span {
+    position: relative;
+    z-index: 1;
+    padding-inline: 10px;
+    background: #111111;
+}
+
 .account-stats span,
 .admin-stats span {
     border: 1px solid var(--line);
@@ -4215,6 +4265,10 @@ textarea {
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
 }
 
+.redesigned-home .home-product-rail .product-badges span:first-child {
+    display: inline-flex;
+}
+
 .redesigned-home .home-product-rail .product-image {
     aspect-ratio: 1 / 1;
 }
@@ -4591,7 +4645,7 @@ textarea {
         grid-auto-columns: clamp(182px, 52vw, 218px);
         gap: 10px;
         margin-inline: -12px;
-        padding: 2px 12px 6px;
+        padding: 2px 12px 2px;
         scroll-padding-inline: 12px;
     }
 
@@ -4603,11 +4657,22 @@ textarea {
         top: 8px;
         left: 8px;
         right: 8px;
+        flex-wrap: nowrap;
+        overflow: hidden;
+        pointer-events: none;
     }
 
     .redesigned-home .home-product-rail .product-badges span {
+        display: none;
         padding: 5px 7px;
         font-size: 0.58rem;
+        white-space: nowrap;
+        flex: 0 0 auto;
+        max-width: 100%;
+    }
+
+    .redesigned-home .home-product-rail .product-badges span:first-child {
+        display: inline-flex;
     }
 
     .redesigned-home .home-product-rail .product-info {
@@ -4681,7 +4746,7 @@ textarea {
 
     .in-app-browser .redesigned-home .home-product-rail {
         grid-auto-columns: clamp(178px, 50vw, 210px);
-        padding-bottom: 4px;
+        padding-bottom: 0;
     }
 
     .in-app-browser .redesigned-home .home-product-rail .product-image {
@@ -4715,11 +4780,12 @@ textarea {
 
     .redesigned-home #trending {
         padding-top: 112px;
-        padding-bottom: 4px;
+        padding-bottom: 0;
     }
 
     .redesigned-home #categories {
-        padding-top: 8px;
+        padding-top: 0;
+        margin-top: 0;
     }
 
     .cinematic-category-grid .category-card {

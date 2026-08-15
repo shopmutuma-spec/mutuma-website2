@@ -3794,6 +3794,15 @@ export function productOptions(product) {
 }
 
 export function discountPercent(product) {
+    const activeAllOffer = activeStoreOffers
+        .filter((offer) => offer?.enabled !== false && offer.scope === "all")
+        .sort((first, second) => Number(second.discount_percent || 0) - Number(first.discount_percent || 0))[0]
+        || (storeSettings.fallbackOffer?.enabled ? storeSettings.fallbackOffer : null);
+
+    if (activeAllOffer?.discount_percent) {
+        return Math.round(Number(activeAllOffer.discount_percent));
+    }
+
     if (!product.oldPrice || product.oldPrice <= product.price) return 0;
     return Math.round((1 - product.price / product.oldPrice) * 100);
 }

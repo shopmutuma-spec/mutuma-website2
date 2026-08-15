@@ -21,6 +21,11 @@
         <section class="account-layout container">
             <form class="contact-form" data-auth-form>
                 <h2>Customer account</h2>
+                <button class="button secondary google-auth-button" type="button" data-google-sign-in aria-label="Continue with Google">
+                    <span class="google-mark" aria-hidden="true">G</span>
+                    Continue with Google
+                </button>
+                <div class="auth-divider"><span>or use email</span></div>
                 <label>Email<input type="email" name="email" autocomplete="email" required></label>
                 <label>Password<input type="password" name="password" autocomplete="current-password" minlength="6" required></label>
                 <div class="split-actions">
