@@ -1,8 +1,8 @@
-import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260813a";
-import { initCurrency } from "./currency.js?v=20260813a";
-import { addToCart } from "./store.js?v=20260813a";
-import { aboutMutuma, roomEdit } from "./site-content.js?v=20260813a";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260813a";
+import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260817c";
+import { initCurrency } from "./currency.js?v=20260817c";
+import { addToCart } from "./store.js?v=20260817c";
+import { aboutMutuma, roomEdit } from "./site-content.js?v=20260817c";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260817c";
 
 boot().catch((error) => {
     console.error("MUTUMA homepage failed to start.", error);
@@ -20,6 +20,8 @@ async function boot() {
     renderRoomEdit();
     renderAbout();
     startHeroRotation();
+    bindNewsletterForm();
+}
 
 function threeHourSeed(date = new Date()) {
     return Math.floor(date.getTime() / (3 * 60 * 60 * 1000));
@@ -141,7 +143,7 @@ function renderNewArrivals() {
 
     target.innerHTML = newProducts.map((product) => `
         <a class="arrival-card" href="product.html?id=${product.id}">
-            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" width="700" height="700">
+            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" width="700" height="700" sizes="(max-width: 620px) 48vw, 18vw">
             <span>${product.category}</span>
             <strong>${product.name}</strong>
         </a>
@@ -158,7 +160,7 @@ function renderRoomEdit() {
     target.innerHTML = `
         <div class="room-edit">
             <div class="room-edit-image">
-                <img src="${roomEdit.image}" alt="MUTUMA room setup" loading="lazy" decoding="async" width="1200" height="900">
+                <img src="${roomEdit.image}" alt="MUTUMA room setup" loading="lazy" decoding="async" width="1200" height="900" sizes="(max-width: 780px) 100vw, 48vw">
             </div>
             <div class="room-edit-content">
                 <span class="eyebrow">${roomEdit.eyebrow}</span>
@@ -167,7 +169,7 @@ function renderRoomEdit() {
                 <div class="room-edit-products">
                     ${roomProducts.map((product) => `
                         <a href="product.html?id=${product.id}">
-                            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" width="220" height="220">
+                            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" width="220" height="220" sizes="120px">
                             <span>${product.name}</span>
                         </a>
                     `).join("")}
@@ -196,8 +198,10 @@ function renderAbout() {
     `;
 }
 
-const newsletterForm = document.querySelector("[data-newsletter]");
-if (newsletterForm) {
+function bindNewsletterForm() {
+    const newsletterForm = document.querySelector("[data-newsletter]");
+    if (!newsletterForm) return;
+
     newsletterForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const email = newsletterForm.email.value;
@@ -208,12 +212,11 @@ if (newsletterForm) {
         try {
             await submitEmailSignup(email, "homepage-newsletter");
             localStorage.setItem("mutuma.emailSubscribed", "true");
-            newsletterForm.innerHTML = "<strong>You're on the list. 25% off is live across MUTUMA.</strong>";
+            newsletterForm.innerHTML = "<strong>You're on the list. 30% off is live across MUTUMA.</strong>";
         } catch (error) {
             notify(error.message);
             button.disabled = false;
             button.textContent = "Join";
         }
     });
-}
 }

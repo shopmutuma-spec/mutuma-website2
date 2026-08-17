@@ -1,7 +1,7 @@
-import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260813a";
-import { initCurrency } from "./currency.js?v=20260813a";
-import { trackEvent } from "./analytics.js?v=20260813a";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260813a";
+import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260817c";
+import { initCurrency } from "./currency.js?v=20260817c";
+import { trackEvent } from "./analytics.js?v=20260817c";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260817c";
 
 boot().catch((error) => {
     console.error("MUTUMA shop failed to start.", error);

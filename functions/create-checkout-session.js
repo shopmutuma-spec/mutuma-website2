@@ -113,15 +113,15 @@ function isActiveOffer(offer) {
 function normalizeOffer(offer) {
     if (!offer) return offer;
     const offerName = String(offer.name || "").toLowerCase();
-    const isLegacyStorewideSale = [30, 45].includes(Number(offer.discount_percent))
-        && (offerName.includes("30% off everything") || offerName.includes("45% off everything"));
+    const isLegacyStorewideSale = [25, 30, 45].includes(Number(offer.discount_percent))
+        && (offerName.includes("25% off everything") || offerName.includes("30% off everything") || offerName.includes("45% off everything"));
 
     if (!isLegacyStorewideSale) return offer;
 
     return {
         ...offer,
-        name: "25% off everything",
-        discount_percent: 25
+        name: "30% off everything",
+        discount_percent: 30
     };
 }
 
@@ -356,7 +356,7 @@ export async function handler(event) {
                 item_count: String(cart.reduce((total, item) => total + item.quantity, 0)),
                 room_reward: reward ? `${reward.discountPercent}%` : "0%",
                 room_reward_discount_usd: String(rewardDiscount),
-                active_offer: "25% off everything"
+                active_offer: "30% off everything"
             },
             success_url: `${origin}/cart.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/cart.html?checkout=cancelled`

@@ -399,15 +399,11 @@ async function detectFromServices() {
         }
     }
 
-    for (const service of fallbackServices) {
-        try {
-            return [await runService(service)];
-        } catch (error) {
-            continue;
-        }
+    try {
+        return [await Promise.any(fallbackServices.map(runService))];
+    } catch (error) {
+        return [];
     }
-
-    return [];
 }
 
 async function detectFromTextServices() {

@@ -1,10 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260813a";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260813a";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260813a";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260813a";
-import { trackEvent } from "./analytics.js?v=20260813a";
-import { storeSettings } from "./site-settings.js?v=20260813a";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260813a";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260817c";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260817c";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260817c";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260817c";
+import { trackEvent } from "./analytics.js?v=20260817c";
+import { storeSettings } from "./site-settings.js?v=20260817c";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260817c";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260817c";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -17,7 +18,8 @@ export const icons = {
     cartPlus: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l2 11h11l2-7H7"/><path d="M16 3v6M13 6h6"/></svg>',
     user: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>',
     menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
-    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    google: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.78-.07-1.53-.2-2.23H12v4.22h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.32 2.98-7.52Z"/><path fill="#34A853" d="M12 22c2.7 0 4.97-.9 6.62-2.44l-3.24-2.51c-.9.6-2.04.95-3.38.95-2.6 0-4.8-1.76-5.59-4.12H3.06v2.59A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.41 13.88A6 6 0 0 1 6.1 12c0-.65.11-1.28.31-1.88V7.53H3.06A10 10 0 0 0 2 12c0 1.61.39 3.14 1.06 4.47l3.35-2.59Z"/><path fill="#EA4335" d="M12 6c1.47 0 2.8.51 3.84 1.5l2.88-2.88C16.97 2.99 14.7 2 12 2a10 10 0 0 0-8.94 5.53l3.35 2.59C7.2 7.76 9.4 6 12 6Z"/></svg>'
 };
 
 function syncViewportHeight() {
@@ -28,7 +30,7 @@ function syncViewportHeight() {
     setHeight();
     window.addEventListener("resize", setHeight, { passive: true });
     window.addEventListener("orientationchange", () => window.setTimeout(setHeight, 250), { passive: true });
-    document.documentElement.classList.toggle("in-app-browser", /tiktok|musical_ly|instagram|fbav|fban/i.test(navigator.userAgent));
+    document.documentElement.classList.toggle("in-app-browser", /tiktok|musical_ly|ttwebview|bytedance|aweme|instagram|fbav|fban/i.test(navigator.userAgent));
 }
 
 export function placeholderImage(productName) {
@@ -80,13 +82,13 @@ export function renderHeader() {
         .slice(0, 3);
 
     header.innerHTML = `
-        <div class="sale-ticker" role="note" aria-label="25% off everything right now.">
+        <div class="sale-ticker" role="note" aria-label="30% off everything right now.">
             <div class="sale-ticker-track">
-                <span>25% off everything</span>
+                <span>30% off everything</span>
                 <span>No code needed</span>
                 <span>Limited time only</span>
                 <span>No code needed</span>
-                <span aria-hidden="true">25% off everything</span>
+                <span aria-hidden="true">30% off everything</span>
                 <span aria-hidden="true">No code needed</span>
                 <span aria-hidden="true">Limited time only</span>
                 <span aria-hidden="true">No code needed</span>
@@ -243,13 +245,13 @@ export function renderFooter() {
     `;
 }
 
-export function productCard(product) {
+export function productCard(product, cardOptions = {}) {
     const wished = getWishlist().includes(product.id);
     const options = productOptions(product);
     return `
         <article class="product-card" data-product-card>
             <a class="product-image" href="product.html?id=${product.id}">
-                ${productImage(product.images[0], product.name)}
+                ${productImage(product.images[0], product.name, { eager: cardOptions.eager, sizes: cardOptions.sizes })}
                 <div class="product-badges">${productBadges(product)}</div>
             </a>
             <div class="product-info">
@@ -281,7 +283,18 @@ export function productCard(product) {
 export function renderProductGrid(target, list) {
     const element = typeof target === "string" ? document.querySelector(target) : target;
     if (!element) return;
-    element.innerHTML = list.filter((product) => product.images?.[0]).map(productCard).join("");
+    const isHomeRail = element.classList.contains("home-product-rail");
+    if (isHomeRail) {
+        element.closest(".home-section")?.classList.add("has-product-rail");
+    }
+
+    element.innerHTML = list
+        .filter((product) => product.images?.[0])
+        .map((product, index) => productCard(product, {
+            eager: index < (isHomeRail ? 3 : 4),
+            sizes: isHomeRail ? "(max-width: 620px) 52vw, (max-width: 980px) 34vw, 18vw" : undefined
+        }))
+        .join("");
     bindProductActions(element);
 }
 
@@ -423,7 +436,7 @@ export function renderCartDrawer() {
         <div class="checkout-trust-row">
             <span>Secure Stripe checkout</span>
             <span>Europe & US delivery</span>
-            <span>25% off applied</span>
+            <span>30% off applied</span>
         </div>
         ${upsells.length ? `
             <div class="drawer-recommendations drawer-upsells">
@@ -436,7 +449,7 @@ export function renderCartDrawer() {
                 `).join("")}
             </div>
         ` : ""}
-        <small>25% off is already applied to product prices. No code needed.</small>
+        <small>30% off is already applied to product prices. No code needed.</small>
         <button class="button secondary wide" data-cart-close>Continue Shopping</button>
         <a class="button secondary wide" href="cart.html">View Full Cart</a>
     `;
@@ -651,6 +664,7 @@ export function openSearch() {
     document.addEventListener("keydown", escapeClose);
     document.body.classList.add("menu-open");
 
+    let searchTrackTimer = 0;
     const render = () => {
         const query = normalizeSearch(input.value);
         const matches = products.filter((product) => {
@@ -683,7 +697,10 @@ export function openSearch() {
         `;
 
         if (query.length >= 2) {
-            trackEvent("search_performed", { query, results: matches.length });
+            window.clearTimeout(searchTrackTimer);
+            searchTrackTimer = window.setTimeout(() => {
+                trackEvent("search_performed", { query, results: matches.length });
+            }, 520);
         }
     };
 
@@ -861,9 +878,11 @@ export function initBaseLayout() {
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-            if (entry.isIntersecting) entry.target.classList.add("revealed");
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("revealed");
+            observer.unobserve(entry.target);
         });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.08, rootMargin: "0px 0px -8% 0px" });
 
     document.querySelectorAll("[data-reveal]").forEach((item) => observer.observe(item));
     window.addEventListener("cartchange", updateCounts);
@@ -885,9 +904,12 @@ export function initBaseLayout() {
 
 function initEmailOffer() {
     const OFFER_KEY = "mutuma.emailOfferSeen";
+    const GOOGLE_PROMPT_KEY = "mutuma.googlePromptSeen";
     const SUBSCRIBED_KEY = "mutuma.emailSubscribed";
+    const page = location.pathname.split("/").pop() || "index.html";
+    const skipPage = page === "account.html" || page === "admin.html";
 
-    if (localStorage.getItem(OFFER_KEY) || localStorage.getItem(SUBSCRIBED_KEY)) return;
+    if (skipPage || getSession()?.access_token || localStorage.getItem(GOOGLE_PROMPT_KEY)) return;
 
     window.setTimeout(() => {
         const modal = document.querySelector("[data-modal]");
@@ -897,23 +919,29 @@ function initEmailOffer() {
             <div class="modal offer-modal open" data-offer-modal>
                 <div class="modal-panel offer-panel">
                     <div class="modal-head">
-                        <span class="eyebrow">Current MUTUMA offer</span>
+                        <span class="eyebrow">MUTUMA account</span>
                         <button class="icon-button" data-offer-close aria-label="Close offer">${icons.close}</button>
                     </div>
-                    <h2>25% off everything.</h2>
-                    <p>The sale is already applied across MUTUMA. Join the drop list before you shop for new room edits, restocks and private deals.</p>
+                    <h2>Save your room finds.</h2>
+                    <p>Sign in with Google to keep your wishlist and future order details closer. It only takes a tap.</p>
+                    <button class="google-auth-button google-auth-button-large" type="button" data-google-modal-sign-in>
+                        <span class="google-mark">${icons.google}</span>
+                        Continue with Google
+                    </button>
+                    <div class="auth-divider"><span>or join the drop list</span></div>
                     <form class="offer-form" name="mutuma-email-list" data-offer-form>
                         <input type="hidden" name="form-name" value="mutuma-email-list">
                         <input type="hidden" name="source" value="first-visit-offer">
                         <input type="email" name="email" placeholder="Email address" aria-label="Email address" required>
-                        <button class="button primary">Get Sale Access</button>
+                        <button class="button primary">Join</button>
                     </form>
-                    <small>No code needed. 25% sale prices are already applied across the store.</small>
+                    <small>30% off is already applied. No code needed.</small>
                 </div>
             </div>
         `;
 
         const close = () => {
+            localStorage.setItem(GOOGLE_PROMPT_KEY, "true");
             localStorage.setItem(OFFER_KEY, "true");
             modal.innerHTML = "";
         };
@@ -921,6 +949,18 @@ function initEmailOffer() {
         modal.querySelector("[data-offer-close]").addEventListener("click", close);
         modal.querySelector("[data-offer-modal]").addEventListener("click", (event) => {
             if (event.target.classList.contains("offer-modal")) close();
+        });
+        modal.querySelector("[data-google-modal-sign-in]").addEventListener("click", async (event) => {
+            const button = event.currentTarget;
+            button.disabled = true;
+            localStorage.setItem(GOOGLE_PROMPT_KEY, "true");
+
+            try {
+                await signInWithGoogle();
+            } catch (error) {
+                notify(error.message);
+                button.disabled = false;
+            }
         });
         modal.querySelector("[data-offer-form]").addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -934,16 +974,17 @@ function initEmailOffer() {
             } catch (error) {
                 notify(error.message);
                 button.disabled = false;
-                button.textContent = "Get Sale Access";
+                button.textContent = "Join";
                 return;
             }
 
             localStorage.setItem(SUBSCRIBED_KEY, "true");
             localStorage.setItem(OFFER_KEY, "true");
+            localStorage.setItem(GOOGLE_PROMPT_KEY, "true");
             modal.querySelector(".offer-panel").innerHTML = `
                 <div class="offer-success">
                     <span class="eyebrow">You're on the list</span>
-                    <h2>25% off is live.</h2>
+                    <h2>30% off is live.</h2>
                     <p>No code needed. Sale prices are already applied across MUTUMA.</p>
                     <button class="button primary wide" data-offer-close>Shop Now</button>
                 </div>

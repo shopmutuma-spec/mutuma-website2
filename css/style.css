@@ -1997,23 +1997,49 @@ textarea {
 .google-auth-button {
     width: 100%;
     display: inline-flex;
+    align-items: center;
     justify-content: center;
     gap: 10px;
+    min-height: 44px;
     margin: 4px 0 6px;
+    border: 1px solid #dadce0 !important;
+    color: #3c4043 !important;
+    background: #ffffff !important;
+    font-family: Arial, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    box-shadow: none;
+}
+
+.google-auth-button:hover,
+.google-auth-button:focus-visible {
+    border-color: #c7cacf !important;
+    background: #f8fafd !important;
+}
+
+.google-auth-button:disabled {
+    opacity: 0.72;
+}
+
+.google-auth-button-large {
+    margin: 12px 0 4px;
 }
 
 .google-mark {
-    width: 22px;
-    height: 22px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 999px;
+    width: 20px;
+    height: 20px;
     display: inline-grid;
     place-items: center;
-    color: #090909;
-    background: #ffffff;
-    font-family: Arial, sans-serif;
-    font-size: 0.86rem;
-    font-weight: 900;
+    flex: 0 0 auto;
+    background: transparent;
+}
+
+.google-mark svg {
+    width: 20px;
+    height: 20px;
+    display: block;
 }
 
 .auth-divider {
@@ -4233,13 +4259,14 @@ textarea {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: clamp(232px, 17vw, 296px);
+    grid-auto-rows: max-content;
     grid-template-columns: none;
     gap: 14px;
     margin-inline: calc(var(--gutter) * -0.35);
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     -webkit-overflow-scrolling: touch;
-    padding: 2px calc(var(--gutter) * 0.35) 18px;
+    padding: 2px calc(var(--gutter) * 0.35) 10px;
     scroll-padding-inline: calc(var(--gutter) * 0.35);
     scroll-behavior: smooth;
     scroll-snap-type: inline proximity;
@@ -4257,12 +4284,15 @@ textarea {
 }
 
 .redesigned-home .home-product-rail .product-card {
+    content-visibility: visible;
+    contain-intrinsic-size: auto;
     display: grid;
     grid-template-rows: auto auto;
     align-self: start;
     height: auto;
     scroll-snap-align: start;
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+    transform: translateZ(0);
 }
 
 .redesigned-home .home-product-rail .product-badges span:first-child {
@@ -4643,10 +4673,12 @@ textarea {
 
     .redesigned-home .home-product-rail {
         grid-auto-columns: clamp(182px, 52vw, 218px);
+        grid-auto-rows: max-content;
         gap: 10px;
         margin-inline: -12px;
-        padding: 2px 12px 2px;
+        padding: 2px 12px 0;
         scroll-padding-inline: 12px;
+        scroll-snap-type: inline proximity;
     }
 
     .redesigned-home .home-product-rail .product-image {
@@ -4718,9 +4750,12 @@ textarea {
     }
 
     .redesigned-home .home-product-rail .product-card {
+        content-visibility: visible;
+        contain-intrinsic-size: auto;
         display: grid;
         grid-template-rows: auto 1fr;
         height: auto;
+        min-height: 0;
     }
 
     .redesigned-home .home-product-rail .card-actions .button {
@@ -4744,61 +4779,87 @@ textarea {
         height: 18px;
     }
 
+    .redesigned-home .home-section.has-product-rail {
+        padding-bottom: 8px;
+    }
+
+    .redesigned-home .home-section:has(.home-product-rail) {
+        padding-bottom: 8px;
+    }
+
+    .redesigned-home .home-section.has-product-rail + .home-section {
+        margin-top: 0;
+        padding-top: 12px;
+    }
+
+    .redesigned-home .home-section:has(.home-product-rail) + .home-section {
+        margin-top: 0;
+        padding-top: 12px;
+    }
+
     .in-app-browser .redesigned-home .home-product-rail {
-        grid-auto-columns: clamp(178px, 50vw, 210px);
         padding-bottom: 0;
-    }
-
-    .in-app-browser .redesigned-home .home-product-rail .product-image {
-        aspect-ratio: 1 / 0.84;
-    }
-
-    .in-app-browser .redesigned-home .home-product-rail .product-info {
-        padding: 7px;
-    }
-
-    .in-app-browser .redesigned-home .home-product-rail .product-meta {
-        font-size: 0.62rem;
-    }
-
-    .in-app-browser .redesigned-home .home-product-rail .product-info h3 {
-        font-size: 0.76rem;
-        margin: 3px 0 5px;
+        margin-bottom: 0;
     }
 
     .in-app-browser .redesigned-home .home-product-rail .card-actions {
-        grid-template-columns: 36px minmax(0, 1fr) 36px;
-        gap: 4px;
-        margin-top: 5px;
+        margin-bottom: 0;
     }
 
-    .in-app-browser .redesigned-home .home-product-rail .card-actions .button,
-    .in-app-browser .redesigned-home .home-product-rail .card-actions .icon-button {
-        height: 36px;
-        min-height: 36px;
+    .in-app-browser .redesigned-home .home-section.has-product-rail {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .in-app-browser .redesigned-home .home-section:has(.home-product-rail) {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .in-app-browser .redesigned-home .home-section.has-product-rail + .home-section {
+        padding-top: 0 !important;
+        margin-top: -8px !important;
+    }
+
+    .in-app-browser .redesigned-home .home-section:has(.home-product-rail) + .home-section {
+        padding-top: 0 !important;
+        margin-top: -8px !important;
     }
 
     .redesigned-home #trending {
         padding-top: 112px;
-        padding-bottom: 0;
+        padding-bottom: 2px;
+        margin-bottom: 0;
     }
 
     .redesigned-home #categories {
+        padding-bottom: 24px;
         padding-top: 0;
-        margin-top: 0;
+        margin-top: -10px;
     }
 
     .in-app-browser .redesigned-home #trending {
+        padding-top: 104px !important;
         padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
     }
 
     .in-app-browser .redesigned-home #categories {
+        padding-bottom: 18px !important;
         padding-top: 0 !important;
-        margin-top: -8px;
+        margin-top: -30px;
     }
 
     .in-app-browser .redesigned-home #trending + #categories {
-        transform: translateY(-8px);
+        transform: none;
+    }
+
+    .in-app-browser .redesigned-home #trending .home-product-rail {
+        padding-bottom: 0 !important;
+    }
+
+    .in-app-browser .redesigned-home #categories .section-head {
+        margin-bottom: 10px;
     }
 
     .cinematic-category-grid .category-card {

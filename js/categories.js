@@ -1,6 +1,6 @@
-import { categories, products, loadStoreCatalog } from "./products.js?v=20260813a";
-import { initCurrency } from "./currency.js?v=20260813a";
-import { initBaseLayout, renderCategories, renderProductGrid } from "./ui.js?v=20260813a";
+import { categories, products, loadStoreCatalog } from "./products.js?v=20260817c";
+import { initCurrency } from "./currency.js?v=20260817c";
+import { initBaseLayout, renderCategories, renderProductGrid } from "./ui.js?v=20260817c";
 
 boot();
 

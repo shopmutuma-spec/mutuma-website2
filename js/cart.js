@@ -1,11 +1,11 @@
-import { initCurrency, formatPrice } from "./currency.js?v=20260813a";
-import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260813a";
-import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260813a";
-import { trackEvent } from "./analytics.js?v=20260813a";
-import { storeSettings } from "./site-settings.js?v=20260813a";
-import { loadStoreCatalog } from "./products.js?v=20260813a";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260813a";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260813a";
+import { initCurrency, formatPrice } from "./currency.js?v=20260817c";
+import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260817c";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260817c";
+import { trackEvent } from "./analytics.js?v=20260817c";
+import { storeSettings } from "./site-settings.js?v=20260817c";
+import { loadStoreCatalog } from "./products.js?v=20260817c";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260817c";
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260817c";
 
 const cartItems = document.querySelector("[data-cart-items]");
 const summary = document.querySelector("[data-cart-summary]");
@@ -113,7 +113,7 @@ function renderCart() {
             <div class="checkout-trust-row">
                 <span>Secure Stripe checkout</span>
                 <span>Europe & US delivery</span>
-                <span>25% off applied</span>
+                <span>30% off applied</span>
             </div>
             ${upsells.length ? `
                 <div class="cart-upsell-list">

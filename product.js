@@ -1,10 +1,10 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260813a";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260813a";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260813a";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260813a";
-import { trackEvent } from "./analytics.js?v=20260813a";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260813a";
-import { setupBundleForProduct } from "./merchandising.js?v=20260813a";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260816a";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260816a";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260816a";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260816a";
+import { trackEvent } from "./analytics.js?v=20260816a";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260816a";
+import { setupBundleForProduct } from "./merchandising.js?v=20260816a";
 
 boot().catch((error) => {
     console.error("MUTUMA product page failed to start.", error);
@@ -70,7 +70,7 @@ ${galleryThumbs}
             </div>
             <p class="stock">${product.stock <= 8 ? "Low stock" : "In stock"} / estimated dispatch in 2-4 business days</p>
             <div class="product-offer-strip">
-                <strong>25% off everything.</strong>
+                <strong>30% off everything.</strong>
                 <span>Sale price is already applied. Shipping is included in the checkout total.</span>
             </div>
             <div class="quantity">

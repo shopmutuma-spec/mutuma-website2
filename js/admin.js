@@ -1,6 +1,6 @@
-import { initCurrency } from "./currency.js?v=20260813a";
-import { initBaseLayout } from "./ui.js?v=20260813a";
-import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260813a";
+import { initCurrency } from "./currency.js?v=20260817c";
+import { initBaseLayout } from "./ui.js?v=20260817c";
+import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260817c";
 
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -964,7 +964,7 @@ function offersPanel(data) {
             </div>
             <form class="admin-update-form" data-offer-form>
                 <input type="hidden" name="id" value="${escapeHtml(activeOffer.id || "")}">
-                <label>Offer name<input name="name" value="${escapeHtml(activeOffer.name || "25% off everything")}" required></label>
+                <label>Offer name<input name="name" value="${escapeHtml(activeOffer.name || "30% off everything")}" required></label>
                 <label>Discount percent<input name="discountPercent" type="number" min="0" max="90" step="1" value="${escapeHtml(activeOffer.discount_percent || 25)}" required></label>
                 <label>Start date<input name="startsAt" type="datetime-local"></label>
                 <label>End date<input name="endsAt" type="datetime-local"></label>

@@ -1,4 +1,4 @@
-import { storeSettings } from "./site-settings.js?v=20260813a";
+import { storeSettings } from "./site-settings.js?v=20260816a";
 
 const baseProducts = [
     {
