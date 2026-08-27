@@ -1,6 +1,6 @@
 export const storeSettings = {
     breakMode: {
-        enabled: true,
+        enabled: false,
         reopenLabel: "Back in 1 day",
         waitlistSource: "one-day-break-waitlist",
         title: "Join the waitlist.",
