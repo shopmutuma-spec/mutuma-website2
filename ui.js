@@ -1,11 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260817c";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260817c";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260817c";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260817c";
-import { trackEvent } from "./analytics.js?v=20260817c";
-import { storeSettings } from "./site-settings.js?v=20260817c";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260817c";
-import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260817c";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260827a";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260827a";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260827a";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260827a";
+import { trackEvent } from "./analytics.js?v=20260827a";
+import { storeSettings } from "./site-settings.js?v=20260827a";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260827a";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260827a";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -435,7 +435,7 @@ export function renderCartDrawer() {
         <button class="button primary wide" data-drawer-checkout>Checkout - ${formatPrice(total)}</button>
         <div class="checkout-trust-row">
             <span>Secure Stripe checkout</span>
-            <span>Europe & US delivery</span>
+            <span>5-8 day delivery</span>
             <span>30% off applied</span>
         </div>
         ${upsells.length ? `

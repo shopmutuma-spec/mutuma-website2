@@ -34,6 +34,7 @@ export async function handler(event) {
                 status,
                 tracking_courier: cleanText(payload.trackingCourier, 80),
                 tracking_number: cleanText(payload.trackingNumber, 120),
+                tracking_url: cleanText(payload.trackingUrl, 500),
                 admin_notes: cleanText(payload.adminNotes, 1000)
             })
         });

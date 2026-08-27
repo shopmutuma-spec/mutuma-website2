@@ -1,4 +1,4 @@
-import { currentCurrency, readyCurrency } from "./currency.js?v=20260817c";
+import { currentCurrency, readyCurrency } from "./currency.js?v=20260827a";
 
 export const stripeConfig = {
     cartCheckoutLink: "",

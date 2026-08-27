@@ -1,7 +1,16 @@
 import Stripe from "stripe";
 import { hasSupabaseConfig, supabaseRequest } from "./supabase-client.js";
+import { queueTrackingEmail } from "./mailer-lite.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+
+function getOrigin(event) {
+    const origin = event.headers.origin || event.headers.Origin;
+    if (origin) return origin;
+
+    const host = event.headers.host || event.headers.Host;
+    return host ? `https://${host}` : "https://mutumas.com";
+}
 
 function json(statusCode, body) {
     return {
@@ -35,11 +44,22 @@ export async function handler(event) {
             return json(400, { error: "Checkout session is not paid." });
         }
 
-        await saveOrder(session);
+        const orderNumber = await saveOrder(session);
+        const email = session.customer_details?.email || session.customer_email || "";
+        const trackingUrl = `${getOrigin(event)}/tracking.html?order=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`;
+        const trackingEmail = await queueCustomerTrackingEmail({
+            email,
+            name: session.customer_details?.name || "",
+            orderNumber,
+            trackingUrl
+        });
 
         return json(200, {
-            email: session.customer_details?.email || session.customer_email || "",
+            email,
             name: session.customer_details?.name || "",
+            orderNumber,
+            trackingUrl,
+            trackingEmailQueued: trackingEmail.ok,
             sessionId: session.id
         });
     } catch (error) {
@@ -47,11 +67,19 @@ export async function handler(event) {
     }
 }
 
-async function saveOrder(session) {
-    if (!hasSupabaseConfig()) return;
+async function queueCustomerTrackingEmail(details) {
+    try {
+        return await queueTrackingEmail(details);
+    } catch (error) {
+        console.warn("MailerLite tracking email skipped.", error);
+        return { ok: false };
+    }
+}
 
+async function saveOrder(session) {
     const email = session.customer_details?.email || session.customer_email || "";
     const orderNumber = session.id.replace(/^cs_(test|live)_/, "").slice(0, 12).toUpperCase();
+    if (!hasSupabaseConfig()) return orderNumber;
 
     try {
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
@@ -96,4 +124,6 @@ async function saveOrder(session) {
     } catch (error) {
         console.warn("Supabase order sync skipped.", error);
     }
+
+    return orderNumber;
 }

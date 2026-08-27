@@ -925,7 +925,7 @@ export async function handler(event) {
         const fetchFrom = new Date(Math.min(filters.from.getTime(), previous.from.getTime()));
         const [subscribers, orders, analyticsEvents, adminProducts, offers, goals, productCostRows] = await Promise.all([
             supabaseRequest("subscribers?select=email,source,subscribed_at&order=subscribed_at.desc&limit=500"),
-            supabaseRequest("orders?select=order_number,email,name,total,currency,status,stripe_session_id,tracking_courier,tracking_number,admin_notes,order_items,customer_details,created_at,updated_at&order=created_at.desc&limit=500"),
+            supabaseRequest("orders?select=order_number,email,name,total,currency,status,stripe_session_id,tracking_courier,tracking_number,tracking_url,admin_notes,order_items,customer_details,created_at,updated_at&order=created_at.desc&limit=500"),
             supabaseRequest(`analytics_events?select=event_name,session_id,page_path,product_id,product_name,search_query,currency,value,metadata,user_agent,country,created_at&created_at=gte.${encodeURIComponent(fetchFrom.toISOString())}&order=created_at.desc&limit=${MAX_EVENT_LIMIT}`),
             optionalSupabaseRequest("catalog_products?select=id,name,description,category,price,old_price,currency,image_url,tags,stock,featured,published,created_at&order=created_at.desc&limit=500"),
             optionalSupabaseRequest("store_offers?select=id,name,discount_percent,scope,enabled,starts_at,ends_at,created_at&order=created_at.desc&limit=50"),

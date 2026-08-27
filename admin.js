@@ -1,6 +1,6 @@
-import { initCurrency } from "./currency.js?v=20260816a";
-import { initBaseLayout } from "./ui.js?v=20260816a";
-import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260816a";
+import { initCurrency } from "./currency.js?v=20260827a";
+import { initBaseLayout } from "./ui.js?v=20260827a";
+import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260827a";
 
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -1156,6 +1156,7 @@ function orderDetail(order) {
                 </label>
                 <label>Courier<input name="trackingCourier" value="${escapeHtml(order.tracking_courier || "")}" placeholder="Royal Mail, DHL, Evri"></label>
                 <label>Tracking number<input name="trackingNumber" value="${escapeHtml(order.tracking_number || "")}" placeholder="Paste tracking number"></label>
+                <label>Tracking link<input name="trackingUrl" value="${escapeHtml(order.tracking_url || "")}" placeholder="Paste carrier tracking URL"></label>
                 <label>Private notes<textarea name="adminNotes" rows="3" placeholder="Internal notes only">${escapeHtml(order.admin_notes || "")}</textarea></label>
                 <button class="button primary">Save Order</button>
                 <p class="form-message" data-order-message></p>
@@ -1647,6 +1648,7 @@ async function saveOrder(formElement) {
                 status: formElement.status.value,
                 trackingCourier: formElement.trackingCourier.value,
                 trackingNumber: formElement.trackingNumber.value,
+                trackingUrl: formElement.trackingUrl.value,
                 adminNotes: formElement.adminNotes.value
             })
         });

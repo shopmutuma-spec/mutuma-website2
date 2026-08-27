@@ -55,6 +55,7 @@ create table if not exists public.orders (
     status text not null default 'paid',
     tracking_courier text,
     tracking_number text,
+    tracking_url text,
     admin_notes text,
     order_items jsonb not null default '[]'::jsonb,
     customer_details jsonb not null default '{}'::jsonb,
@@ -65,6 +66,7 @@ create table if not exists public.orders (
 alter table public.orders
 add column if not exists tracking_courier text,
 add column if not exists tracking_number text,
+add column if not exists tracking_url text,
 add column if not exists admin_notes text,
 add column if not exists order_items jsonb not null default '[]'::jsonb;
 

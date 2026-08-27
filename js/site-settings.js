@@ -1,4 +1,11 @@
 export const storeSettings = {
+    breakMode: {
+        enabled: true,
+        reopenLabel: "Back in 1 day",
+        waitlistSource: "one-day-break-waitlist",
+        title: "Join the waitlist.",
+        body: "Enter your email and we will let you know when MUTUMA reopens."
+    },
     freeShippingThreshold: 50,
     standardShipping: 6,
     popularSearches: ["lamp", "rug", "poster", "desk", "gaming"],

@@ -1,10 +1,10 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260816a";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260816a";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260816a";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260816a";
-import { trackEvent } from "./analytics.js?v=20260816a";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260816a";
-import { setupBundleForProduct } from "./merchandising.js?v=20260816a";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260827a";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260827a";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260827a";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260827a";
+import { trackEvent } from "./analytics.js?v=20260827a";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260827a";
+import { setupBundleForProduct } from "./merchandising.js?v=20260827a";
 
 boot().catch((error) => {
     console.error("MUTUMA product page failed to start.", error);
@@ -68,7 +68,7 @@ ${galleryThumbs}
                 <strong data-price="${product.price}">${formatPrice(product.price)}</strong>
                 ${product.oldPrice ? `<s data-price="${product.oldPrice}">${formatPrice(product.oldPrice)}</s>` : ""}
             </div>
-            <p class="stock">${product.stock <= 8 ? "Low stock" : "In stock"} / estimated dispatch in 2-4 business days</p>
+            <p class="stock">${product.stock <= 8 ? "Low stock" : "In stock"} / estimated delivery in 5-8 business days once dispatched</p>
             <div class="product-offer-strip">
                 <strong>30% off everything.</strong>
                 <span>Sale price is already applied. Shipping is included in the checkout total.</span>
@@ -96,14 +96,14 @@ ${galleryThumbs}
             <button class="button secondary wide" data-buy-stripe>Buy Now</button>
             <div class="checkout-trust-row product-trust-row">
                 <span>Secure Stripe checkout</span>
-                <span>Europe & US delivery</span>
+                <span>5-8 day delivery</span>
                 <span>Easy returns</span>
             </div>
             <button class="button secondary wide ${getWishlist().includes(product.id) ? "active" : ""}" data-wishlist-product aria-pressed="${getWishlist().includes(product.id)}">Wishlist</button>
             <div class="details">
                 <details open><summary>Description</summary><p>${product.description}</p></details>
                 <details><summary>Specifications</summary><p>Category: ${product.category}. Sizes: ${sizeList}. Variations: ${variationList}. Style: ${options.styles.join(", ")}.</p></details>
-                <details><summary>Delivery Estimate</summary><p>Estimated dispatch is 2-4 business days. Europe and US shipping options are confirmed at Stripe Checkout.</p></details>
+                <details><summary>Delivery Estimate</summary><p>Estimated delivery is 5-8 business days once dispatched. Europe and US shipping options are confirmed at Stripe Checkout.</p></details>
                 <details><summary>Returns</summary><p>Unused products can be returned within 30 days. See the returns page for the full policy.</p></details>
             </div>
         </aside>

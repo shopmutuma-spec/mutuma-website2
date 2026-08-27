@@ -1,11 +1,24 @@
-import { initCurrency } from "./currency.js?v=20260816a";
-import { initBaseLayout } from "./ui.js?v=20260816a";
+import { initCurrency } from "./currency.js?v=20260827a";
+import { initBaseLayout } from "./ui.js?v=20260827a";
 
 initBaseLayout();
 initCurrency().catch(() => {});
 
 const form = document.querySelector("[data-tracking-form]");
 const message = document.querySelector("[data-tracking-message]");
+const params = new URLSearchParams(window.location.search);
+
+if (params.get("order")) {
+    form.orderNumber.value = params.get("order");
+}
+
+if (params.get("email")) {
+    form.email.value = params.get("email");
+}
+
+if (form.orderNumber.value && form.email.value) {
+    window.setTimeout(() => form.requestSubmit(), 0);
+}
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -32,9 +45,11 @@ form.addEventListener("submit", async (event) => {
         }
 
         const data = await response.json();
-        message.textContent = response.ok && data.message
-            ? data.message
-            : "Tracking is not available for this order yet.";
+        if (response.ok && data.message) {
+            renderTrackingMessage(data);
+        } else {
+            message.textContent = "Tracking is not available for this order yet.";
+        }
     } catch (error) {
         message.textContent = "Order tracking is not connected yet. Contact MUTUMA with your order number and checkout email.";
     } finally {
@@ -42,3 +57,25 @@ form.addEventListener("submit", async (event) => {
         button.textContent = "Check Order";
     }
 });
+
+function renderTrackingMessage(data) {
+    message.textContent = "";
+
+    const status = document.createElement("strong");
+    status.textContent = data.message;
+    message.append(status);
+
+    if (data.order?.trackingUrl) {
+        const link = document.createElement("a");
+        link.className = "button secondary";
+        link.href = data.order.trackingUrl;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "Open carrier tracking";
+        message.append(link);
+    }
+
+    const estimate = document.createElement("small");
+    estimate.textContent = "Estimated delivery is 5-8 business days once dispatched.";
+    message.append(estimate);
+}

@@ -323,11 +323,11 @@ export async function handler(event) {
                         delivery_estimate: {
                             minimum: {
                                 unit: "business_day",
-                                value: 2
+                                value: 5
                             },
                             maximum: {
                                 unit: "business_day",
-                                value: 5
+                                value: 8
                             }
                         }
                     }

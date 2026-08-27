@@ -1,11 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260817c";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260817c";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260817c";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260817c";
-import { trackEvent } from "./analytics.js?v=20260817c";
-import { storeSettings } from "./site-settings.js?v=20260817c";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260817c";
-import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260817c";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260827a";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260827a";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260827a";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260827a";
+import { trackEvent } from "./analytics.js?v=20260827a";
+import { storeSettings } from "./site-settings.js?v=20260827a";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260827a";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260827a";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -435,7 +435,7 @@ export function renderCartDrawer() {
         <button class="button primary wide" data-drawer-checkout>Checkout - ${formatPrice(total)}</button>
         <div class="checkout-trust-row">
             <span>Secure Stripe checkout</span>
-            <span>Europe & US delivery</span>
+            <span>5-8 day delivery</span>
             <span>30% off applied</span>
         </div>
         ${upsells.length ? `
@@ -873,6 +873,7 @@ export function initBaseLayout() {
     renderFooter();
     updateCounts();
     updatePrices();
+    renderBreakMode();
     initEmailOffer();
     prewarmCheckout();
 
@@ -902,6 +903,75 @@ export function initBaseLayout() {
     });
 }
 
+function renderBreakMode() {
+    if (!storeSettings.breakMode?.enabled) return;
+
+    const pathname = location.pathname.replace(/\/+$/, "");
+    const page = pathname.split("/").pop() || "index.html";
+    const allowedPages = new Set([
+        "admin.html",
+        "admin",
+        "account.html",
+        "account",
+        "tracking.html",
+        "tracking",
+        "privacy.html",
+        "privacy",
+        "terms.html",
+        "terms",
+        "returns.html",
+        "returns",
+        "delivery.html",
+        "delivery",
+        "policies.html",
+        "policies"
+    ]);
+
+    if (allowedPages.has(page) || pathname.includes("/.netlify/")) return;
+
+    document.body.classList.add("break-mode-active");
+
+    const shell = document.createElement("section");
+    shell.className = "break-screen";
+    shell.setAttribute("data-break-screen", "");
+    shell.setAttribute("aria-label", "MUTUMA waiting list");
+    shell.innerHTML = `
+        <div class="break-screen-inner">
+            <span class="eyebrow">${storeSettings.breakMode.reopenLabel}</span>
+            <h1>MUTUMA</h1>
+            <h2>${storeSettings.breakMode.title}</h2>
+            <p>${storeSettings.breakMode.body}</p>
+            <form class="break-waitlist-form" data-break-waitlist>
+                <input type="email" name="email" placeholder="Email address" aria-label="Email address" autocomplete="email" required>
+                <button class="button primary" type="submit">Join</button>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(shell);
+
+    const form = shell.querySelector("[data-break-waitlist]");
+    const button = form.querySelector("button");
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        button.disabled = true;
+        button.textContent = "Joining...";
+
+        try {
+            await submitEmailSignup(form.email.value, storeSettings.breakMode.waitlistSource, {
+                waitlist: "one-day-break"
+            });
+            localStorage.setItem("mutuma.emailSubscribed", "true");
+            form.innerHTML = "<strong>You are on the 1-day list. We will let you know when MUTUMA reopens.</strong>";
+        } catch (error) {
+            notify(error.message);
+            button.disabled = false;
+            button.textContent = "Join";
+        }
+    });
+}
+
 function initEmailOffer() {
     const OFFER_KEY = "mutuma.emailOfferSeen";
     const GOOGLE_PROMPT_KEY = "mutuma.googlePromptSeen";
@@ -909,7 +979,7 @@ function initEmailOffer() {
     const page = location.pathname.split("/").pop() || "index.html";
     const skipPage = page === "account.html" || page === "admin.html";
 
-    if (skipPage || getSession()?.access_token || localStorage.getItem(GOOGLE_PROMPT_KEY)) return;
+    if (storeSettings.breakMode?.enabled || skipPage || getSession()?.access_token || localStorage.getItem(GOOGLE_PROMPT_KEY)) return;
 
     window.setTimeout(() => {
         const modal = document.querySelector("[data-modal]");

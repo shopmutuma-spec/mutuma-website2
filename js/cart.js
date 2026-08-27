@@ -1,11 +1,11 @@
-import { initCurrency, formatPrice } from "./currency.js?v=20260817c";
-import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260817c";
-import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260817c";
-import { trackEvent } from "./analytics.js?v=20260817c";
-import { storeSettings } from "./site-settings.js?v=20260817c";
-import { loadStoreCatalog } from "./products.js?v=20260817c";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260817c";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260817c";
+import { initCurrency, formatPrice } from "./currency.js?v=20260827a";
+import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260827a";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260827a";
+import { trackEvent } from "./analytics.js?v=20260827a";
+import { storeSettings } from "./site-settings.js?v=20260827a";
+import { loadStoreCatalog } from "./products.js?v=20260827a";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260827a";
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260827a";
 
 const cartItems = document.querySelector("[data-cart-items]");
 const summary = document.querySelector("[data-cart-summary]");
@@ -13,6 +13,7 @@ const FREE_SHIPPING_THRESHOLD = storeSettings.freeShippingThreshold;
 const STANDARD_SHIPPING = storeSettings.standardShipping;
 const params = new URLSearchParams(window.location.search);
 const checkoutStatus = params.get("checkout");
+let completedOrder = null;
 
 boot();
 
@@ -23,9 +24,11 @@ async function boot() {
 
     if (checkoutStatus === "success") {
         clearCart();
-        notify("Payment complete. Your order details are in Stripe.");
         trackEvent("purchase_completed", { sessionId: params.get("session_id") || "" });
-        syncStripeCustomerEmail(params.get("session_id"));
+        completedOrder = await syncStripeCustomerEmail(params.get("session_id"));
+        notify(completedOrder?.orderNumber
+            ? `Payment complete. Order ${completedOrder.orderNumber} is ready to track.`
+            : "Payment complete. Your order details are in Stripe.");
         renderPostPurchasePicks();
     } else if (checkoutStatus === "cancelled") {
         notify("Checkout cancelled. Your cart is still here.");
@@ -36,20 +39,38 @@ async function boot() {
 }
 
 async function syncStripeCustomerEmail(sessionId) {
-    if (!sessionId || localStorage.getItem(`mutuma.stripeEmailSynced.${sessionId}`)) return;
+    if (!sessionId) return null;
+
+    const cachedOrder = localStorage.getItem(`mutuma.orderTracking.${sessionId}`);
+    if (cachedOrder) {
+        try {
+            return JSON.parse(cachedOrder);
+        } catch (error) {
+            localStorage.removeItem(`mutuma.orderTracking.${sessionId}`);
+        }
+    }
 
     try {
         const response = await fetch(`/.netlify/functions/get-checkout-session?session_id=${encodeURIComponent(sessionId)}`);
         const data = await response.json();
 
-        if (!response.ok || !data.email) return;
+        if (!response.ok) return null;
 
-        await submitEmailSignup(data.email, "stripe-checkout", {
-            stripeSessionId: sessionId
-        });
-        localStorage.setItem(`mutuma.stripeEmailSynced.${sessionId}`, "true");
+        if (data.email && !localStorage.getItem(`mutuma.stripeEmailSynced.${sessionId}`)) {
+            await submitEmailSignup(data.email, "stripe-checkout", {
+                stripeSessionId: sessionId
+            });
+            localStorage.setItem(`mutuma.stripeEmailSynced.${sessionId}`, "true");
+        }
+
+        if (data.orderNumber) {
+            localStorage.setItem(`mutuma.orderTracking.${sessionId}`, JSON.stringify(data));
+        }
+
+        return data;
     } catch (error) {
         console.warn("Stripe email sync skipped.", error);
+        return null;
     }
 }
 
@@ -58,7 +79,7 @@ function renderCart() {
 
     if (!cart.length) {
         cartItems.innerHTML = checkoutStatus === "success"
-            ? '<div class="empty-state">Payment complete. Finish the room with these picks below.</div>'
+            ? postPurchaseMessage()
             : '<div class="empty-state">Your cart is empty.</div>';
         summary.innerHTML = "";
         updateCounts();
@@ -112,7 +133,7 @@ function renderCart() {
             <button class="button primary wide" data-checkout>Checkout with Stripe - ${formatPrice(total)}</button>
             <div class="checkout-trust-row">
                 <span>Secure Stripe checkout</span>
-                <span>Europe & US delivery</span>
+                <span>5-8 day delivery</span>
                 <span>30% off applied</span>
             </div>
             ${upsells.length ? `
@@ -185,6 +206,21 @@ function renderCart() {
         });
     });
     updateCounts();
+}
+
+function postPurchaseMessage() {
+    if (!completedOrder?.orderNumber) {
+        return '<div class="empty-state">Payment complete. Finish the room with these picks below.</div>';
+    }
+
+    return `
+        <div class="empty-state">
+            <strong>Payment complete.</strong>
+            <span>Your order number is ${completedOrder.orderNumber}.</span>
+            <a class="button primary" href="${completedOrder.trackingUrl}">Track your order</a>
+            <small>Save this link. Delivery is estimated at 5-8 business days once dispatched.</small>
+        </div>
+    `;
 }
 
 function renderPostPurchasePicks() {
