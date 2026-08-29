@@ -11,15 +11,15 @@ function isActiveOffer(offer) {
 function normalizeOffer(offer) {
     if (!offer) return offer;
     const offerName = String(offer.name || "").toLowerCase();
-    const isLegacyStorewideSale = [25, 30, 45].includes(Number(offer.discount_percent))
-        && (offerName.includes("25% off everything") || offerName.includes("30% off everything") || offerName.includes("45% off everything"));
+    const isLegacyStorewideSale = [15, 25, 30, 45].includes(Number(offer.discount_percent))
+        && (offerName.includes("15% off everything") || offerName.includes("25% off everything") || offerName.includes("30% off everything") || offerName.includes("45% off everything"));
 
     if (!isLegacyStorewideSale) return offer;
 
     return {
         ...offer,
-        name: "30% off everything",
-        discount_percent: 30
+        name: "15% off everything",
+        discount_percent: 15
     };
 }
 

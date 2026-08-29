@@ -2334,7 +2334,7 @@ textarea {
 
 .admin-table {
     width: 100%;
-    min-width: 720px;
+    min-width: 920px;
     border-collapse: collapse;
 }
 
@@ -2806,6 +2806,32 @@ textarea {
     outline: 1px solid var(--line);
 }
 
+.admin-order-preview {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 220px;
+}
+
+.admin-order-preview img,
+.admin-line-item img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+.admin-order-preview span {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--text);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
 .status-pill {
     display: inline-flex;
     align-items: center;
@@ -2815,6 +2841,13 @@ textarea {
     color: var(--text);
     background: rgba(255, 255, 255, 0.06);
     text-transform: capitalize;
+}
+
+.new-order-pill {
+    margin-top: 6px;
+    color: var(--bg);
+    background: var(--text);
+    border-color: var(--text);
 }
 
 .admin-detail-grid {
@@ -2835,6 +2868,35 @@ textarea {
     display: block;
     color: var(--text);
     margin-bottom: 4px;
+}
+
+.admin-total-grid {
+    margin-top: 18px;
+}
+
+.admin-line-items {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0 18px;
+}
+
+.admin-line-item {
+    display: grid;
+    grid-template-columns: 54px minmax(160px, 1fr) auto auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+
+.admin-line-item div {
+    display: grid;
+    gap: 3px;
+}
+
+.admin-line-item span {
+    color: var(--muted);
 }
 
 .admin-update-form {

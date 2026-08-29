@@ -82,13 +82,13 @@ export function renderHeader() {
         .slice(0, 3);
 
     header.innerHTML = `
-        <div class="sale-ticker" role="note" aria-label="30% off everything right now.">
+        <div class="sale-ticker" role="note" aria-label="15% off everything right now.">
             <div class="sale-ticker-track">
-                <span>30% off everything</span>
+                <span>15% off everything</span>
                 <span>No code needed</span>
                 <span>Limited time only</span>
                 <span>No code needed</span>
-                <span aria-hidden="true">30% off everything</span>
+                <span aria-hidden="true">15% off everything</span>
                 <span aria-hidden="true">No code needed</span>
                 <span aria-hidden="true">Limited time only</span>
                 <span aria-hidden="true">No code needed</span>
@@ -436,7 +436,7 @@ export function renderCartDrawer() {
         <div class="checkout-trust-row">
             <span>Secure Stripe checkout</span>
             <span>5-8 day delivery</span>
-            <span>30% off applied</span>
+            <span>15% off applied</span>
         </div>
         ${upsells.length ? `
             <div class="drawer-recommendations drawer-upsells">
@@ -449,7 +449,7 @@ export function renderCartDrawer() {
                 `).join("")}
             </div>
         ` : ""}
-        <small>30% off is already applied to product prices. No code needed.</small>
+        <small>15% off is already applied to product prices. No code needed.</small>
         <button class="button secondary wide" data-cart-close>Continue Shopping</button>
         <a class="button secondary wide" href="cart.html">View Full Cart</a>
     `;
@@ -1005,7 +1005,7 @@ function initEmailOffer() {
                         <input type="email" name="email" placeholder="Email address" aria-label="Email address" required>
                         <button class="button primary">Join</button>
                     </form>
-                    <small>30% off is already applied. No code needed.</small>
+                    <small>15% off is already applied. No code needed.</small>
                 </div>
             </div>
         `;
@@ -1054,7 +1054,7 @@ function initEmailOffer() {
             modal.querySelector(".offer-panel").innerHTML = `
                 <div class="offer-success">
                     <span class="eyebrow">You're on the list</span>
-                    <h2>30% off is live.</h2>
+                    <h2>15% off is live.</h2>
                     <p>No code needed. Sale prices are already applied across MUTUMA.</p>
                     <button class="button primary wide" data-offer-close>Shop Now</button>
                 </div>

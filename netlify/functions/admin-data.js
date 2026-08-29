@@ -78,15 +78,15 @@ function cleanText(value, fallback = "") {
 function normalizeOffer(offer) {
     if (!offer) return offer;
     const offerName = String(offer.name || "").toLowerCase();
-    const isLegacyStorewideSale = [25, 30, 45].includes(Number(offer.discount_percent))
-        && (offerName.includes("25% off everything") || offerName.includes("30% off everything") || offerName.includes("45% off everything"));
+    const isLegacyStorewideSale = [15, 25, 30, 45].includes(Number(offer.discount_percent))
+        && (offerName.includes("15% off everything") || offerName.includes("25% off everything") || offerName.includes("30% off everything") || offerName.includes("45% off everything"));
 
     if (!isLegacyStorewideSale) return offer;
 
     return {
         ...offer,
-        name: "30% off everything",
-        discount_percent: 30
+        name: "15% off everything",
+        discount_percent: 15
     };
 }
 
@@ -147,20 +147,38 @@ async function optionalSupabaseRequest(path) {
 }
 
 async function loadAdminOrders() {
-    const fullSelect = "orders?select=order_number,email,name,total,currency,status,stripe_session_id,tracking_courier,tracking_number,tracking_url,admin_notes,order_items,customer_details,created_at,updated_at&order=created_at.desc&limit=500";
+    const fullSelect = "orders?select=order_number,email,name,subtotal,discounts,tax,shipping_cost,total,currency,status,payment_status,fulfilment_status,delivery_method,stripe_session_id,stripe_payment_intent,tracking_courier,tracking_number,tracking_url,admin_notes,order_items,customer_details,billing_details,shipping_details,order_status_history,created_at,updated_at&order=created_at.desc&limit=500";
     const safeSelect = "orders?select=order_number,email,name,total,currency,status,stripe_session_id,tracking_courier,tracking_number,admin_notes,order_items,customer_details,created_at,updated_at&order=created_at.desc&limit=500";
 
     try {
-        return await supabaseRequest(fullSelect);
+        return normalizeAdminOrders(await supabaseRequest(fullSelect));
     } catch (error) {
         const message = String(error.message || "");
-        if (!message.includes("tracking_url")) throw error;
+        if (!message.includes("tracking_url") && !message.includes("payment_status") && !message.includes("billing_details")) throw error;
         const orders = await supabaseRequest(safeSelect);
-        return orders.map((order) => ({
+        return normalizeAdminOrders(orders.map((order) => ({
             ...order,
             tracking_url: ""
-        }));
+        })));
     }
+}
+
+function normalizeAdminOrders(orders = []) {
+    return orders.map((order) => {
+        const status = String(order.status || "").toLowerCase();
+        const paymentStatus = order.payment_status || (["paid", "refunded", "failed"].includes(status) ? status : "paid");
+        const fulfilmentStatus = order.fulfilment_status || (["processing", "shipped", "delivered", "refunded", "payment_failed"].includes(status) ? status : "processing");
+
+        return {
+            ...order,
+            payment_status: paymentStatus,
+            fulfilment_status: fulfilmentStatus,
+            order_items: Array.isArray(order.order_items) ? order.order_items : [],
+            billing_details: order.billing_details || order.customer_details || {},
+            shipping_details: order.shipping_details || order.customer_details?.shipping || {},
+            order_status_history: Array.isArray(order.order_status_history) ? order.order_status_history : []
+        };
+    });
 }
 
 function metadata(eventItem) {

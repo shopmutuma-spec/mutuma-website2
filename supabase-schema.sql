@@ -47,28 +47,50 @@ execute function public.set_updated_at();
 create table if not exists public.orders (
     id uuid primary key default gen_random_uuid(),
     stripe_session_id text not null unique,
+    stripe_payment_intent text,
     order_number text not null unique,
     email text not null,
     name text,
+    subtotal numeric,
+    discounts numeric,
+    tax numeric,
+    shipping_cost numeric,
     total numeric,
     currency text not null default 'USD',
     status text not null default 'paid',
+    payment_status text not null default 'paid',
+    fulfilment_status text not null default 'processing',
+    delivery_method text,
     tracking_courier text,
     tracking_number text,
     tracking_url text,
     admin_notes text,
     order_items jsonb not null default '[]'::jsonb,
     customer_details jsonb not null default '{}'::jsonb,
+    billing_details jsonb not null default '{}'::jsonb,
+    shipping_details jsonb not null default '{}'::jsonb,
+    order_status_history jsonb not null default '[]'::jsonb,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
 
 alter table public.orders
+add column if not exists stripe_payment_intent text,
+add column if not exists subtotal numeric,
+add column if not exists discounts numeric,
+add column if not exists tax numeric,
+add column if not exists shipping_cost numeric,
+add column if not exists payment_status text not null default 'paid',
+add column if not exists fulfilment_status text not null default 'processing',
+add column if not exists delivery_method text,
 add column if not exists tracking_courier text,
 add column if not exists tracking_number text,
 add column if not exists tracking_url text,
 add column if not exists admin_notes text,
-add column if not exists order_items jsonb not null default '[]'::jsonb;
+add column if not exists order_items jsonb not null default '[]'::jsonb,
+add column if not exists billing_details jsonb not null default '{}'::jsonb,
+add column if not exists shipping_details jsonb not null default '{}'::jsonb,
+add column if not exists order_status_history jsonb not null default '[]'::jsonb;
 
 alter table public.orders enable row level security;
 
@@ -199,9 +221,9 @@ for each row
 execute function public.set_updated_at();
 
 insert into public.store_offers (name, discount_percent, scope, enabled)
-select '30% off everything', 30, 'all', true
+select '15% off everything', 15, 'all', true
 where not exists (
-    select 1 from public.store_offers where name = '30% off everything'
+    select 1 from public.store_offers where name = '15% off everything'
 );
 
 drop policy if exists "No public analytics reads" on public.analytics_events;
@@ -237,6 +259,48 @@ on public.orders (created_at desc);
 
 create index if not exists orders_email_idx
 on public.orders (email);
+
+create index if not exists orders_payment_intent_idx
+on public.orders (stripe_payment_intent);
+
+create table if not exists public.stripe_webhook_events (
+    id uuid primary key default gen_random_uuid(),
+    event_id text not null unique,
+    event_type text not null,
+    status text not null default 'processing',
+    error_message text,
+    processed_at timestamptz,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+alter table public.stripe_webhook_events enable row level security;
+
+drop policy if exists "No public webhook reads" on public.stripe_webhook_events;
+
+create policy "No public webhook reads"
+on public.stripe_webhook_events
+for select
+to anon, authenticated
+using (false);
+
+drop policy if exists "No public webhook writes" on public.stripe_webhook_events;
+
+create policy "No public webhook writes"
+on public.stripe_webhook_events
+for insert
+to anon, authenticated
+with check (false);
+
+drop trigger if exists stripe_webhook_events_set_updated_at on public.stripe_webhook_events;
+
+create trigger stripe_webhook_events_set_updated_at
+before update on public.stripe_webhook_events
+for each row
+execute function public.set_updated_at();
+
+create index if not exists stripe_webhook_events_event_id_idx
+on public.stripe_webhook_events (event_id);
 
 create table if not exists public.product_costs (
     id uuid primary key default gen_random_uuid(),

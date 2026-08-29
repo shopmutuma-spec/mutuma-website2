@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Product image unavailable">
+    <rect width="320" height="320" fill="#101010"/>
+    <rect x="32" y="32" width="256" height="256" rx="18" fill="#181818" stroke="#3a3a3a"/>
+    <path d="M96 210l42-48 30 34 22-24 42 38H96z" fill="#f4f4f4" opacity=".86"/>
+    <circle cx="120" cy="112" r="22" fill="#f4f4f4" opacity=".86"/>
+    <text x="160" y="262" text-anchor="middle" fill="#f4f4f4" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="4">MUTUMA</text>
+</svg>

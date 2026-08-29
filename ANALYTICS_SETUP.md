@@ -61,18 +61,18 @@ Net profit stays unavailable until real product costs, Stripe fees, shipping cos
 
 Use Stripe secret keys only in Netlify environment variables. Stripe Checkout is created server-side by `create-checkout-session.js`.
 
-For production-grade payment analytics, add a Stripe webhook endpoint that verifies `STRIPE_WEBHOOK_SECRET` and stores:
+Stripe webhook syncing is handled by:
+
+`/.netlify/functions/stripe-webhook`
+
+It verifies `STRIPE_WEBHOOK_SECRET` and stores:
 
 - `checkout.session.completed`
-- `payment_intent.succeeded`
+- `checkout.session.async_payment_failed`
 - `payment_intent.payment_failed`
 - `charge.refunded`
-- `charge.dispute.created`
-- `payout.created`
-- `payout.paid`
-- `payout.failed`
 
-Do not trust only client-side success URLs for final payment records.
+Do not trust only client-side success URLs for final payment records. The success URL sync remains only as a backup.
 
 ## UTM Campaign Tracking
 

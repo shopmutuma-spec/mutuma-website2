@@ -1,6 +1,5 @@
 import Stripe from "stripe";
-import { hasSupabaseConfig, supabaseRequest } from "./supabase-client.js";
-import { queueTrackingEmail } from "./mailer-lite.js";
+import { savePaidCheckoutSession } from "./order-sync.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
@@ -44,86 +43,26 @@ export async function handler(event) {
             return json(400, { error: "Checkout session is not paid." });
         }
 
-        const orderNumber = await saveOrder(session);
-        const email = session.customer_details?.email || session.customer_email || "";
-        const trackingUrl = `${getOrigin(event)}/tracking.html?order=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`;
-        const trackingEmail = await queueCustomerTrackingEmail({
-            email,
-            name: session.customer_details?.name || "",
-            orderNumber,
-            trackingUrl
+        const result = await savePaidCheckoutSession({
+            stripe,
+            session,
+            origin: getOrigin(event),
+            queueEmail: true
         });
+        const orderNumber = result.orderNumber;
+        const email = result.email || session.customer_details?.email || session.customer_email || "";
+        const trackingUrl = `${getOrigin(event)}/tracking.html?order=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`;
 
         return json(200, {
             email,
             name: session.customer_details?.name || "",
             orderNumber,
             trackingUrl,
-            trackingEmailQueued: trackingEmail.ok,
+            trackingEmailQueued: result.created,
+            alreadyExists: Boolean(result.alreadyExists),
             sessionId: session.id
         });
     } catch (error) {
         return json(500, { error: error.message || "Unable to read checkout session." });
     }
-}
-
-async function queueCustomerTrackingEmail(details) {
-    try {
-        return await queueTrackingEmail(details);
-    } catch (error) {
-        console.warn("MailerLite tracking email skipped.", error);
-        return { ok: false };
-    }
-}
-
-async function saveOrder(session) {
-    const email = session.customer_details?.email || session.customer_email || "";
-    const orderNumber = session.id.replace(/^cs_(test|live)_/, "").slice(0, 12).toUpperCase();
-    if (!hasSupabaseConfig()) return orderNumber;
-
-    try {
-        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
-            expand: ["data.price.product"],
-            limit: 100
-        });
-        const orderItems = lineItems.data.map((item) => ({
-            name: item.description || item.price?.product?.name || "",
-            quantity: item.quantity || 1,
-            amount_total: item.amount_total ? item.amount_total / 100 : null,
-            currency: String(item.currency || session.currency || "usd").toUpperCase(),
-            product_id: item.price?.product?.metadata?.product_id || ""
-        }));
-        const freeGiftProductId = session.metadata?.free_gift_product_id || "";
-        const freeGiftProductName = session.metadata?.free_gift_product_name || "";
-
-        if (freeGiftProductId && freeGiftProductName && !orderItems.some((item) => item.product_id === freeGiftProductId)) {
-            orderItems.push({
-                name: freeGiftProductName,
-                quantity: 1,
-                amount_total: 0,
-                currency: String(session.currency || "usd").toUpperCase(),
-                product_id: freeGiftProductId,
-                gift: true
-            });
-        }
-
-        await supabaseRequest("orders?on_conflict=stripe_session_id", {
-            method: "POST",
-            body: JSON.stringify([{
-                stripe_session_id: session.id,
-                order_number: orderNumber,
-                email,
-                name: session.customer_details?.name || "",
-                total: session.amount_total ? session.amount_total / 100 : null,
-                currency: String(session.currency || "usd").toUpperCase(),
-                status: session.payment_status,
-                order_items: orderItems,
-                customer_details: session.customer_details || {}
-            }])
-        });
-    } catch (error) {
-        console.warn("Supabase order sync skipped.", error);
-    }
-
-    return orderNumber;
 }

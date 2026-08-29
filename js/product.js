@@ -70,7 +70,7 @@ ${galleryThumbs}
             </div>
             <p class="stock">${product.stock <= 8 ? "Low stock" : "In stock"} / estimated delivery in 5-8 business days once dispatched</p>
             <div class="product-offer-strip">
-                <strong>30% off everything.</strong>
+                <strong>15% off everything.</strong>
                 <span>Sale price is already applied. Shipping is included in the checkout total.</span>
             </div>
             <div class="quantity">

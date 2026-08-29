@@ -89,6 +89,52 @@ function customerAddress(details = {}) {
     ].filter(Boolean).join(", ");
 }
 
+function addressFromDetails(details = {}) {
+    const address = details.address || details;
+    return [
+        details.name,
+        address.line1,
+        address.line2,
+        address.city,
+        address.state,
+        address.postal_code,
+        address.country
+    ].filter(Boolean).join(", ");
+}
+
+function orderItems(order) {
+    return Array.isArray(order.order_items) ? order.order_items : [];
+}
+
+function orderItemCount(order) {
+    return orderItems(order).reduce((total, item) => total + Number(item.quantity || 1), 0);
+}
+
+function orderPreviewImage(order) {
+    const firstItem = orderItems(order).find((item) => item.image_url);
+    return firstItem?.image_url || "images/products/product-placeholder.svg";
+}
+
+function orderPreviewName(order) {
+    const items = orderItems(order);
+    if (!items.length) return "Products pending";
+
+    const extra = items.length > 1 ? ` +${items.length - 1} more` : "";
+    return `${items[0].name || items[0].product_id || "Product"}${extra}`;
+}
+
+function isNewOrder(order) {
+    return Date.now() - new Date(order.created_at).getTime() < 24 * 60 * 60 * 1000;
+}
+
+function fulfilmentStatus(order) {
+    return order.fulfilment_status || order.status || "processing";
+}
+
+function paymentStatus(order) {
+    return order.payment_status || (String(order.status || "").includes("refund") ? "refunded" : "paid");
+}
+
 function csvEscape(value) {
     const text = String(value ?? "");
     const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
@@ -964,7 +1010,7 @@ function offersPanel(data) {
             </div>
             <form class="admin-update-form" data-offer-form>
                 <input type="hidden" name="id" value="${escapeHtml(activeOffer.id || "")}">
-                <label>Offer name<input name="name" value="${escapeHtml(activeOffer.name || "30% off everything")}" required></label>
+                <label>Offer name<input name="name" value="${escapeHtml(activeOffer.name || "15% off everything")}" required></label>
                 <label>Discount percent<input name="discountPercent" type="number" min="0" max="90" step="1" value="${escapeHtml(activeOffer.discount_percent || 25)}" required></label>
                 <label>Start date<input name="startsAt" type="datetime-local"></label>
                 <label>End date<input name="endsAt" type="datetime-local"></label>
@@ -1023,8 +1069,11 @@ function orderRows(orders) {
                     <tr>
                         <th>Order</th>
                         <th>Customer</th>
+                        <th>Products</th>
+                        <th>Items</th>
                         <th>Total</th>
-                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Fulfilment</th>
                         <th>Tracking</th>
                         <th>Date</th>
                     </tr>
@@ -1032,10 +1081,24 @@ function orderRows(orders) {
                 <tbody>
                     ${orders.map((order) => `
                         <tr data-order-row="${escapeHtml(order.order_number)}" tabindex="0">
-                            <td><strong>${escapeHtml(order.order_number)}</strong></td>
-                            <td>${escapeHtml(order.email)}</td>
+                            <td>
+                                <strong>${escapeHtml(order.order_number)}</strong>
+                                ${isNewOrder(order) ? '<span class="status-pill new-order-pill">New</span>' : ""}
+                            </td>
+                            <td>
+                                <strong>${escapeHtml(order.name || order.customer_details?.name || "Customer")}</strong>
+                                <span class="muted">${escapeHtml(order.email)}</span>
+                            </td>
+                            <td>
+                                <div class="admin-order-preview">
+                                    <img src="${escapeHtml(orderPreviewImage(order))}" alt="" loading="lazy">
+                                    <span>${escapeHtml(orderPreviewName(order))}</span>
+                                </div>
+                            </td>
+                            <td>${orderItemCount(order)}</td>
                             <td>${money(order.total, order.currency)}</td>
-                            <td><span class="status-pill">${escapeHtml(order.status)}</span></td>
+                            <td><span class="status-pill">${escapeHtml(paymentStatus(order))}</span></td>
+                            <td><span class="status-pill">${escapeHtml(fulfilmentStatus(order))}</span></td>
                             <td>${escapeHtml(order.tracking_number || "Not added")}</td>
                             <td>${formatDate(order.created_at)}</td>
                         </tr>
@@ -1119,7 +1182,7 @@ function orderSection(orders) {
 function orderDetail(order) {
     if (!order) return "";
 
-    const items = Array.isArray(order.order_items) ? order.order_items : [];
+    const items = orderItems(order);
     return `
         <section class="admin-card admin-order-detail">
             <div class="admin-card-head">
@@ -1133,24 +1196,53 @@ function orderDetail(order) {
                 <span><b>Email</b>${escapeHtml(order.email)}</span>
                 <span><b>Name</b>${escapeHtml(order.name || order.customer_details?.name || "")}</span>
                 <span><b>Phone</b>${escapeHtml(order.customer_details?.phone || "")}</span>
-                <span><b>Address</b>${escapeHtml(customerAddress(order.customer_details))}</span>
+                <span><b>Payment status</b>${escapeHtml(paymentStatus(order))}</span>
+                <span><b>Fulfilment status</b>${escapeHtml(fulfilmentStatus(order))}</span>
+                <span><b>Delivery method</b>${escapeHtml(order.delivery_method || "Tracked shipping")}</span>
+                <span><b>Delivery address</b>${escapeHtml(addressFromDetails(order.shipping_details) || customerAddress(order.customer_details))}</span>
+                <span><b>Billing address</b>${escapeHtml(addressFromDetails(order.billing_details) || customerAddress(order.customer_details))}</span>
+                <span><b>Stripe session</b>${escapeHtml(order.stripe_session_id || "")}</span>
             </div>
             <h4>Products</h4>
             ${items.length ? `
-                <div class="admin-mini-list">
+                <div class="admin-line-items">
                     ${items.map((item) => `
-                        <div>
-                            <span>${escapeHtml(item.name || item.product_id || "Product")}</span>
-                            <strong>${escapeHtml(item.quantity || 1)} x ${money(item.amount_total, item.currency || order.currency)}</strong>
+                        <div class="admin-line-item">
+                            <img src="${escapeHtml(item.image_url || "images/products/product-placeholder.svg")}" alt="" loading="lazy">
+                            <div>
+                                <strong>${escapeHtml(item.name || item.product_id || "Product")}</strong>
+                                <span>${escapeHtml([item.variant, item.sku ? `SKU ${item.sku}` : ""].filter(Boolean).join(" / "))}</span>
+                            </div>
+                            <span>${escapeHtml(item.quantity || 1)} item${Number(item.quantity || 1) === 1 ? "" : "s"}</span>
+                            <span>${money(item.unit_price ?? item.amount_total, item.currency || order.currency)}</span>
+                            <strong>${money(item.line_total ?? item.amount_total, item.currency || order.currency)}</strong>
                         </div>
                     `).join("")}
                 </div>
             ` : '<p class="muted">Line items will appear for new synced Stripe orders.</p>'}
+            <div class="admin-detail-grid admin-total-grid">
+                <span><b>Subtotal</b>${money(order.subtotal ?? order.total, order.currency)}</span>
+                <span><b>Discounts</b>${money(order.discounts || 0, order.currency)}</span>
+                <span><b>Tax</b>${money(order.tax || 0, order.currency)}</span>
+                <span><b>Shipping</b>${money(order.shipping_cost || 0, order.currency)}</span>
+                <span><b>Final total</b>${money(order.total, order.currency)}</span>
+            </div>
+            <h4>Status history</h4>
+            ${order.order_status_history?.length ? `
+                <div class="admin-mini-list">
+                    ${order.order_status_history.slice().reverse().map((entry) => `
+                        <div>
+                            <span>${escapeHtml(formatDate(entry.at))} / ${escapeHtml(entry.event || "update")}</span>
+                            <strong>${escapeHtml(entry.to || "")}</strong>
+                        </div>
+                    `).join("")}
+                </div>
+            ` : '<p class="muted">Status history will appear after the next webhook/admin update.</p>'}
             <form class="admin-update-form" data-order-update="${escapeHtml(order.order_number)}">
                 <label>Status
                     <select name="status">
-                        ${["paid", "processing", "shipped", "delivered", "refunded"].map((status) => `
-                            <option value="${status}" ${order.status === status ? "selected" : ""}>${status}</option>
+                        ${["processing", "shipped", "delivered", "refunded", "payment_failed"].map((status) => `
+                            <option value="${status}" ${fulfilmentStatus(order) === status ? "selected" : ""}>${status}</option>
                         `).join("")}
                     </select>
                 </label>

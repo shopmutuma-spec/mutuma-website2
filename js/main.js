@@ -212,7 +212,7 @@ function bindNewsletterForm() {
         try {
             await submitEmailSignup(email, "homepage-newsletter");
             localStorage.setItem("mutuma.emailSubscribed", "true");
-            newsletterForm.innerHTML = "<strong>You're on the list. 30% off is live across MUTUMA.</strong>";
+            newsletterForm.innerHTML = "<strong>You're on the list. 15% off is live across MUTUMA.</strong>";
         } catch (error) {
             notify(error.message);
             button.disabled = false;

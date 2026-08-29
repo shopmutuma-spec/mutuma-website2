@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { products } from "../../js/products.js";
+import { products, productOptions, productVariantLabel } from "../../js/products.js";
 import { storeSettings } from "../../js/site-settings.js";
 import { supabaseRequest } from "./supabase-client.js";
 
@@ -79,6 +79,28 @@ function getOrigin(event) {
     return host ? `https://${host}` : "https://mutuma.netlify.app";
 }
 
+function publicAssetUrl(origin, path) {
+    const value = String(path || "").trim();
+    if (!value) return "";
+    if (/^https?:\/\//i.test(value)) return value;
+    return `${origin.replace(/\/$/, "")}/${value.replace(/^\//, "")}`;
+}
+
+function productSku(product) {
+    return String(product.sku || product.id || "").trim();
+}
+
+function checkoutVariant(product) {
+    const variant = productVariantLabel(product);
+    if (variant) return variant;
+
+    const options = productOptions(product);
+    return [
+        options.sizes?.[0],
+        options.colours?.[0]
+    ].filter(Boolean).join(" / ");
+}
+
 function normalizeRemoteProduct(product) {
     const currency = product.currency || BASE_CURRENCY;
 
@@ -113,15 +135,15 @@ function isActiveOffer(offer) {
 function normalizeOffer(offer) {
     if (!offer) return offer;
     const offerName = String(offer.name || "").toLowerCase();
-    const isLegacyStorewideSale = [25, 30, 45].includes(Number(offer.discount_percent))
-        && (offerName.includes("25% off everything") || offerName.includes("30% off everything") || offerName.includes("45% off everything"));
+    const isLegacyStorewideSale = [15, 25, 30, 45].includes(Number(offer.discount_percent))
+        && (offerName.includes("15% off everything") || offerName.includes("25% off everything") || offerName.includes("30% off everything") || offerName.includes("45% off everything"));
 
     if (!isLegacyStorewideSale) return offer;
 
     return {
         ...offer,
-        name: "30% off everything",
-        discount_percent: 30
+        name: "15% off everything",
+        discount_percent: 15
     };
 }
 
@@ -333,21 +355,33 @@ export async function handler(event) {
                     }
                 }
             ],
-            line_items: cart.map(({ product, quantity }) => ({
-                quantity,
-                price_data: {
-                    currency: stripeCurrency,
-                    unit_amount: stripeAmount(product.price * discountMultiplier, currency, rates),
-                    product_data: {
-                        name: product.name,
-                        description: product.description,
-                        metadata: {
-                            product_id: product.id,
-                            category: product.category
+            line_items: cart.map(({ product, quantity }) => {
+                const imageUrl = publicAssetUrl(origin, product.images?.[0]);
+                const unitAmount = stripeAmount(product.price * discountMultiplier, currency, rates);
+
+                return {
+                    quantity,
+                    price_data: {
+                        currency: stripeCurrency,
+                        unit_amount: unitAmount,
+                        product_data: {
+                            name: product.name,
+                            description: product.description,
+                            images: imageUrl.startsWith("https://") ? [imageUrl] : undefined,
+                            metadata: {
+                                product_id: product.id,
+                                product_name: product.name,
+                                category: product.category,
+                                sku: productSku(product),
+                                variant: checkoutVariant(product),
+                                image_url: imageUrl,
+                                unit_amount: String(unitAmount),
+                                unit_price_base: String(product.price)
+                            }
                         }
                     }
-                }
-            })),
+                };
+            }),
             metadata: {
                 brand: "MUTUMA",
                 base_currency: BASE_CURRENCY,
@@ -356,7 +390,7 @@ export async function handler(event) {
                 item_count: String(cart.reduce((total, item) => total + item.quantity, 0)),
                 room_reward: reward ? `${reward.discountPercent}%` : "0%",
                 room_reward_discount_usd: String(rewardDiscount),
-                active_offer: "30% off everything"
+                active_offer: "15% off everything"
             },
             success_url: `${origin}/cart.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/cart.html?checkout=cancelled`

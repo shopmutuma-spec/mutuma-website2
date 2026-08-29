@@ -134,7 +134,7 @@ function renderCart() {
             <div class="checkout-trust-row">
                 <span>Secure Stripe checkout</span>
                 <span>5-8 day delivery</span>
-                <span>30% off applied</span>
+                <span>15% off applied</span>
             </div>
             ${upsells.length ? `
                 <div class="cart-upsell-list">

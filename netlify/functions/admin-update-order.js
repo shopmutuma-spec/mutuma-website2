@@ -1,7 +1,8 @@
 import { requireAdmin } from "./admin-auth.js";
 import { json, supabaseRequest } from "./supabase-client.js";
+import { appendOrderHistory } from "./order-sync.js";
 
-const allowedStatuses = new Set(["paid", "processing", "shipped", "delivered", "refunded"]);
+const allowedStatuses = new Set(["processing", "shipped", "delivered", "refunded", "payment_failed"]);
 
 function cleanText(value, maxLength = 500) {
     return String(value || "").trim().slice(0, maxLength);
@@ -28,14 +29,27 @@ export async function handler(event) {
             return json(400, { error: "Choose a valid order status." });
         }
 
+        const existingRows = await supabaseRequest(`orders?select=status,fulfilment_status,order_status_history&order_number=eq.${encodeURIComponent(orderNumber)}&limit=1`);
+        const existingOrder = existingRows?.[0] || {};
+        const currentStatus = existingOrder.fulfilment_status || existingOrder.status || "";
+        const history = appendOrderHistory(existingOrder.order_status_history, {
+            at: new Date().toISOString(),
+            event: "admin.order_updated",
+            from: currentStatus,
+            to: status,
+            note: cleanText(payload.adminNotes, 240) || "Order updated in admin."
+        });
+
         const rows = await supabaseRequest(`orders?order_number=eq.${encodeURIComponent(orderNumber)}`, {
             method: "PATCH",
             body: JSON.stringify({
                 status,
+                fulfilment_status: status,
                 tracking_courier: cleanText(payload.trackingCourier, 80),
                 tracking_number: cleanText(payload.trackingNumber, 120),
                 tracking_url: cleanText(payload.trackingUrl, 500),
-                admin_notes: cleanText(payload.adminNotes, 1000)
+                admin_notes: cleanText(payload.adminNotes, 1000),
+                order_status_history: history
             })
         });
 

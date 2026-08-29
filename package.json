@@ -3,6 +3,12 @@
     "version": "1.0.0",
     "private": true,
     "type": "module",
+    "scripts": {
+        "test": "node tests/order-sync.test.mjs",
+        "build": "node scripts/validate-project.mjs",
+        "lint": "node scripts/validate-project.mjs",
+        "typecheck": "node scripts/validate-project.mjs"
+    },
     "dependencies": {
         "stripe": "^16.12.0"
     }
