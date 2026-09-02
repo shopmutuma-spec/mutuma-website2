@@ -19,6 +19,22 @@ function saveSession(session) {
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
+async function refreshSession(session) {
+    if (!session?.refresh_token) return null;
+
+    try {
+        const data = await authRequest("token?grant_type=refresh_token", {
+            refresh_token: session.refresh_token
+        });
+        if (!data?.access_token) return null;
+        saveSession(data);
+        return data;
+    } catch (error) {
+        clearSession();
+        return null;
+    }
+}
+
 function oauthRedirectUrl() {
     const url = new URL("account.html", window.location.origin);
     return url.toString();
@@ -135,16 +151,27 @@ export async function signInWithGoogle() {
 }
 
 export async function getCurrentUser() {
-    const session = getSession();
+    let session = getSession();
     if (!session?.access_token) return null;
 
     const config = await loadConfig();
-    const response = await fetch(`${config.url.replace(/\/$/, "")}/auth/v1/user`, {
+    let response = await fetch(`${config.url.replace(/\/$/, "")}/auth/v1/user`, {
         headers: {
             apikey: config.anonKey,
             Authorization: `Bearer ${session.access_token}`
         }
     });
+
+    if (response.status === 401) {
+        session = await refreshSession(session);
+        if (!session) return null;
+        response = await fetch(`${config.url.replace(/\/$/, "")}/auth/v1/user`, {
+            headers: {
+                apikey: config.anonKey,
+                Authorization: `Bearer ${session.access_token}`
+            }
+        });
+    }
 
     if (!response.ok) {
         clearSession();
@@ -155,16 +182,23 @@ export async function getCurrentUser() {
 }
 
 export async function adminFetch(path, options = {}) {
-    const session = getSession();
+    let session = getSession();
     if (!session?.access_token) throw new Error("Please sign in first.");
 
-    const response = await fetch(path, {
+    const request = (accessToken) => fetch(path, {
         ...options,
         headers: {
-            Authorization: `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${accessToken}`,
             ...(options.headers || {})
         }
     });
+    let response = await request(session.access_token);
+
+    if (response.status === 401) {
+        session = await refreshSession(session);
+        if (!session) throw new Error("Your session expired. Please sign in again.");
+        response = await request(session.access_token);
+    }
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) throw new Error(data.error || "Admin request failed.");

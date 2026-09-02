@@ -153,13 +153,13 @@ async function loadAdminOrders() {
     try {
         return normalizeAdminOrders(await supabaseRequest(fullSelect));
     } catch (error) {
-        const message = String(error.message || "");
-        if (!message.includes("tracking_url") && !message.includes("payment_status") && !message.includes("billing_details")) throw error;
-        const orders = await supabaseRequest(safeSelect);
-        return normalizeAdminOrders(orders.map((order) => ({
-            ...order,
-            tracking_url: ""
-        })));
+        try {
+            const orders = await supabaseRequest(safeSelect);
+            return normalizeAdminOrders(orders.map((order) => ({ ...order, tracking_url: "" })));
+        } catch (fallbackError) {
+            const minimalSelect = "orders?select=order_number,email,name,total,currency,status,stripe_session_id,order_items,customer_details,created_at&order=created_at.desc&limit=500";
+            return normalizeAdminOrders(await supabaseRequest(minimalSelect));
+        }
     }
 }
 

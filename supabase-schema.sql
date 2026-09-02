@@ -154,11 +154,15 @@ create table if not exists public.catalog_products (
 
 alter table public.catalog_products enable row level security;
 
+drop policy if exists "No public catalog product writes" on public.catalog_products;
+
 create policy "No public catalog product writes"
 on public.catalog_products
 for insert
 to anon, authenticated
 with check (false);
+
+drop policy if exists "No public catalog product updates" on public.catalog_products;
 
 create policy "No public catalog product updates"
 on public.catalog_products
@@ -166,6 +170,8 @@ for update
 to anon, authenticated
 using (false)
 with check (false);
+
+drop policy if exists "No public catalog product deletes" on public.catalog_products;
 
 create policy "No public catalog product deletes"
 on public.catalog_products
@@ -194,11 +200,15 @@ create table if not exists public.store_offers (
 
 alter table public.store_offers enable row level security;
 
+drop policy if exists "No public offer writes" on public.store_offers;
+
 create policy "No public offer writes"
 on public.store_offers
 for insert
 to anon, authenticated
 with check (false);
+
+drop policy if exists "No public offer updates" on public.store_offers;
 
 create policy "No public offer updates"
 on public.store_offers
@@ -206,6 +216,8 @@ for update
 to anon, authenticated
 using (false)
 with check (false);
+
+drop policy if exists "No public offer deletes" on public.store_offers;
 
 create policy "No public offer deletes"
 on public.store_offers
