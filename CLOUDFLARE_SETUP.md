@@ -12,7 +12,7 @@ Connect the repository to Cloudflare Pages and use these settings:
 
 If Cloudflare shows a **Deploy command** field, use:
 
-`npm run build && npx wrangler pages deploy dist --project-name=mutuma-store`
+`npm run build && npx wrangler deploy`
 
 The project also includes a Worker entry point and assets configuration, so Cloudflare's
 default `npx wrangler deploy` command is supported when the dashboard does not allow the

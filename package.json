@@ -6,7 +6,7 @@
     "scripts": {
         "test": "node tests/order-sync.test.mjs && node tests/cloudflare-adapter.test.mjs",
         "build": "node scripts/validate-project.mjs && node scripts/build-cloudflare.mjs",
-        "deploy:cloudflare": "npm run build && npx wrangler pages deploy dist --project-name=mutuma-store",
+        "deploy:cloudflare": "npm run build && npx wrangler deploy",
         "lint": "node scripts/validate-project.mjs",
         "typecheck": "node scripts/validate-project.mjs"
     },

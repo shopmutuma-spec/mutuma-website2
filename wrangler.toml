@@ -1,7 +1,7 @@
-name = "mutuma-store"
+name = "mutuma-website2"
 main = "worker.js"
 compatibility_date = "2026-09-03"
-compatibility_flags = ["nodejs_compat", "populate_process_env"]
+compatibility_flags = ["nodejs_compat"]
 
 [build]
 command = "node scripts/validate-project.mjs && node scripts/build-cloudflare.mjs"
