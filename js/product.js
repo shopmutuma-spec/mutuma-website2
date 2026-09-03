@@ -1,10 +1,11 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260827a";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260827a";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260827a";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260827a";
-import { trackEvent } from "./analytics.js?v=20260827a";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260827a";
-import { setupBundleForProduct } from "./merchandising.js?v=20260827a";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260902b";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260902b";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260902b";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260902b";
+import { trackEvent } from "./analytics.js?v=20260902b";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260902b";
+import { setupBundleForProduct } from "./merchandising.js?v=20260902b";
+import { storeSettings } from "./site-settings.js?v=20260902b";
 
 boot().catch((error) => {
     console.error("MUTUMA product page failed to start.", error);
@@ -93,7 +94,7 @@ ${galleryThumbs}
                 </div>
             ` : ""}
             <button class="button primary wide" data-add-product>Add to Bag</button>
-            <button class="button secondary wide" data-buy-stripe>Buy Now</button>
+            <button class="button secondary wide" data-buy-stripe ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases temporarily paused"}</button>
             <div class="checkout-trust-row product-trust-row">
                 <span>Secure Stripe checkout</span>
                 <span>5-8 day delivery</span>
@@ -111,7 +112,7 @@ ${galleryThumbs}
     <div class="mobile-sticky-add">
         <span><b data-price="${product.price}">${formatPrice(product.price)}</b> / ${product.name}</span>
         <button class="button primary" data-mobile-add>Add</button>
-        <button class="button secondary" data-mobile-buy>Buy Now</button>
+        <button class="button secondary" data-mobile-buy ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases paused"}</button>
     </div>
 `;
 

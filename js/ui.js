@@ -1,11 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260827a";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260827a";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260827a";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260827a";
-import { trackEvent } from "./analytics.js?v=20260827a";
-import { storeSettings } from "./site-settings.js?v=20260827a";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260827a";
-import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260827a";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260902b";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260902b";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260902b";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260902b";
+import { trackEvent } from "./analytics.js?v=20260902b";
+import { storeSettings } from "./site-settings.js?v=20260902b";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260902b";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260902b";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -82,16 +82,15 @@ export function renderHeader() {
         .slice(0, 3);
 
     header.innerHTML = `
-        <div class="sale-ticker" role="note" aria-label="15% off everything right now.">
+        <div class="sale-ticker" role="note" aria-label="${storeSettings.purchasing?.enabled ? "15% off everything right now." : "Purchases are temporarily paused."}">
             <div class="sale-ticker-track">
-                <span>15% off everything</span>
-                <span>No code needed</span>
-                <span>Limited time only</span>
-                <span>No code needed</span>
-                <span aria-hidden="true">15% off everything</span>
-                <span aria-hidden="true">No code needed</span>
-                <span aria-hidden="true">Limited time only</span>
-                <span aria-hidden="true">No code needed</span>
+                ${storeSettings.purchasing?.enabled ? `
+                    <span>15% off everything</span><span>No code needed</span><span>Limited time only</span><span>No code needed</span>
+                    <span aria-hidden="true">15% off everything</span><span aria-hidden="true">No code needed</span><span aria-hidden="true">Limited time only</span><span aria-hidden="true">No code needed</span>
+                ` : `
+                    <span>Store preview open</span><span>Purchases temporarily paused</span><span>Browse all products</span><span>We will be back soon</span>
+                    <span aria-hidden="true">Store preview open</span><span aria-hidden="true">Purchases temporarily paused</span><span aria-hidden="true">Browse all products</span><span aria-hidden="true">We will be back soon</span>
+                `}
             </div>
         </div>
         <nav class="nav">
@@ -271,7 +270,7 @@ export function productCard(product, cardOptions = {}) {
                 </div>
                 <div class="card-actions">
                     <button class="button secondary quick-add-button" data-add-cart="${product.id}" aria-label="Add ${product.name} to bag" title="Add to bag">${icons.cartPlus}<span>Add to bag</span></button>
-                    <button class="button primary buy-now-button" data-buy-now="${product.id}">Buy Now</button>
+                    <button class="button primary buy-now-button" data-buy-now="${product.id}" ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases paused"}</button>
                     <button class="button secondary quick-view-button" data-quick-view="${product.id}">Quick View</button>
                     <button class="icon-button ${wished ? "active" : ""}" data-wishlist="${product.id}" aria-pressed="${wished}" aria-label="Add ${product.name} to wishlist">${icons.heart}</button>
                 </div>
@@ -432,7 +431,7 @@ export function renderCartDrawer() {
         ${rewardDiscount ? `<div><span>Room reward</span><strong>-${formatPrice(rewardDiscount)}</strong></div>` : ""}
         <div><span>Shipping</span><strong>${shipping ? formatPrice(shipping) : "Included"}</strong></div>
         <div class="drawer-total"><span>Total incl. shipping</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
-        <button class="button primary wide" data-drawer-checkout>Checkout - ${formatPrice(total)}</button>
+        <button class="button primary wide" data-drawer-checkout ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? `Checkout - ${formatPrice(total)}` : "Purchases temporarily paused"}</button>
         <div class="checkout-trust-row">
             <span>Secure Stripe checkout</span>
             <span>5-8 day delivery</span>
@@ -783,7 +782,7 @@ export function openQuickView(productId) {
                             <button data-qv-plus aria-label="Increase quantity">+</button>
                         </div>
                         <button class="button primary wide" data-qv-add>Add to Cart</button>
-                        <button class="button secondary wide" data-qv-buy>Buy Now</button>
+                        <button class="button secondary wide" data-qv-buy ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases temporarily paused"}</button>
                         <button class="button secondary wide ${wished ? "active" : ""}" data-qv-wishlist>${wished ? "Saved" : "Wishlist"}</button>
                         <a class="button secondary wide" href="product.html?id=${product.id}">Full Product Page</a>
                     </div>

@@ -297,6 +297,10 @@ export async function handler(event) {
         return json(405, { error: "Method not allowed" });
     }
 
+    if (!storeSettings.purchasing?.enabled) {
+        return json(503, { error: storeSettings.purchasing?.message || "Purchases are temporarily paused." });
+    }
+
     if (!process.env.STRIPE_SECRET_KEY) {
         return json(500, { error: "Stripe secret key is missing." });
     }

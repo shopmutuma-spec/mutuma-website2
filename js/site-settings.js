@@ -1,4 +1,8 @@
 export const storeSettings = {
+    purchasing: {
+        enabled: false,
+        message: "Purchases are temporarily paused. You can still browse every product."
+    },
     breakMode: {
         enabled: false,
         reopenLabel: "Back in 1 day",

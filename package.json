@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "node tests/order-sync.test.mjs",
+        "test": "node tests/order-sync.test.mjs && node tests/cloudflare-adapter.test.mjs",
         "build": "node scripts/validate-project.mjs",
         "lint": "node scripts/validate-project.mjs",
         "typecheck": "node scripts/validate-project.mjs"

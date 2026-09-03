@@ -1,4 +1,5 @@
-import { currentCurrency, readyCurrency } from "./currency.js?v=20260827a";
+import { currentCurrency, readyCurrency } from "./currency.js?v=20260902b";
+import { storeSettings } from "./site-settings.js?v=20260902b";
 
 export const stripeConfig = {
     cartCheckoutLink: "",
@@ -25,7 +26,7 @@ function preconnectStripe() {
 }
 
 export function prewarmCheckout() {
-    if (checkoutWarmupStarted || !stripeConfig.checkoutEndpoint) return;
+    if (!storeSettings.purchasing?.enabled || checkoutWarmupStarted || !stripeConfig.checkoutEndpoint) return;
 
     checkoutWarmupStarted = true;
     preconnectStripe();
@@ -94,6 +95,10 @@ function redirectToCheckout(url) {
 }
 
 async function createStripeCheckout(cart) {
+    if (!storeSettings.purchasing?.enabled) {
+        throw new Error(storeSettings.purchasing?.message || "Purchases are temporarily paused.");
+    }
+
     const checkoutCurrency = await readyCurrency(80);
     const response = await fetch(stripeConfig.checkoutEndpoint, {
         method: "POST",

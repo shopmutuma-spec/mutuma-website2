@@ -1,11 +1,11 @@
-import { initCurrency, formatPrice } from "./currency.js?v=20260827a";
-import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260827a";
-import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260827a";
-import { trackEvent } from "./analytics.js?v=20260827a";
-import { storeSettings } from "./site-settings.js?v=20260827a";
-import { loadStoreCatalog } from "./products.js?v=20260827a";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260827a";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260827a";
+import { initCurrency, formatPrice } from "./currency.js?v=20260902b";
+import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260902b";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260902b";
+import { trackEvent } from "./analytics.js?v=20260902b";
+import { storeSettings } from "./site-settings.js?v=20260902b";
+import { loadStoreCatalog } from "./products.js?v=20260902b";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260902b";
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260902b";
 
 const cartItems = document.querySelector("[data-cart-items]");
 const summary = document.querySelector("[data-cart-summary]");
@@ -130,9 +130,9 @@ function renderCart() {
             <div><span>Shipping</span><strong>${shipping ? formatPrice(shipping) : "Included"}</strong></div>
             <div><span>Tax</span><strong>Calculated by Stripe</strong></div>
             <div class="total"><span>Total incl. shipping</span><strong data-price="${total}">${formatPrice(total)}</strong></div>
-            <button class="button primary wide" data-checkout>Checkout with Stripe - ${formatPrice(total)}</button>
+            <button class="button primary wide" data-checkout ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? `Checkout - ${formatPrice(total)}` : "Purchases temporarily paused"}</button>
             <div class="checkout-trust-row">
-                <span>Secure Stripe checkout</span>
+                <span>${storeSettings.purchasing?.enabled ? "Secure checkout" : "Products remain available to browse"}</span>
                 <span>5-8 day delivery</span>
                 <span>15% off applied</span>
             </div>
@@ -185,7 +185,7 @@ function renderCart() {
         });
     });
 
-    document.querySelector("[data-checkout]").addEventListener("click", async (event) => {
+    document.querySelector("[data-checkout]")?.addEventListener("click", async (event) => {
         const checkoutButton = event.currentTarget;
         checkoutButton.disabled = true;
         checkoutButton.classList.add("is-loading");

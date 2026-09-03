@@ -12,6 +12,12 @@ const requiredFiles = [
     "netlify/functions/order-sync.js",
     "netlify/functions/admin-data.js",
     "netlify/functions/admin-update-order.js",
+    "functions/_adapter.js",
+    "functions/.netlify/functions/[name].js",
+    "functions/currency-location.js",
+    "wrangler.toml",
+    "_redirects",
+    "_headers",
     "supabase-schema.sql"
 ];
 
