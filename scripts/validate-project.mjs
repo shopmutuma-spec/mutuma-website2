@@ -13,7 +13,6 @@ const requiredFiles = [
     "netlify/functions/admin-data.js",
     "netlify/functions/admin-update-order.js",
     "functions/_adapter.js",
-    "functions/.netlify/functions/[name].js",
     "functions/api/[name].js",
     "functions/currency-location.js",
     "scripts/build-cloudflare.mjs",
