@@ -1,4 +1,12 @@
 name = "mutuma-store"
+main = "worker.js"
 compatibility_date = "2026-09-03"
-compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = "dist"
+compatibility_flags = ["nodejs_compat", "populate_process_env"]
+
+[build]
+command = "node scripts/validate-project.mjs && node scripts/build-cloudflare.mjs"
+
+[assets]
+directory = "./dist"
+binding = "STATIC_ASSETS"
+run_worker_first = ["/api/*", "/currency-location", "/.netlify/functions/*"]

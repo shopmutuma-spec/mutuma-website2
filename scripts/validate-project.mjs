@@ -18,6 +18,7 @@ const requiredFiles = [
     "functions/currency-location.js",
     "scripts/build-cloudflare.mjs",
     "wrangler.toml",
+    "worker.js",
     "_redirects",
     "_headers",
     "supabase-schema.sql"

@@ -14,7 +14,9 @@ If Cloudflare shows a **Deploy command** field, use:
 
 `npm run build && npx wrangler pages deploy dist --project-name=mutuma-store`
 
-Do not use `npx wrangler deploy`; that command deploys a Worker rather than this Pages project.
+The project also includes a Worker entry point and assets configuration, so Cloudflare's
+default `npx wrangler deploy` command is supported when the dashboard does not allow the
+Pages deploy command to be changed.
 
 Deploy through Cloudflare's Git integration or Wrangler. Dashboard drag-and-drop deployment does not compile Pages Functions.
 
