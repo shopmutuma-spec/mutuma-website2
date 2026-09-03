@@ -3550,7 +3550,7 @@ async function fetchStoreCatalog(timeout = 900) {
     const timeoutId = globalThis.setTimeout(() => controller.abort(), timeout);
 
     try {
-        const response = await fetch("/.netlify/functions/store-catalog", {
+        const response = await fetch("/api/store-catalog", {
             signal: controller.signal,
             cache: "default"
         });

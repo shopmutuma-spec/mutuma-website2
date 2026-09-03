@@ -28,7 +28,7 @@ form.addEventListener("submit", async (event) => {
     message.textContent = "";
 
     try {
-        const response = await fetch("/.netlify/functions/track-order", {
+        const response = await fetch("/api/track-order", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

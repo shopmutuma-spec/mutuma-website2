@@ -1650,7 +1650,7 @@ function adminDataUrl() {
     Object.entries(adminState).forEach(([key, value]) => {
         if (value) params.set(key, value);
     });
-    return `/.netlify/functions/admin-data?${params.toString()}`;
+    return `/api/admin-data?${params.toString()}`;
 }
 
 async function loadAdmin(options = {}) {
@@ -1685,7 +1685,7 @@ async function loadAdmin(options = {}) {
 
 async function loadAdminHealth() {
     try {
-        adminHealth = await adminFetch("/.netlify/functions/admin-health");
+        adminHealth = await adminFetch("/api/admin-health");
     } catch (error) {
         adminHealth = {
             ok: false,
@@ -1730,7 +1730,7 @@ async function saveOrder(formElement) {
     statusMessage.textContent = "Saving...";
 
     try {
-        await adminFetch("/.netlify/functions/admin-update-order", {
+        await adminFetch("/api/admin-update-order", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -1760,7 +1760,7 @@ async function saveOffer(formElement) {
     statusMessage.textContent = "Saving offer...";
 
     try {
-        await adminFetch("/.netlify/functions/admin-save-offer", {
+        await adminFetch("/api/admin-save-offer", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -1790,7 +1790,7 @@ async function saveProduct(formElement) {
     statusMessage.textContent = "Adding product...";
 
     try {
-        await adminFetch("/.netlify/functions/admin-save-product", {
+        await adminFetch("/api/admin-save-product", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

@@ -567,7 +567,7 @@ export function notify(message) {
 }
 
 export async function submitEmailSignup(email, source, metadata = {}) {
-    const supabaseResponse = await fetch("/.netlify/functions/subscribe-email", {
+    const supabaseResponse = await fetch("/api/subscribe-email", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

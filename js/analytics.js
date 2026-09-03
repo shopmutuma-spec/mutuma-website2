@@ -83,10 +83,10 @@ function sendAnalytics(name, detail) {
 
     if (navigator.sendBeacon) {
         const blob = new Blob([payload], { type: "application/json" });
-        if (navigator.sendBeacon("/.netlify/functions/collect-analytics", blob)) return;
+        if (navigator.sendBeacon("/api/collect-analytics", blob)) return;
     }
 
-    fetch("/.netlify/functions/collect-analytics", {
+    fetch("/api/collect-analytics", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

@@ -4,7 +4,7 @@ import { storeSettings } from "./site-settings.js?v=20260902b";
 export const stripeConfig = {
     cartCheckoutLink: "",
     paymentLinks: {},
-    checkoutEndpoint: "/.netlify/functions/create-checkout-session"
+    checkoutEndpoint: "/api/create-checkout-session"
 };
 
 let checkoutWarmupStarted = false;

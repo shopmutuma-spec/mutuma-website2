@@ -6,9 +6,15 @@ Connect the repository to Cloudflare Pages and use these settings:
 
 - Framework preset: None
 - Build command: `npm run build`
-- Build output directory: `.`
+- Build output directory: `dist`
 - Root directory: the folder containing this file
 - Node.js compatibility: enabled by `wrangler.toml`
+
+If Cloudflare shows a **Deploy command** field, use:
+
+`npm run build && npx wrangler pages deploy dist --project-name=mutuma-store`
+
+Do not use `npx wrangler deploy`; that command deploys a Worker rather than this Pages project.
 
 Deploy through Cloudflare's Git integration or Wrangler. Dashboard drag-and-drop deployment does not compile Pages Functions.
 
@@ -33,8 +39,11 @@ Add variables separately for Preview if preview deployments need working authent
 After deployment, check:
 
 - `/currency-location`
-- `/.netlify/functions/supabase-health`
-- `/.netlify/functions/store-catalog`
+- `/api/supabase-health`
+- `/api/store-catalog`
+
+The storefront uses `/api/*` for Cloudflare Pages Functions. The older
+`/.netlify/functions/*` route remains available for Netlify compatibility.
 - `/admin.html`
 
 The old Netlify function URLs are intentionally preserved, so the browser code does not need different production URLs.

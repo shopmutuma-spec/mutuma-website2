@@ -16,7 +16,6 @@ const requiredFiles = [
     "functions/.netlify/functions/[name].js",
     "functions/api/[name].js",
     "functions/currency-location.js",
-    "scripts/build-cloudflare.mjs",
     "wrangler.toml",
     "_redirects",
     "_headers",

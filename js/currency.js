@@ -321,7 +321,7 @@ async function detectFromServices() {
             })
         },
         {
-            url: "/.netlify/functions/detect-currency",
+            url: "/api/detect-currency",
             priority: 120,
             parse: (data) => ({
                 country: normalizeCountry(data.country),

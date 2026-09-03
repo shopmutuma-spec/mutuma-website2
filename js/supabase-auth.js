@@ -4,7 +4,7 @@ let configPromise;
 
 async function loadConfig() {
     if (!configPromise) {
-        configPromise = fetch("/.netlify/functions/supabase-config")
+        configPromise = fetch("/api/supabase-config")
             .then(async (response) => {
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || "Supabase is not configured yet.");
@@ -199,6 +199,7 @@ export async function adminFetch(path, options = {}) {
         if (!session) throw new Error("Your session expired. Please sign in again.");
         response = await request(session.access_token);
     }
+
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) throw new Error(data.error || "Admin request failed.");

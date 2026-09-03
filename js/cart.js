@@ -51,7 +51,7 @@ async function syncStripeCustomerEmail(sessionId) {
     }
 
     try {
-        const response = await fetch(`/.netlify/functions/get-checkout-session?session_id=${encodeURIComponent(sessionId)}`);
+        const response = await fetch(`/api/get-checkout-session?session_id=${encodeURIComponent(sessionId)}`);
         const data = await response.json();
 
         if (!response.ok) return null;
