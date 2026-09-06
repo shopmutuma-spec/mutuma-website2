@@ -4,7 +4,7 @@ let configPromise;
 
 async function loadConfig() {
     if (!configPromise) {
-        configPromise = fetch("/api/supabase-config")
+        configPromise = fetch("/.netlify/functions/supabase-config")
             .then(async (response) => {
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || "Supabase is not configured yet.");

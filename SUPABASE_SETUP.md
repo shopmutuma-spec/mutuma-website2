@@ -22,6 +22,10 @@ PUBLIC_SITE_URL=https://mutumas.com
 
 Keep `SUPABASE_SERVICE_ROLE_KEY` private. Do not put it in browser JavaScript.
 
+Newer Supabase projects can use `SUPABASE_PUBLISHABLE_KEY` and
+`SUPABASE_SECRET_KEY` instead of the legacy anon and service-role variables.
+The website accepts either pair. Keep the secret key private as well.
+
 ## 3. Redeploy
 
 Trigger a new Netlify deploy after adding the environment variables.

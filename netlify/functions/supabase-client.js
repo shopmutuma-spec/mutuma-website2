@@ -1,6 +1,26 @@
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
+function keyFromDictionary(value) {
+    if (!value) return "";
+    try {
+        const keys = JSON.parse(value);
+        return String(keys?.default || Object.values(keys || {})[0] || "").trim();
+    } catch (error) {
+        return "";
+    }
+}
+
+const SUPABASE_URL = String(process.env.SUPABASE_URL || "").trim();
+const SUPABASE_SERVER_KEY = String(
+    process.env.SUPABASE_SECRET_KEY
+    || process.env.SUPABASE_SERVICE_ROLE_KEY
+    || keyFromDictionary(process.env.SUPABASE_SECRET_KEYS)
+    || ""
+).trim();
+const SUPABASE_PUBLIC_KEY = String(
+    process.env.SUPABASE_PUBLISHABLE_KEY
+    || process.env.SUPABASE_ANON_KEY
+    || keyFromDictionary(process.env.SUPABASE_PUBLISHABLE_KEYS)
+    || ""
+).trim();
 
 function normalizeSupabaseUrl(value) {
     const rawValue = String(value || "").trim();
@@ -15,13 +35,13 @@ function normalizeSupabaseUrl(value) {
 }
 
 export function hasSupabaseConfig() {
-    return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+    return Boolean(SUPABASE_URL && SUPABASE_SERVER_KEY);
 }
 
 export function publicSupabaseConfig() {
     return {
         url: normalizeSupabaseUrl(SUPABASE_URL),
-        anonKey: SUPABASE_ANON_KEY
+        anonKey: SUPABASE_PUBLIC_KEY
     };
 }
 
@@ -44,8 +64,8 @@ export async function supabaseRequest(path, options = {}) {
     const response = await fetch(`${baseUrl}/rest/v1/${path}`, {
         ...options,
         headers: {
-            apikey: SUPABASE_SERVICE_ROLE_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            apikey: SUPABASE_SERVER_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVER_KEY}`,
             "Content-Type": "application/json",
             Prefer: "return=representation,resolution=merge-duplicates",
             ...(options.headers || {})
@@ -63,12 +83,12 @@ export async function supabaseRequest(path, options = {}) {
 }
 
 export async function verifySupabaseUser(token) {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !token) return null;
+    if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY || !token) return null;
 
     const baseUrl = normalizeSupabaseUrl(SUPABASE_URL);
     const response = await fetch(`${baseUrl}/auth/v1/user`, {
         headers: {
-            apikey: SUPABASE_ANON_KEY,
+            apikey: SUPABASE_PUBLIC_KEY,
             Authorization: `Bearer ${token}`
         }
     });

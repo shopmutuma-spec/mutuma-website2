@@ -11,7 +11,7 @@ export async function handler() {
     if (!checks.supabaseUrl || !checks.anonKey || !checks.serviceRoleKey) {
         return json(503, {
             ok: false,
-            error: "Supabase environment variables are missing in Netlify.",
+            error: "Supabase environment variables are missing in Netlify. Add SUPABASE_URL, a publishable/anon key, and a secret/service-role key, then redeploy.",
             checks
         });
     }
