@@ -1,8 +1,8 @@
-import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260906-payments";
-import { initCurrency } from "./currency.js?v=20260906-payments";
-import { addToCart } from "./store.js?v=20260906-payments";
-import { aboutMutuma, roomEdit } from "./site-content.js?v=20260906-payments";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260906-payments";
+import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260906-email-batch";
+import { initCurrency } from "./currency.js?v=20260906-email-batch";
+import { addToCart } from "./store.js?v=20260906-email-batch";
+import { aboutMutuma, roomEdit } from "./site-content.js?v=20260906-email-batch";
+import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260906-email-batch";
 
 boot().catch((error) => {
     console.error("MUTUMA homepage failed to start.", error);

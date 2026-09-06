@@ -147,7 +147,7 @@ async function optionalSupabaseRequest(path) {
 }
 
 async function loadAdminOrders() {
-    const fullSelect = "orders?select=order_number,email,name,subtotal,discounts,tax,shipping_cost,total,currency,status,payment_status,fulfilment_status,delivery_method,stripe_session_id,stripe_payment_intent,tracking_courier,tracking_number,tracking_url,admin_notes,order_items,customer_details,billing_details,shipping_details,order_status_history,created_at,updated_at&order=created_at.desc&limit=500";
+    const fullSelect = "orders?select=*&order=created_at.desc&limit=500";
     const safeSelect = "orders?select=order_number,email,name,total,currency,status,stripe_session_id,tracking_courier,tracking_number,admin_notes,order_items,customer_details,created_at,updated_at&order=created_at.desc&limit=500";
 
     try {

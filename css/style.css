@@ -3509,6 +3509,10 @@ textarea {
 }
 
 /* Footer */
+.product-facts { margin: 20px 0; border-top: 1px solid var(--line); }
+.product-facts > div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.5; }
+.product-facts dt { color: var(--muted); }
+.product-facts dd { margin: 0; overflow-wrap: anywhere; }
 .payment-footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .payment-footer p { margin: 0; font-size: 13px; }
 .payment-footer ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; }

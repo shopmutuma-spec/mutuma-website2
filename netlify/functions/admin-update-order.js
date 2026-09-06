@@ -1,6 +1,7 @@
 import { requireAdmin } from "./admin-auth.js";
 import { json, supabaseRequest } from "./supabase-client.js";
 import { appendOrderHistory } from "./order-sync.js";
+import { notifyOrder } from "./order-email.js";
 
 const allowedStatuses = new Set(["processing", "shipped", "delivered", "refunded", "payment_failed"]);
 
@@ -31,6 +32,7 @@ export async function handler(event) {
 
         const existingRows = await supabaseRequest(`orders?select=status,fulfilment_status,order_status_history&order_number=eq.${encodeURIComponent(orderNumber)}&limit=1`);
         const existingOrder = existingRows?.[0] || {};
+        if (!existingRows?.length) return json(404, { error: "Order not found." });
         const currentStatus = existingOrder.fulfilment_status || existingOrder.status || "";
         const history = appendOrderHistory(existingOrder.order_status_history, {
             at: new Date().toISOString(),
@@ -53,7 +55,13 @@ export async function handler(event) {
             })
         });
 
+        let notification = null;
+        if (currentStatus !== status && ["shipped", "delivered"].includes(status)) {
+            try { notification = await notifyOrder(orderNumber, status); }
+            catch { notification = { status: "failed", error: "Check email configuration and migration." }; }
+        }
         return json(200, {
+            notification,
             ok: true,
             order: rows?.[0] || null
         });

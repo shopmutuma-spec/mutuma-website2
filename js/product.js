@@ -1,11 +1,11 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260906-payments";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260906-payments";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260906-payments";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-payments";
-import { trackEvent } from "./analytics.js?v=20260906-payments";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260906-payments";
-import { setupBundleForProduct } from "./merchandising.js?v=20260906-payments";
-import { storeSettings } from "./site-settings.js?v=20260906-payments";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260906-email-batch";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260906-email-batch";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260906-email-batch";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-email-batch";
+import { trackEvent } from "./analytics.js?v=20260906-email-batch";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260906-email-batch";
+import { setupBundleForProduct } from "./merchandising.js?v=20260906-email-batch";
+import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
 
 boot().catch((error) => {
     console.error("MUTUMA product page failed to start.", error);
@@ -69,7 +69,15 @@ ${galleryThumbs}
                 <strong data-price="${product.price}">${formatPrice(product.price)}</strong>
                 ${product.oldPrice ? `<s data-price="${product.oldPrice}">${formatPrice(product.oldPrice)}</s>` : ""}
             </div>
-            <p class="stock">${product.stock <= 8 ? "Low stock" : "In stock"} / estimated delivery in 5-8 business days once dispatched</p>
+            <p class="stock">${product.stock === 0 ? "Out of stock" : product.stock <= 8 ? "Low stock" : "In stock"}</p>
+            <dl class="product-facts">
+                <div><dt>Sizes</dt><dd>${escapeProductText(sizeList)}</dd></div>
+                ${product.material ? `<div><dt>Material</dt><dd>${escapeProductText(product.material)}</dd></div>` : ""}
+                ${product.dimensions ? `<div><dt>Dimensions</dt><dd>${escapeProductText(product.dimensions)}</dd></div>` : ""}
+                ${typeof product.framed === "boolean" ? `<div><dt>Frame</dt><dd>${product.framed ? "Included" : "Not included"}</dd></div>` : ""}
+                <div><dt>Delivery</dt><dd>Estimated 5-8 business days after dispatch</dd></div>
+                <div><dt>Shipping</dt><dd><span data-price="${storeSettings.standardShipping}">${formatPrice(storeSettings.standardShipping)}</span>; free on orders of <span data-price="${storeSettings.freeShippingThreshold}">${formatPrice(storeSettings.freeShippingThreshold)}</span> or more</dd></div>
+            </dl>
             <div class="product-offer-strip">
                 <strong>15% off everything.</strong>
                 <span>Sale price is already applied. Shipping is included in the checkout total.</span>
@@ -97,7 +105,7 @@ ${galleryThumbs}
             <button class="button secondary wide" data-buy-stripe ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases temporarily paused"}</button>
             <div class="checkout-trust-row product-trust-row">
                 <span>Secure Stripe checkout</span>
-                <span>5-8 day delivery</span>
+                <span>Tracked delivery</span>
                 <span>Easy returns</span>
             </div>
             <button class="button secondary wide ${getWishlist().includes(product.id) ? "active" : ""}" data-wishlist-product aria-pressed="${getWishlist().includes(product.id)}">Wishlist</button>
@@ -119,6 +127,10 @@ ${galleryThumbs}
 let quantity = 1;
 const quantityInput = document.querySelector("[data-quantity]");
 let activeGalleryIndex = 0;
+
+function escapeProductText(value) {
+    return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+}
 
 function buildGalleryImages(item) {
     return [...new Set(item.images.filter(Boolean))];

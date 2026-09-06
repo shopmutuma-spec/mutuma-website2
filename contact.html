@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>MUTUMA Contact | Support</title>
     <meta name="description" content="Contact MUTUMA for orders, shipping and product support.">
-    <link rel="stylesheet" href="css/style.css?v=20260906-payments">
+    <link rel="stylesheet" href="css/style.css?v=20260906-email-batch">
 </head>
 <body>
     <div class="loading-screen" data-loader aria-hidden="true">
         <div class="loading-logo">MUTUMA</div>
     </div>
-    <script src="js/loader.js?v=20260906-payments"></script>
+    <script src="js/loader.js?v=20260906-email-batch"></script>
     <header class="site-header" data-header></header>
 
     <main>
@@ -24,21 +24,23 @@
         <section class="contact-layout container">
             <div class="contact-card">
                 <h2>Studio Desk</h2>
-                <p>hello@mutumas.com</p>
+                <p><a href="mailto:hello@mutumas.com">hello@mutumas.com</a></p>
                 <p>Monday to Friday / Worldwide support</p>
             </div>
             <form class="contact-form" data-contact-form>
-                <label>Name<input required></label>
-                <label>Email<input type="email" required></label>
-                <label>Message<textarea required></textarea></label>
+                <label>Name<input name="name" autocomplete="name" maxlength="120" required></label>
+                <label>Email<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
+                <label>Message<textarea name="message" minlength="10" maxlength="5000" required></textarea></label>
+                <div hidden aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>
                 <button class="button primary">Send Message</button>
+                <p data-contact-status role="status" aria-live="polite"></p>
             </form>
         </section>
     </main>
 
     <footer class="site-footer" data-footer></footer>
     <div data-modal></div>
-    <script type="module" src="js/contact.js?v=20260906-payments"></script>
+    <script type="module" src="js/contact.js?v=20260906-email-batch"></script>
 </body>
 </html>
 

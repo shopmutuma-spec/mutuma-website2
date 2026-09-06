@@ -1,6 +1,6 @@
-import { initCurrency } from "./currency.js?v=20260906-payments";
-import { initBaseLayout } from "./ui.js?v=20260906-payments";
-import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260906-payments";
+import { initCurrency } from "./currency.js?v=20260906-email-batch";
+import { initBaseLayout } from "./ui.js?v=20260906-email-batch";
+import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260906-email-batch";
 
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -1227,6 +1227,10 @@ function orderDetail(order) {
                 <span><b>Shipping</b>${money(order.shipping_cost || 0, order.currency)}</span>
                 <span><b>Final total</b>${money(order.total, order.currency)}</span>
             </div>
+            <h4>Customer email</h4>
+            <p role="status">${escapeHtml(order.email_notification?.kind || "Order notification")}: ${escapeHtml(order.email_notification?.status === "accepted" ? "Accepted by email provider" : order.email_notification?.status || "Not recorded")}</p>
+            ${order.email_notification?.error ? `<p class="form-message">${escapeHtml(order.email_notification.error)}</p>` : ""}
+            ${order.email_notification?.status !== "accepted" ? `<button class="button secondary" data-retry-order-email="${escapeHtml(order.order_number)}">Retry customer email</button>` : ""}
             <h4>Status history</h4>
             ${order.order_status_history?.length ? `
                 <div class="admin-mini-list">
@@ -1730,7 +1734,7 @@ async function saveOrder(formElement) {
     statusMessage.textContent = "Saving...";
 
     try {
-        await adminFetch("/.netlify/functions/admin-update-order", {
+        const result = await adminFetch("/.netlify/functions/admin-update-order", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -1745,7 +1749,7 @@ async function saveOrder(formElement) {
             })
         });
         await loadAdmin();
-        statusMessage.textContent = "Saved.";
+        notify(result.notification?.status === "failed" ? "Order saved. Customer email failed; check order details and retry." : "Order saved.");
     } catch (error) {
         statusMessage.textContent = error.message;
     } finally {
@@ -1835,7 +1839,18 @@ form.addEventListener("submit", async (event) => {
     }
 });
 
-panel.addEventListener("click", (event) => {
+panel.addEventListener("click", async (event) => {
+    const retryEmail = event.target.closest("[data-retry-order-email]");
+    if (retryEmail) {
+        retryEmail.disabled = true;
+        try {
+            const result = await adminFetch("/.netlify/functions/admin-retry-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderNumber: retryEmail.dataset.retryOrderEmail }) });
+            await loadAdmin();
+            notify(result.notification?.status === "accepted" ? "Email accepted for sending." : "Email failed. Check the order email status.");
+        } catch (error) { notify(error.message); }
+        finally { retryEmail.disabled = false; }
+        return;
+    }
     const row = event.target.closest("[data-order-row]");
     if (row && adminData) {
         renderAdmin(currentAdminUser, row.dataset.orderRow);

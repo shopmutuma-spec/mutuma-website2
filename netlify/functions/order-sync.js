@@ -1,5 +1,5 @@
 import { hasSupabaseConfig, supabaseRequest } from "./supabase-client.js";
-import { queueTrackingEmail } from "./mailer-lite.js";
+import { notifyOrder } from "./order-email.js";
 
 const ORDER_HISTORY_LIMIT = 40;
 const IMAGE_PLACEHOLDER = "images/products/product-placeholder.svg";
@@ -143,16 +143,10 @@ async function queueCustomerEmail(session, orderNumber, origin) {
     const email = customerEmail(session);
     if (!email) return { ok: false, skipped: true };
 
-    const trackingUrl = `${origin}/tracking.html?order=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`;
     try {
-        return await queueTrackingEmail({
-            email,
-            name: customerName(session),
-            orderNumber,
-            trackingUrl
-        });
+        return await notifyOrder(orderNumber);
     } catch (error) {
-        console.warn("MailerLite tracking email skipped.", error);
+        console.warn("Order email failed. Check email configuration and migration.");
         return { ok: false };
     }
 }

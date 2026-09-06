@@ -415,3 +415,5 @@ on public.admin_audit_log
 for insert
 to anon, authenticated
 with check (false);
+
+alter table public.orders add column if not exists email_notification jsonb;

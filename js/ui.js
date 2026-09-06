@@ -1,11 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260906-payments";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260906-payments";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-payments";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260906-payments";
-import { trackEvent } from "./analytics.js?v=20260906-payments";
-import { storeSettings } from "./site-settings.js?v=20260906-payments";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260906-payments";
-import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260906-payments";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260906-email-batch";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260906-email-batch";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-email-batch";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260906-email-batch";
+import { trackEvent } from "./analytics.js?v=20260906-email-batch";
+import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260906-email-batch";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260906-email-batch";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',

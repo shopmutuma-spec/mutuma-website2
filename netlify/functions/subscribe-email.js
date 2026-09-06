@@ -1,4 +1,5 @@
 import { hasSupabaseConfig, json, supabaseRequest } from "./supabase-client.js";
+import { syncNewsletter } from "./newsletter-sync.js";
 
 function cleanEmail(email) {
     return String(email || "").trim().toLowerCase();
@@ -37,6 +38,8 @@ export async function handler(event) {
             }])
         });
 
+        try { await syncNewsletter(email); }
+        catch { return json(503, { error: "Your email was saved, but newsletter signup could not finish. Please try again shortly." }); }
         return json(200, {
             ok: true,
             subscriber: rows?.[0] || { email, source }
