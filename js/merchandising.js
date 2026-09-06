@@ -1,5 +1,5 @@
-import { products, getRecommendedProducts } from "./products.js?v=20260902b";
-import { storeSettings } from "./site-settings.js?v=20260902b";
+import { products, getRecommendedProducts } from "./products.js?v=20260906-open";
+import { storeSettings } from "./site-settings.js?v=20260906-open";
 
 export function cartItemCount(cart) {
     return cart.reduce((total, item) => total + Number(item.quantity || 1), 0);

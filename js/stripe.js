@@ -1,5 +1,5 @@
-import { currentCurrency, readyCurrency } from "./currency.js?v=20260902b";
-import { storeSettings } from "./site-settings.js?v=20260902b";
+import { currentCurrency, readyCurrency } from "./currency.js?v=20260906-open";
+import { storeSettings } from "./site-settings.js?v=20260906-open";
 
 export const stripeConfig = {
     cartCheckoutLink: "",
