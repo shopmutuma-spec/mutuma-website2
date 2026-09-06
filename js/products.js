@@ -1,4 +1,4 @@
-import { storeSettings } from "./site-settings.js?v=20260906-open";
+import { storeSettings } from "./site-settings.js?v=20260906-payments";
 
 const baseProducts = [
     {

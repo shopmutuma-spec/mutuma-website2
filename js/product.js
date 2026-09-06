@@ -1,11 +1,11 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260906-open";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260906-open";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260906-open";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-open";
-import { trackEvent } from "./analytics.js?v=20260906-open";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260906-open";
-import { setupBundleForProduct } from "./merchandising.js?v=20260906-open";
-import { storeSettings } from "./site-settings.js?v=20260906-open";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260906-payments";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260906-payments";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260906-payments";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-payments";
+import { trackEvent } from "./analytics.js?v=20260906-payments";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260906-payments";
+import { setupBundleForProduct } from "./merchandising.js?v=20260906-payments";
+import { storeSettings } from "./site-settings.js?v=20260906-payments";
 
 boot().catch((error) => {
     console.error("MUTUMA product page failed to start.", error);

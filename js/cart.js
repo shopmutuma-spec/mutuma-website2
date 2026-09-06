@@ -1,11 +1,11 @@
-import { initCurrency, formatPrice } from "./currency.js?v=20260906-open";
-import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260906-open";
-import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260906-open";
-import { trackEvent } from "./analytics.js?v=20260906-open";
-import { storeSettings } from "./site-settings.js?v=20260906-open";
-import { loadStoreCatalog } from "./products.js?v=20260906-open";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260906-open";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260906-open";
+import { initCurrency, formatPrice } from "./currency.js?v=20260906-payments";
+import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260906-payments";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260906-payments";
+import { trackEvent } from "./analytics.js?v=20260906-payments";
+import { storeSettings } from "./site-settings.js?v=20260906-payments";
+import { loadStoreCatalog } from "./products.js?v=20260906-payments";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260906-payments";
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260906-payments";
 
 const cartItems = document.querySelector("[data-cart-items]");
 const summary = document.querySelector("[data-cart-summary]");

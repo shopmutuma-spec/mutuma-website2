@@ -3509,6 +3509,11 @@ textarea {
 }
 
 /* Footer */
+.payment-footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.payment-footer p { margin: 0; font-size: 13px; }
+.payment-footer ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; }
+.payment-footer li { width: 66px; height: 42px; background: #fff; border: 1px solid #dedede; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+.payment-footer img { display: block; width: 58px; height: 36px; object-fit: contain; }
 .site-footer {
     border-top: 1px solid var(--line);
     padding: 44px 0;

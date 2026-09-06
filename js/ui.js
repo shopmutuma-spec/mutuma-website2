@@ -1,11 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260906-open";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260906-open";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-open";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260906-open";
-import { trackEvent } from "./analytics.js?v=20260906-open";
-import { storeSettings } from "./site-settings.js?v=20260906-open";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260906-open";
-import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260906-open";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260906-payments";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260906-payments";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-payments";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260906-payments";
+import { trackEvent } from "./analytics.js?v=20260906-payments";
+import { storeSettings } from "./site-settings.js?v=20260906-payments";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260906-payments";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260906-payments";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -202,6 +202,7 @@ export function renderFooter() {
     const footer = document.querySelector("[data-footer]");
     if (!footer) return;
 
+    const paymentBrands = [["visa", "Visa"], ["mastercard", "Mastercard"], ["american-express", "American Express"], ["discover", "Discover"], ["diners", "Diners Club"], ["jcb", "JCB"], ["unionpay", "UnionPay"], ["apple-pay", "Apple Pay"]];
     footer.innerHTML = `
         <div class="container footer-grid">
             <div>
@@ -240,6 +241,12 @@ export function renderFooter() {
                 <a href="https://www.instagram.com/" rel="noopener" target="_blank">Instagram</a>
                 <a href="https://www.pinterest.com/" rel="noopener" target="_blank">Pinterest</a>
             </div>
+        </div>
+        <div class="container payment-footer">
+            <p>Secure payments through Stripe</p>
+            <ul aria-label="Payment methods">
+                ${paymentBrands.map(([file, name]) => `<li><img src="/images/payments/${file}.svg" alt="${name}" width="58" height="36" loading="lazy"></li>`).join("")}
+            </ul>
         </div>
     `;
 }
