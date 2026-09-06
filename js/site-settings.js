@@ -1,6 +1,6 @@
 export const storeSettings = {
     purchasing: {
-        enabled: false,
+        enabled: true,
         message: "Purchases are temporarily paused. You can still browse every product."
     },
     breakMode: {
