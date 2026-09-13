@@ -214,7 +214,7 @@ export function renderFooter() {
                 <strong>Shop</strong>
                 <a href="shop.html">Shop</a>
                 <a href="categories.html">Categories</a>
-                <a href="index.html#about">About</a>
+                <a href="about.html">About Us</a>
                 <a href="shop.html?tag=best-seller">Best Sellers</a>
                 <a href="wishlist.html">Wishlist</a>
                 <a href="account.html">Account</a>

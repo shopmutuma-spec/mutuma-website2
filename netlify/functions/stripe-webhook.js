@@ -63,7 +63,7 @@ async function markProcessed(stripeEvent, status, errorMessage = "") {
 }
 
 async function handleEvent(stripeEvent, event) {
-    if (stripeEvent.type === "checkout.session.completed") {
+    if (["checkout.session.completed", "checkout.session.async_payment_succeeded"].includes(stripeEvent.type)) {
         const session = await stripe.checkout.sessions.retrieve(stripeEvent.data.object.id);
 
         if (session.payment_status !== "paid") {

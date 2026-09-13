@@ -6,7 +6,7 @@ initCurrency().catch(() => {});
 
 const form = document.querySelector("[data-tracking-form]");
 const message = document.querySelector("[data-tracking-message]");
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.hash.slice(1) || window.location.search);
 
 if (params.get("order")) {
     form.orderNumber.value = params.get("order");
@@ -15,6 +15,8 @@ if (params.get("order")) {
 if (params.get("email")) {
     form.email.value = params.get("email");
 }
+
+if (params.has("email")) history.replaceState(null, "", window.location.pathname);
 
 if (form.orderNumber.value && form.email.value) {
     window.setTimeout(() => form.requestSubmit(), 0);
@@ -40,7 +42,7 @@ form.addEventListener("submit", async (event) => {
         });
 
         if (response.status === 404) {
-            message.textContent = "Order tracking is not connected yet. Contact MUTUMA with your order number and checkout email.";
+            message.textContent = "No matching order found. Check your order number and checkout email. A new purchase may take a moment to appear.";
             return;
         }
 
@@ -51,7 +53,7 @@ form.addEventListener("submit", async (event) => {
             message.textContent = "Tracking is not available for this order yet.";
         }
     } catch (error) {
-        message.textContent = "Order tracking is not connected yet. Contact MUTUMA with your order number and checkout email.";
+        message.textContent = "We could not check your order right now. Please try again or email shopmutuma@gmail.com.";
     } finally {
         button.disabled = false;
         button.textContent = "Check Order";
@@ -70,7 +72,7 @@ function renderTrackingMessage(data) {
         link.className = "button secondary";
         link.href = data.order.trackingUrl;
         link.target = "_blank";
-        link.rel = "noopener";
+        link.rel = "noopener noreferrer";
         link.textContent = "Open carrier tracking";
         message.append(link);
     }

@@ -14,10 +14,10 @@ export async function notifyOrder(orderNumber, kind = "processing") {
     try {
         const url = new URL("/tracking.html", process.env.PUBLIC_SITE_URL);
         if (url.protocol !== "https:") throw new Error("PUBLIC_SITE_URL must use HTTPS.");
-        url.searchParams.set("order", orderNumber);
-        url.searchParams.set("email", order.email);
+        // Fragment values stay out of HTTP request URLs and referrer headers.
+        url.hash = new URLSearchParams({ order: orderNumber, email: order.email }).toString();
         const message = kind === "shipped" ? "Your order has shipped." : kind === "delivered" ? "Your order has been marked delivered." : "Thank you for your order. We are preparing it for dispatch.";
-        notification.messageId = await sendEmail({ to: order.email, subject: `MUTUMA order ${orderNumber} - ${kind}`, text: `${message}\n\nOrder: ${orderNumber}\nTrack your order: ${url.href}\n\nFor help, reply to this email.` });
+        notification.messageId = await sendEmail({ to: order.email, replyTo: process.env.SUPPORT_EMAIL || "shopmutuma@gmail.com", subject: `MUTUMA order ${orderNumber} - ${kind}`, text: `${message}\n\nOrder: ${orderNumber}\nTrack your order: ${url.href}\n\nTracking details appear on this page when dispatch information is added. Estimated delivery is 5-8 business days after dispatch.\n\nFor help, reply to this email.` });
         notification.status = "accepted";
     } catch (error) {
         notification.status = "failed";

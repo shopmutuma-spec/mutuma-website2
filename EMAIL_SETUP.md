@@ -10,7 +10,7 @@ Add server-side Netlify environment variables:
 
 - RESEND_API_KEY
 - RESEND_FROM_EMAIL: a monitored address on a domain verified in Resend
-- SUPPORT_EMAIL: the inbox to receive contact enquiries
+- SUPPORT_EMAIL: shopmutuma@gmail.com (the owner's approved support inbox)
 - PUBLIC_SITE_URL: https://mutumas.com
 - MAILERLITE_API_KEY
 - MAILERLITE_GROUP_ID: the marketing newsletter group

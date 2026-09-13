@@ -30,7 +30,9 @@ function publicMessage(order) {
         processing: "Your order is being prepared. Estimated delivery is 5-8 business days once dispatched.",
         shipped: "Your order has shipped. Tracking details will be added when available.",
         delivered: "Your order is marked as delivered.",
-        refunded: "This order is marked as refunded."
+        refunded: "This order is marked as refunded.",
+        payment_failed: "Payment was unsuccessful. This order is not being prepared for dispatch.",
+        cancelled: "This order has been cancelled."
     };
 
     return messages[status] || "Your order has been received.";
@@ -41,8 +43,11 @@ export async function handler(event) {
         return json(405, { error: "Method not allowed" });
     }
 
+    let payload;
+    try { payload = JSON.parse(event.body || "{}"); }
+    catch { return json(400, { error: "Invalid request." }); }
+    if (!payload || typeof payload !== "object") return json(400, { error: "Invalid request." });
     try {
-        const payload = JSON.parse(event.body || "{}");
         const orderNumber = cleanText(payload.orderNumber, 64).toUpperCase();
         const email = cleanText(payload.email, 180).toLowerCase();
 
@@ -68,6 +73,6 @@ export async function handler(event) {
             }
         });
     } catch (error) {
-        return json(500, { error: error.message || "Order tracking is unavailable." });
+        return json(503, { error: "Order tracking is temporarily unavailable." });
     }
 }
