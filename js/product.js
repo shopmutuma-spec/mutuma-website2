@@ -10,6 +10,7 @@ import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
 import { escapeHtml } from "./html.js";
 import { showPageError } from "./page-error.js";
 import { updateProductSeo } from "./seo.js";
+import { bindProductPurchase } from "./product-purchase.js";
 
 boot().catch((error) => {
     console.error("MUTUMA product page failed to start.", error);
@@ -130,8 +131,6 @@ ${galleryThumbs}
     </div>
 `;
 
-let quantity = 1;
-const quantityInput = document.querySelector("[data-quantity]");
 let activeGalleryIndex = 0;
 
 function escapeProductText(value) {
@@ -189,28 +188,19 @@ galleryMain.addEventListener("touchend", (event) => {
     }
 }, { passive: true });
 
-document.querySelector("[data-qty-minus]").addEventListener("click", () => {
-    quantity = Math.max(1, quantity - 1);
-    quantityInput.value = quantity;
-});
-
-document.querySelector("[data-qty-plus]").addEventListener("click", () => {
-    quantity += 1;
-    quantityInput.value = quantity;
-});
-
-document.querySelector("[data-add-product]").addEventListener("click", () => {
-    addToCart(product.id, quantity);
-    updateCounts();
-    notify("Added to cart");
-    openCartDrawer();
-});
-
-document.querySelector("[data-mobile-add]").addEventListener("click", () => {
-    addToCart(product.id, quantity);
-    updateCounts();
-    notify("Added to cart");
-    openCartDrawer();
+bindProductPurchase({
+    root: productRoot,
+    product,
+    enabled: Boolean(storeSettings.purchasing?.enabled),
+    add: (id, quantity) => {
+        addToCart(id, quantity);
+        updateCounts();
+        notify("Added to cart");
+        openCartDrawer();
+    },
+    checkout: checkoutProduct,
+    notify,
+    onCheckoutStarted: (source) => trackEvent("checkout_started", { source, productId: product.id, currency: currentCurrency() })
 });
 
 document.querySelector("[data-add-setup-bundle]")?.addEventListener("click", () => {
@@ -223,28 +213,6 @@ document.querySelector("[data-add-setup-bundle]")?.addEventListener("click", () 
         productId: product.id,
         quantity: setupBundle.length
     });
-});
-
-document.querySelector("[data-buy-stripe]").addEventListener("click", async (event) => {
-    event.currentTarget.disabled = true;
-    event.currentTarget.textContent = "Opening Stripe...";
-    trackEvent("checkout_started", { source: "product_page", productId: product.id, currency: currentCurrency() });
-    const result = await checkoutProduct(product.id, quantity);
-    if (!result.ok) notify(result.message);
-    event.currentTarget.disabled = false;
-    event.currentTarget.textContent = "Buy Now";
-});
-
-document.querySelector("[data-mobile-buy]").addEventListener("click", async (event) => {
-    event.currentTarget.disabled = true;
-    event.currentTarget.textContent = "Opening...";
-    trackEvent("checkout_started", { source: "mobile_sticky", productId: product.id, currency: currentCurrency() });
-    const result = await checkoutProduct(product.id, quantity);
-    if (!result.ok) {
-        notify(result.message);
-        event.currentTarget.disabled = false;
-        event.currentTarget.textContent = "Buy Now";
-    }
 });
 
 document.querySelector("[data-wishlist-product]").addEventListener("click", (event) => {
