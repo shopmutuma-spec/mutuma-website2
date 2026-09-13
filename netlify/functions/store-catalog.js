@@ -30,18 +30,16 @@ export async function handler(event) {
 
     try {
         const [products, offers] = await Promise.all([
-            supabaseRequest("catalog_products?select=id,name,description,category,price,old_price,currency,image_url,tags,stock,featured,published&published=eq.true&order=created_at.desc&limit=300"),
+            supabaseRequest("catalog_products?select=id,name,description,category,price,old_price,currency,image_url,tags,stock,featured,published&order=created_at.desc&limit=300"),
             supabaseRequest("store_offers?select=id,name,discount_percent,scope,enabled,starts_at,ends_at,created_at&enabled=eq.true&order=created_at.desc&limit=20")
         ]);
 
         return json(200, {
-            products,
+            products: products.filter((product) => product.published),
+            unpublishedIds: products.filter((product) => !product.published).map((product) => product.id),
             offers: offers.filter(isActiveOffer).map(normalizeOffer)
         });
     } catch (error) {
-        return json(200, {
-            products: [],
-            offers: []
-        });
+        return json(503, { error: "Store catalogue temporarily unavailable." });
     }
 }

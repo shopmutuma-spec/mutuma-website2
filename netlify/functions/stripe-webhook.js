@@ -1,6 +1,7 @@
 import Stripe from "stripe";
-import { json, supabaseRequest } from "./supabase-client.js";
+import { json } from "./supabase-client.js";
 import { savePaidCheckoutSession, updateOrderPaymentStatus } from "./order-sync.js";
+import { claimWebhook, finishWebhook } from "./webhook-lease.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
@@ -18,48 +19,6 @@ function getOrigin(event) {
 
 function rawBody(event) {
     return event.isBase64Encoded ? Buffer.from(event.body || "", "base64") : event.body || "";
-}
-
-async function alreadyProcessed(stripeEvent) {
-    const existing = await supabaseRequest(`stripe_webhook_events?select=event_id,status&event_id=eq.${encodeURIComponent(stripeEvent.id)}&limit=1`);
-    if (existing?.[0]?.status === "processed" || existing?.[0]?.status === "processing") return true;
-
-    if (existing?.[0]?.status === "failed") {
-        await supabaseRequest(`stripe_webhook_events?event_id=eq.${encodeURIComponent(stripeEvent.id)}`, {
-            method: "PATCH",
-            body: JSON.stringify({
-                status: "processing",
-                error_message: ""
-            })
-        });
-        return false;
-    }
-
-    await supabaseRequest("stripe_webhook_events?on_conflict=event_id", {
-        method: "POST",
-        body: JSON.stringify([{
-            event_id: stripeEvent.id,
-            event_type: stripeEvent.type,
-            status: "processing"
-        }])
-    });
-
-    return false;
-}
-
-async function markProcessed(stripeEvent, status, errorMessage = "") {
-    try {
-        await supabaseRequest(`stripe_webhook_events?event_id=eq.${encodeURIComponent(stripeEvent.id)}`, {
-            method: "PATCH",
-            body: JSON.stringify({
-                status,
-                error_message: errorMessage,
-                processed_at: new Date().toISOString()
-            })
-        });
-    } catch (error) {
-        console.warn("Webhook status update skipped.", error);
-    }
 }
 
 async function handleEvent(stripeEvent, event) {
@@ -128,16 +87,21 @@ export async function handler(event) {
         return json(400, { error: "Webhook signature verification failed." });
     }
 
+    let lease;
     try {
-        if (await alreadyProcessed(stripeEvent)) {
+        lease = await claimWebhook(stripeEvent);
+        if (lease.state === "processed") {
             return json(200, { ok: true, duplicate: true });
         }
+        if (lease.state === "busy") return json(503, { error: "Event processing is in progress; retry later." });
 
         const result = await handleEvent(stripeEvent, event);
-        await markProcessed(stripeEvent, "processed");
+        await finishWebhook(lease, "processed");
         return json(200, { ok: true, result });
     } catch (error) {
-        await markProcessed(stripeEvent, "failed", error.message || "Webhook processing failed.");
-        return json(500, { error: error.message || "Webhook processing failed." });
+        if (lease?.state === "claimed") {
+            try { await finishWebhook(lease, "failed"); } catch { /* The lease can be recovered on a later retry. */ }
+        }
+        return json(500, { error: "Webhook processing failed; retry required." });
     }
 }

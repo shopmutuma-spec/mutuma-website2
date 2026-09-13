@@ -112,6 +112,7 @@ function normalizeRemoteProduct(product) {
         price: toUsdAmount(product.price, currency),
         oldPrice: product.old_price ? toUsdAmount(product.old_price, currency) : null,
         currency: BASE_CURRENCY,
+        stock: product.stock ?? null,
         images: [product.image_url].filter(Boolean),
         tags: Array.isArray(product.tags) ? product.tags : []
     };
@@ -147,13 +148,18 @@ function normalizeOffer(offer) {
     };
 }
 
-async function loadCheckoutProducts() {
+export async function loadCheckoutProducts() {
     try {
         const [remoteProducts, offers] = await Promise.all([
-            supabaseRequest("catalog_products?select=id,name,description,category,price,old_price,currency,image_url,tags,published&published=eq.true&limit=300"),
+            supabaseRequest("catalog_products?select=id,name,description,category,price,old_price,currency,image_url,tags,stock,published&limit=300"),
             supabaseRequest("store_offers?select=name,discount_percent,scope,enabled,starts_at,ends_at&enabled=eq.true&limit=20")
         ]);
-        const mergedProducts = [...products, ...remoteProducts.map(normalizeRemoteProduct)];
+        const merged = new Map(products.map((product) => [product.id, { ...product }]));
+        remoteProducts.forEach((product) => {
+            if (product.published) merged.set(product.id, { ...merged.get(product.id), ...normalizeRemoteProduct(product) });
+            else merged.delete(product.id);
+        });
+        const mergedProducts = [...merged.values()];
         const activeOffers = offers.filter(isActiveOffer).map(normalizeOffer);
         const offersToApply = activeOffers.length ? activeOffers : [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
         const bestOffer = offersToApply
@@ -170,17 +176,7 @@ async function loadCheckoutProducts() {
 
         return mergedProducts;
     } catch (error) {
-        return products.map((product) => {
-            const offer = storeSettings.fallbackOffer;
-            const basePrice = Number(product.oldPrice || product.price || 0);
-            if (!offer?.enabled || !basePrice) return product;
-
-            return {
-                ...product,
-                oldPrice: Math.max(Number(product.oldPrice || 0), basePrice),
-                price: Number((basePrice * (1 - Number(offer.discount_percent) / 100)).toFixed(2))
-            };
-        });
+        throw Object.assign(new Error("We could not confirm current prices. Please try again shortly."), { statusCode: 503 });
     }
 }
 
@@ -205,22 +201,25 @@ function cachedCheckoutProducts() {
     return checkoutCatalogCache.promise;
 }
 
-function sanitizeCart(cart, catalogProducts) {
+export function sanitizeCart(cart, catalogProducts) {
     if (!Array.isArray(cart)) return [];
-
-    return cart
-        .map((item) => {
-            const product = catalogProducts.find((entry) => entry.id === item.id);
-            const quantity = Math.max(1, Math.min(Number(item.quantity) || 1, 20));
-
-            if (!product) return null;
-
-            return {
-                product,
-                quantity
-            };
-        })
-        .filter(Boolean);
+    const quantities = new Map();
+    return cart.map((item) => {
+        const product = catalogProducts.find((entry) => entry.id === item?.id);
+        const quantity = Number(item?.quantity ?? 1);
+        if (!product || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) {
+            throw Object.assign(new Error("Please refresh your cart and check the selected items."), { statusCode: 400 });
+        }
+        const totalQuantity = (quantities.get(product.id) || 0) + quantity;
+        quantities.set(product.id, totalQuantity);
+        if (totalQuantity > 20 || (product.stock != null && totalQuantity > Number(product.stock))) {
+            throw Object.assign(new Error("A selected quantity is no longer available. Please update your cart."), { statusCode: 400 });
+        }
+        if (!Number.isFinite(product.price) || product.price <= 0) {
+            throw Object.assign(new Error("A product price is unavailable. Please try again shortly."), { statusCode: 503 });
+        }
+        return { product, quantity };
+    });
 }
 
 function sanitizeCurrency(currency) {
@@ -402,6 +401,6 @@ export async function handler(event) {
 
         return json(200, { url: session.url });
     } catch (error) {
-        return json(500, { error: error.message || "Unable to create checkout session." });
+        return json(error.statusCode || 500, { error: error.statusCode ? error.message : "Unable to create checkout session. Please try again." });
     }
 }

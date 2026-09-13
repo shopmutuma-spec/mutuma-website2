@@ -6,6 +6,8 @@ import { trackEvent } from "./analytics.js?v=20260906-email-batch";
 import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
 import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260906-email-batch";
 import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260906-email-batch";
+import { escapeHtml, safeImageUrl } from "./html.js";
+import { initPrivacyChoice } from "./privacy-choice.js";
 
 export const icons = {
     home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
@@ -39,7 +41,7 @@ export function placeholderImage(productName) {
             <rect width="900" height="1125" fill="#111111"/>
             <rect x="60" y="60" width="780" height="1005" rx="28" fill="#090909" stroke="#ffffff" stroke-opacity=".14"/>
             <circle cx="450" cy="470" r="180" fill="#ffffff" fill-opacity=".88"/>
-            <text x="80" y="980" fill="#ffffff" font-family="Arial" font-size="56" font-weight="900">${productName}</text>
+            <text x="80" y="980" fill="#ffffff" font-family="Arial" font-size="56" font-weight="900">${escapeHtml(productName)}</text>
             <text x="80" y="1040" fill="#bdbdbd" font-family="Arial" font-size="26" font-weight="700">MUTUMA</text>
         </svg>
     `;
@@ -51,11 +53,14 @@ export function productImage(image, alt, options = {}) {
     const priority = options.eager ? ' fetchpriority="high"' : "";
     const sizes = options.sizes || "(max-width: 620px) 50vw, (max-width: 980px) 50vw, 25vw";
 
-    return `<img src="${image}" alt="${alt}" loading="${loading}" decoding="async"${priority} width="900" height="1125" sizes="${sizes}" onerror="this.onerror=null;const card=this.closest('[data-product-card], .gallery-thumbs button');if(card){card.remove();}else{this.remove();}">`;
+    const source = safeImageUrl(image);
+    const useCdn = typeof location !== "undefined" && (location.hostname === "mutumas.com" || location.hostname.endsWith(".netlify.app")) && /^\/?images\/.+\.(jpe?g|png|webp)$/i.test(source);
+    const srcset = useCdn ? [320, 480, 640, 960, 1280].map((width) => `/.netlify/images?url=${encodeURIComponent('/' + source.replace(/^\//, ''))}&w=${width}&q=80 ${width}w`).join(", ") : "";
+    return `<img src="${escapeHtml(source)}" alt="${escapeHtml(alt)}" loading="${loading}" decoding="async"${priority} width="900" height="1125"${srcset ? ` srcset="${escapeHtml(srcset)}" sizes="${escapeHtml(sizes)}"` : ""} onerror="if(this.srcset){this.removeAttribute('srcset');}else{this.onerror=null;this.src='/images/products/product-placeholder.svg';}">`;
 }
 
 function optionDots(options) {
-    return options.colours.slice(0, 4).map((colour) => `<span aria-label="${colour}" title="${colour}"></span>`).join("");
+    return options.colours.slice(0, 4).map((colour) => `<span aria-label="${escapeHtml(colour)}" title="${escapeHtml(colour)}"></span>`).join("");
 }
 
 function productBadges(product) {
@@ -68,7 +73,7 @@ function productBadges(product) {
     if (isNewArrival(product)) badges.push("New");
     if (product.tags.includes("low-stock")) badges.push("Low stock");
 
-    return badges.slice(0, 3).map((badge) => `<span>${badge}</span>`).join("");
+    return badges.slice(0, 3).map((badge) => `<span>${escapeHtml(badge)}</span>`).join("");
 }
 
 export function renderHeader() {
@@ -133,9 +138,9 @@ export function renderHeader() {
                 <div class="mobile-menu-recent">
                     <strong>Recently viewed</strong>
                     ${recentMenuItems.map((product) => `
-                        <a href="product.html?id=${product.id}">
-                            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async">
-                            <span>${product.name}</span>
+                        <a href="product.html?id=${escapeHtml(product.id)}">
+                            ${productImage(product.images[0], product.name, { sizes: "80px" })}
+                            <span>${escapeHtml(product.name)}</span>
                         </a>
                     `).join("")}
                 </div>
@@ -231,6 +236,7 @@ export function renderFooter() {
             <div>
                 <strong>Legal</strong>
                 <a href="privacy.html">Privacy Policy</a>
+                <button type="button" class="privacy-settings" data-privacy-settings>Privacy settings</button>
                 <a href="terms.html">Terms and Conditions</a>
                 <a href="policies.html#refunds">Refund Policy</a>
                 <a href="policies.html#shipping">Shipping Policy</a>
@@ -256,19 +262,19 @@ export function productCard(product, cardOptions = {}) {
     const options = productOptions(product);
     return `
         <article class="product-card" data-product-card>
-            <a class="product-image" href="product.html?id=${product.id}">
+            <a class="product-image" href="product.html?id=${escapeHtml(product.id)}">
                 ${productImage(product.images[0], product.name, { eager: cardOptions.eager, sizes: cardOptions.sizes })}
                 <div class="product-badges">${productBadges(product)}</div>
             </a>
             <div class="product-info">
                 <div class="product-meta">
-                    <span>${product.category}</span>
-                    <span>${options.type}</span>
+                    <span>${escapeHtml(product.category)}</span>
+                    <span>${escapeHtml(options.type)}</span>
                 </div>
-                <h3><a href="product.html?id=${product.id}">${product.name}</a></h3>
-                <p>${product.description}</p>
+                <h3><a href="product.html?id=${escapeHtml(product.id)}">${escapeHtml(product.name)}</a></h3>
+                <p>${escapeHtml(product.description)}</p>
                 <div class="option-row">
-                    <span>${options.sizes.slice(0, 2).join(" / ")}</span>
+                    <span>${escapeHtml(options.sizes.slice(0, 2).join(" / "))}</span>
                     <div class="swatches">${optionDots(options)}</div>
                 </div>
                 <div class="price-row">
@@ -276,10 +282,10 @@ export function productCard(product, cardOptions = {}) {
                     ${product.oldPrice ? `<s data-price="${product.oldPrice}">${formatPrice(product.oldPrice)}</s>` : ""}
                 </div>
                 <div class="card-actions">
-                    <button class="button secondary quick-add-button" data-add-cart="${product.id}" aria-label="Add ${product.name} to bag" title="Add to bag">${icons.cartPlus}<span>Add to bag</span></button>
-                    <button class="button primary buy-now-button" data-buy-now="${product.id}" ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases paused"}</button>
-                    <button class="button secondary quick-view-button" data-quick-view="${product.id}">Quick View</button>
-                    <button class="icon-button ${wished ? "active" : ""}" data-wishlist="${product.id}" aria-pressed="${wished}" aria-label="Add ${product.name} to wishlist">${icons.heart}</button>
+                    <button class="button secondary quick-add-button" data-add-cart="${escapeHtml(product.id)}" aria-label="Add ${escapeHtml(product.name)} to bag" title="Add to bag">${icons.cartPlus}<span>Add to bag</span></button>
+                    <button class="button primary buy-now-button" data-buy-now="${escapeHtml(product.id)}" ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases paused"}</button>
+                    <button class="button secondary quick-view-button" data-quick-view="${escapeHtml(product.id)}">Quick View</button>
+                    <button class="icon-button ${wished ? "active" : ""}" data-wishlist="${escapeHtml(product.id)}" aria-pressed="${wished}" aria-label="Add ${escapeHtml(product.name)} to wishlist">${icons.heart}</button>
                 </div>
             </div>
         </article>
@@ -295,9 +301,8 @@ export function renderProductGrid(target, list) {
     }
 
     element.innerHTML = list
-        .filter((product) => product.images?.[0])
         .map((product, index) => productCard(product, {
-            eager: index < (isHomeRail ? 3 : 4),
+            eager: element.matches("[data-trending-products]") && index < 2,
             sizes: isHomeRail ? "(max-width: 620px) 52vw, (max-width: 980px) 34vw, 18vw" : undefined
         }))
         .join("");
@@ -354,8 +359,8 @@ export function renderCategories(target) {
     if (!element) return;
     element.innerHTML = categories.map((category) => `
         <a class="category-card" href="categories.html?category=${encodeURIComponent(category.name)}#category-${category.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}">
-            <img src="${category.image}" alt="${category.name}" loading="lazy" decoding="async" onerror="this.style.opacity='0';">
-            <span>${category.name}</span>
+            <img src="${category.image}" alt="${escapeHtml(category.name)}" loading="lazy" decoding="async" onerror="this.style.opacity='0';">
+            <span>${escapeHtml(category.name)}</span>
         </a>
     `).join("");
 }
@@ -380,9 +385,9 @@ export function renderCartDrawer() {
             <div class="drawer-recommendations">
                 <strong>Start with a best seller</strong>
                 ${getProductsByTag("best-seller", 2).map((product) => `
-                    <a href="product.html?id=${product.id}">
+                    <a href="product.html?id=${escapeHtml(product.id)}">
                         ${productImage(product.images[0], product.name)}
-                        <span>${product.name}</span>
+                        <span>${escapeHtml(product.name)}</span>
                     </a>
                 `).join("")}
             </div>
@@ -395,18 +400,18 @@ export function renderCartDrawer() {
         <article class="drawer-line">
             ${productImage(product.images[0], product.name)}
             <div>
-                <strong>${product.name}</strong>
-                <span>${product.category}</span>
+                <strong>${escapeHtml(product.name)}</strong>
+                <span>${escapeHtml(product.category)}</span>
                 <div class="quantity small">
-                    <button data-drawer-decrease="${product.id}" aria-label="Decrease ${product.name} quantity">-</button>
-                    <input value="${quantity}" readonly aria-label="${product.name} quantity">
-                    <button data-drawer-increase="${product.id}" aria-label="Increase ${product.name} quantity">+</button>
+                    <button data-drawer-decrease="${escapeHtml(product.id)}" aria-label="Decrease ${escapeHtml(product.name)} quantity">-</button>
+                    <input value="${quantity}" readonly aria-label="${escapeHtml(product.name)} quantity">
+                    <button data-drawer-increase="${escapeHtml(product.id)}" aria-label="Increase ${escapeHtml(product.name)} quantity">+</button>
                 </div>
             </div>
             <div class="drawer-line-end">
                 <b data-price="${product.price * quantity}">${formatPrice(product.price * quantity)}</b>
-                <button data-drawer-remove="${product.id}" aria-label="Remove ${product.name}">Remove</button>
-                <button data-drawer-save="${product.id}" aria-label="Save ${product.name} for later">Save for later</button>
+                <button data-drawer-remove="${escapeHtml(product.id)}" aria-label="Remove ${escapeHtml(product.name)}">Remove</button>
+                <button data-drawer-save="${escapeHtml(product.id)}" aria-label="Save ${escapeHtml(product.name)} for later">Save for later</button>
             </div>
         </article>
     `).join("");
@@ -448,9 +453,9 @@ export function renderCartDrawer() {
             <div class="drawer-recommendations drawer-upsells">
                 <strong>${subtotal < freeShippingThreshold ? "Add one to unlock more value" : "Complete the room"}</strong>
                 ${upsells.map((product) => `
-                    <button type="button" data-drawer-upsell="${product.id}">
+                    <button type="button" data-drawer-upsell="${escapeHtml(product.id)}">
                         ${productImage(product.images[0], product.name)}
-                        <span>${product.name}<small>${formatPrice(product.price)}</small></span>
+                        <span>${escapeHtml(product.name)}<small>${formatPrice(product.price)}</small></span>
                     </button>
                 `).join("")}
             </div>
@@ -682,15 +687,15 @@ export function openSearch() {
         suggestions.innerHTML = query ? "" : `
             <div class="suggestion-group">
                 <strong>Popular</strong>
-                ${storeSettings.popularSearches.map((term) => `<button data-search-term="${term}">${term}</button>`).join("")}
+                ${storeSettings.popularSearches.map((term) => `<button data-search-term="${escapeHtml(term)}">${escapeHtml(term)}</button>`).join("")}
             </div>
-            ${readRecent().length ? `<div class="suggestion-group"><strong>Recent</strong>${readRecent().map((term) => `<button data-search-term="${term}">${term}</button>`).join("")}<button data-clear-searches>Clear</button></div>` : ""}
+            ${readRecent().length ? `<div class="suggestion-group"><strong>Recent</strong>${readRecent().map((term) => `<button data-search-term="${escapeHtml(term)}">${escapeHtml(term)}</button>`).join("")}<button data-clear-searches>Clear</button></div>` : ""}
         `;
 
         results.innerHTML = matches.length ? matches.map((product) => `
-            <a class="search-result" href="product.html?id=${product.id}">
+            <a class="search-result" href="product.html?id=${escapeHtml(product.id)}">
                 ${productImage(product.images[0], product.name)}
-                <span><strong>${product.name}</strong><small>${product.category}</small></span>
+                <span><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.category)}</small></span>
                 <b>
                     ${formatPrice(product.price)}
                     ${product.oldPrice ? `<s>${formatPrice(product.oldPrice)}</s>` : ""}
@@ -757,7 +762,7 @@ export function openQuickView(productId) {
     const options = productOptions(product);
     const wished = getWishlist().includes(product.id);
     modal.innerHTML = `
-        <div class="modal open" role="dialog" aria-modal="true" aria-label="${product.name} quick view">
+        <div class="modal open" role="dialog" aria-modal="true" aria-label="${escapeHtml(product.name)} quick view">
             <div class="modal-panel quick-view-panel">
                 <div class="modal-head">
                     <strong>Quick View</strong>
@@ -768,21 +773,21 @@ export function openQuickView(productId) {
                         <div class="quick-view-image" data-quick-image>${productImage(product.images[0], product.name)}</div>
                         <div class="gallery-thumbs">
                             ${product.images.map((image, index) => `
-                                <button class="${index === 0 ? "active" : ""}" data-qv-image="${image}" aria-label="Show ${product.name} image ${index + 1}">
+                                <button class="${index === 0 ? "active" : ""}" data-qv-image="${escapeHtml(image)}" aria-label="Show ${escapeHtml(product.name)} image ${index + 1}">
                                     ${productImage(image, product.name)}
                                 </button>
                             `).join("")}
                         </div>
                     </div>
                     <div class="quick-view-info">
-                        <span class="eyebrow">${product.category}</span>
-                        <h2>${product.name}</h2>
-                        <p>${product.description}</p>
+                        <span class="eyebrow">${escapeHtml(product.category)}</span>
+                        <h2>${escapeHtml(product.name)}</h2>
+                        <p>${escapeHtml(product.description)}</p>
                         <div class="price-large">
                             <strong data-price="${product.price}">${formatPrice(product.price)}</strong>
                             ${product.oldPrice ? `<s data-price="${product.oldPrice}">${formatPrice(product.oldPrice)}</s>` : ""}
                         </div>
-                        <div class="option-row"><span>Sizes: ${options.sizes.join(", ")}</span><div class="swatches">${optionDots(options)}</div></div>
+                        <div class="option-row"><span>Sizes: ${escapeHtml(options.sizes.join(", "))}</span><div class="swatches">${optionDots(options)}</div></div>
                         <div class="quantity">
                             <button data-qv-minus aria-label="Decrease quantity">-</button>
                             <input value="1" data-qv-quantity aria-label="Quantity" inputmode="numeric">
@@ -791,7 +796,7 @@ export function openQuickView(productId) {
                         <button class="button primary wide" data-qv-add>Add to Cart</button>
                         <button class="button secondary wide" data-qv-buy ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases temporarily paused"}</button>
                         <button class="button secondary wide ${wished ? "active" : ""}" data-qv-wishlist>${wished ? "Saved" : "Wishlist"}</button>
-                        <a class="button secondary wide" href="product.html?id=${product.id}">Full Product Page</a>
+                        <a class="button secondary wide" href="product.html?id=${escapeHtml(product.id)}">Full Product Page</a>
                     </div>
                 </div>
             </div>
@@ -877,6 +882,7 @@ export function initBaseLayout() {
     document.documentElement.classList.remove("no-js");
     renderHeader();
     renderFooter();
+    initPrivacyChoice();
     updateCounts();
     updatePrices();
     renderBreakMode();
@@ -989,7 +995,7 @@ function initEmailOffer() {
 
     window.setTimeout(() => {
         const modal = document.querySelector("[data-modal]");
-        if (!modal || modal.innerHTML.trim()) return;
+        if (!modal || modal.innerHTML.trim() || document.querySelector("[data-privacy-choice]")) return;
 
         modal.innerHTML = `
             <div class="modal offer-modal open" data-offer-modal>

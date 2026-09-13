@@ -1,4 +1,6 @@
 import { initCurrency, formatPrice } from "./currency.js?v=20260906-email-batch";
+import { escapeHtml } from "./html.js";
+import { showPageError } from "./page-error.js";
 import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260906-email-batch";
 import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260906-email-batch";
 import { trackEvent } from "./analytics.js?v=20260906-email-batch";
@@ -15,12 +17,12 @@ const params = new URLSearchParams(window.location.search);
 const checkoutStatus = params.get("checkout");
 let completedOrder = null;
 
-boot();
+boot().catch(showPageError);
 
 async function boot() {
-    await loadStoreCatalog();
     initBaseLayout();
     initCurrency().catch(() => {});
+    await loadStoreCatalog();
 
     if (checkoutStatus === "success") {
         clearCart();
@@ -90,15 +92,15 @@ function renderCart() {
         <article class="cart-line">
             ${productImage(product.images[0], product.name)}
             <div>
-                <strong>${product.name}</strong>
-                <span>${product.category}</span>
-                <button data-remove="${product.id}">Remove</button>
-                <button data-save-later="${product.id}">Save for later</button>
+                <strong>${escapeHtml(product.name)}</strong>
+                <span>${escapeHtml(product.category)}</span>
+                <button data-remove="${escapeHtml(product.id)}">Remove</button>
+                <button data-save-later="${escapeHtml(product.id)}">Save for later</button>
             </div>
             <div class="quantity small">
-                <button data-decrease="${product.id}">-</button>
-                <input value="${quantity}" readonly aria-label="${product.name} quantity">
-                <button data-increase="${product.id}">+</button>
+                <button data-decrease="${escapeHtml(product.id)}">-</button>
+                <input value="${quantity}" readonly aria-label="${escapeHtml(product.name)} quantity">
+                <button data-increase="${escapeHtml(product.id)}">+</button>
             </div>
             <b data-price="${product.price * quantity}">${formatPrice(product.price * quantity)}</b>
         </article>
@@ -140,9 +142,9 @@ function renderCart() {
                 <div class="cart-upsell-list">
                     <strong>${subtotal < FREE_SHIPPING_THRESHOLD ? "Get closer to free delivery" : "Complete your setup"}</strong>
                     ${upsells.map((product) => `
-                        <button type="button" data-cart-upsell="${product.id}">
+                        <button type="button" data-cart-upsell="${escapeHtml(product.id)}">
                             ${productImage(product.images[0], product.name)}
-                            <span>${product.name}</span>
+                            <span>${escapeHtml(product.name)}</span>
                             <b>${formatPrice(product.price)}</b>
                         </button>
                     `).join("")}
@@ -240,9 +242,9 @@ function renderPostPurchasePicks() {
             </div>
             <div class="cart-upsell-grid">
                 ${picks.map((product) => `
-                    <a href="product.html?id=${product.id}">
+                    <a href="product.html?id=${escapeHtml(product.id)}">
                         ${productImage(product.images[0], product.name)}
-                        <span>${product.name}</span>
+                        <span>${escapeHtml(product.name)}</span>
                         <strong>${formatPrice(product.price)}</strong>
                     </a>
                 `).join("")}

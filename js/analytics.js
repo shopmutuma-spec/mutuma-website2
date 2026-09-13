@@ -1,3 +1,4 @@
+import { analyticsAllowed } from "./privacy-choice.js";
 const SESSION_KEY = "mutuma.analyticsSession";
 const FIRST_TOUCH_KEY = "mutuma.firstTouch";
 const LAST_TOUCH_KEY = "mutuma.lastTouch";
@@ -97,6 +98,7 @@ function sendAnalytics(name, detail) {
 }
 
 export function trackEvent(name, detail = {}) {
+    if (!analyticsAllowed()) return;
     window.mutumaAnalytics = window.mutumaAnalytics || [];
     window.mutumaAnalytics.push({
         name,
@@ -119,6 +121,7 @@ export function trackEvent(name, detail = {}) {
 }
 
 function trackSessionStarted() {
+    if (!analyticsAllowed()) return;
     try {
         const key = `${sessionId()}:${new Date().toISOString().slice(0, 10)}`;
         if (sessionStorage.getItem(STARTED_KEY) === key) return;
@@ -134,6 +137,7 @@ function trackSessionStarted() {
 }
 
 function trackPageViewed() {
+    if (!analyticsAllowed()) return;
     if (sentPageView) return;
     sentPageView = true;
     trackEvent("page_viewed", {
@@ -143,6 +147,7 @@ function trackPageViewed() {
 }
 
 function trackScrollDepth() {
+    if (!analyticsAllowed()) return;
     const documentHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
     if (documentHeight <= 0) return;
     const depth = Math.round(window.scrollY / documentHeight * 100);
@@ -155,6 +160,7 @@ function trackScrollDepth() {
 }
 
 function trackClick(event) {
+    if (!analyticsAllowed() || !event.target?.closest) return;
     const target = event.target.closest("a, button, [data-add-cart], [data-buy-now], [data-wishlist]");
     const now = Date.now();
     clickWindow = clickWindow.filter((time) => now - time < 1200);
@@ -170,7 +176,8 @@ function trackClick(event) {
         return;
     }
 
-    if (target.tagName === "A" && target.href && !target.href.includes(window.location.host)) {
+    if (!target) return;
+    if (target.tagName === "A" && target.href && new URL(target.href).origin !== window.location.origin) {
         trackEvent("outbound_link_clicked", {
             href: target.href,
             label: target.textContent.trim().slice(0, 120)
@@ -231,6 +238,19 @@ window.addEventListener("scroll", () => {
         scrollFrameRequested = false;
     });
 }, { passive: true });
-trackSessionStarted();
-trackPageViewed();
+window.addEventListener("mutuma:privacychange", () => {
+    if (analyticsAllowed()) {
+        trackSessionStarted();
+        trackPageViewed();
+    } else {
+        sentPageView = false;
+        maxScrollDepth = 0;
+        clickWindow = [];
+        window.mutumaAnalytics = [];
+    }
+});
+if (analyticsAllowed()) {
+    trackSessionStarted();
+    trackPageViewed();
+}
 trackWebVitals();

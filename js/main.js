@@ -2,25 +2,29 @@ import { findProductById, products, loadStoreCatalog } from "./products.js?v=202
 import { initCurrency } from "./currency.js?v=20260906-email-batch";
 import { addToCart } from "./store.js?v=20260906-email-batch";
 import { aboutMutuma, roomEdit } from "./site-content.js?v=20260906-email-batch";
-import { initBaseLayout, notify, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260906-email-batch";
+import { initBaseLayout, notify, productImage, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260906-email-batch";
+
+import { escapeHtml } from "./html.js";
+import { showPageError } from "./page-error.js";
 
 boot().catch((error) => {
     console.error("MUTUMA homepage failed to start.", error);
+    showPageError();
 });
 
 async function boot() {
-    await loadStoreCatalog();
     initBaseLayout();
     initCurrency().catch(() => {});
+    renderCategories("[data-category-grid]");
+    renderAbout();
+    bindNewsletterForm();
+    await loadStoreCatalog();
     renderProductGrid("[data-trending-products]", getTrendingRoomProducts(10));
     renderProductGrid("[data-best-sellers]", getHomeProductSet("best-seller", 8));
     renderProductGrid("[data-customer-favourites]", getCustomerFavourites());
     renderNewArrivals();
-    renderCategories("[data-category-grid]");
     renderRoomEdit();
-    renderAbout();
     startHeroRotation();
-    bindNewsletterForm();
 }
 
 function threeHourSeed(date = new Date()) {
@@ -142,10 +146,10 @@ function renderNewArrivals() {
     ).slice(0, 4);
 
     target.innerHTML = newProducts.map((product) => `
-        <a class="arrival-card" href="product.html?id=${product.id}">
-            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" width="700" height="700" sizes="(max-width: 620px) 48vw, 18vw">
-            <span>${product.category}</span>
-            <strong>${product.name}</strong>
+        <a class="arrival-card" href="product.html?id=${escapeHtml(product.id)}">
+            ${productImage(product.images[0], product.name, { sizes: "(max-width: 620px) 48vw, 18vw" })}
+            <span>${escapeHtml(product.category)}</span>
+            <strong>${escapeHtml(product.name)}</strong>
         </a>
     `).join("");
 }
@@ -168,9 +172,9 @@ function renderRoomEdit() {
                 ${roomEdit.body ? `<p>${roomEdit.body}</p>` : ""}
                 <div class="room-edit-products">
                     ${roomProducts.map((product) => `
-                        <a href="product.html?id=${product.id}">
-                            <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" width="220" height="220" sizes="120px">
-                            <span>${product.name}</span>
+                        <a href="product.html?id=${escapeHtml(product.id)}">
+                            ${productImage(product.images[0], product.name, { sizes: "120px" })}
+                            <span>${escapeHtml(product.name)}</span>
                         </a>
                     `).join("")}
                 </div>

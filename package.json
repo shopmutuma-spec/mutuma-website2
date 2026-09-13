@@ -4,10 +4,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "node tests/order-sync.test.mjs && node tests/email-workflows.test.mjs",
-        "build": "node scripts/validate-project.mjs",
-        "lint": "node scripts/validate-project.mjs",
-        "typecheck": "node scripts/validate-project.mjs"
+        "test": "node scripts/test.mjs",
+        "build": "node scripts/check-project.mjs && node scripts/build-seo.mjs",
+        "lint": "node scripts/check-project.mjs",
+        "typecheck": "node scripts/check-project.mjs"
     },
     "dependencies": {
         "stripe": "^16.12.0"

@@ -7,19 +7,25 @@ import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid
 import { setupBundleForProduct } from "./merchandising.js?v=20260906-email-batch";
 import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
 
+import { escapeHtml } from "./html.js";
+import { showPageError } from "./page-error.js";
+import { updateProductSeo } from "./seo.js";
+
 boot().catch((error) => {
     console.error("MUTUMA product page failed to start.", error);
+    showPageError();
 });
 
 async function boot() {
-await loadStoreCatalog();
 initBaseLayout();
 initCurrency().catch(() => {});
+await loadStoreCatalog();
 prewarmCheckout();
 
 const params = new URLSearchParams(window.location.search);
-const product = getProductById(params.get("id"));
+const product = findProductById(params.get("id"));
 const productRoot = document.querySelector("[data-product-detail]");
+updateProductSeo(product);
 
 if (!product) {
     productRoot.innerHTML = `
@@ -45,7 +51,7 @@ const groupedVariants = buildGroupedVariants(product, familyProducts);
 const galleryThumbs = galleryImages.length > 1 ? `
             <div class="gallery-thumbs">
                 ${galleryImages.map((image, index) => `
-                    <button class="${index === 0 ? "active" : ""}" data-gallery-image="${image}" aria-label="Show image ${index + 1}">
+                    <button class="${index === 0 ? "active" : ""}" data-gallery-image="${escapeHtml(image)}" aria-label="Show image ${index + 1}">
                         ${productImage(image, product.name)}
                     </button>
                 `).join("")}
@@ -61,9 +67,9 @@ productRoot.innerHTML = `
 ${galleryThumbs}
         </div>
         <aside class="purchase-panel">
-            <span class="eyebrow">${product.category}</span>
-            <h1>${product.name}</h1>
-            <p>${product.description}</p>
+            <span class="eyebrow">${escapeHtml(product.category)}</span>
+            <h1>${escapeHtml(product.name)}</h1>
+            <p>${escapeHtml(product.description)}</p>
             <div class="rating">${product.rating} stars / ${product.reviews} reviews</div>
             <div class="price-large">
                 <strong data-price="${product.price}">${formatPrice(product.price)}</strong>
@@ -83,9 +89,9 @@ ${galleryThumbs}
                 <span>Sale price is already applied. Shipping is included in the checkout total.</span>
             </div>
             <div class="quantity">
-                <button data-qty-minus>-</button>
+                <button data-qty-minus aria-label="Decrease quantity">-</button>
                 <input value="1" data-quantity aria-label="Quantity" inputmode="numeric">
-                <button data-qty-plus>+</button>
+                <button data-qty-plus aria-label="Increase quantity">+</button>
             </div>
             ${groupedVariants}
             ${setupBundle.length >= 2 ? `
@@ -110,15 +116,15 @@ ${galleryThumbs}
             </div>
             <button class="button secondary wide ${getWishlist().includes(product.id) ? "active" : ""}" data-wishlist-product aria-pressed="${getWishlist().includes(product.id)}">Wishlist</button>
             <div class="details">
-                <details open><summary>Description</summary><p>${product.description}</p></details>
-                <details><summary>Specifications</summary><p>Category: ${product.category}. Sizes: ${sizeList}. Variations: ${variationList}. Style: ${options.styles.join(", ")}.</p></details>
+                <details open><summary>Description</summary><p>${escapeHtml(product.description)}</p></details>
+                <details><summary>Specifications</summary><p>Category: ${escapeHtml(product.category)}. Sizes: ${escapeHtml(sizeList)}. Variations: ${escapeHtml(variationList)}. Style: ${escapeHtml(options.styles.join(", "))}.</p></details>
                 <details><summary>Delivery Estimate</summary><p>Estimated delivery is 5-8 business days once dispatched. Europe and US shipping options are confirmed at Stripe Checkout.</p></details>
                 <details><summary>Returns</summary><p>Unused products can be returned within 30 days. See the returns page for the full policy.</p></details>
             </div>
         </aside>
     </section>
     <div class="mobile-sticky-add">
-        <span><b data-price="${product.price}">${formatPrice(product.price)}</b> / ${product.name}</span>
+        <span><b data-price="${product.price}">${formatPrice(product.price)}</b> / ${escapeHtml(product.name)}</span>
         <button class="button primary" data-mobile-add>Add</button>
         <button class="button secondary" data-mobile-buy ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases paused"}</button>
     </div>
@@ -149,9 +155,9 @@ function buildGroupedVariants(item, familyItems) {
                 </div>
                 <div class="variant-grid">
                     ${familyItems.map((familyItem) => `
-                        <a class="variant-choice ${familyItem.id === item.id ? "active" : ""}" href="product.html?id=${familyItem.id}" aria-label="View ${familyItem.name}">
+                        <a class="variant-choice ${familyItem.id === item.id ? "active" : ""}" href="product.html?id=${escapeHtml(familyItem.id)}" aria-label="View ${escapeHtml(familyItem.name)}">
                             ${productImage(familyItem.images[0], familyItem.name)}
-                            <span>${productVariantLabel(familyItem)}</span>
+                            <span>${escapeHtml(productVariantLabel(familyItem))}</span>
                         </a>
                     `).join("")}
                 </div>

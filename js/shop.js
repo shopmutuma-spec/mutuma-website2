@@ -3,14 +3,17 @@ import { initCurrency } from "./currency.js?v=20260906-email-batch";
 import { trackEvent } from "./analytics.js?v=20260906-email-batch";
 import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260906-email-batch";
 
+import { showPageError } from "./page-error.js";
+
 boot().catch((error) => {
     console.error("MUTUMA shop failed to start.", error);
+    showPageError();
 });
 
 async function boot() {
-await loadStoreCatalog();
 initBaseLayout();
 initCurrency().catch(() => {});
+await loadStoreCatalog();
 
 const params = new URLSearchParams(window.location.search);
 const state = {

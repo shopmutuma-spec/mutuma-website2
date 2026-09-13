@@ -155,9 +155,10 @@ export async function savePaidCheckoutSession({ stripe, session, origin, queueEm
     const orderNumber = orderNumberFromSession(session.id);
     const email = customerEmail(session);
     const paymentStatus = paymentStatusFromSession(session);
+    if (paymentStatus !== "paid") throw new Error("A confirmed paid session is required.");
 
     if (!hasSupabaseConfig()) {
-        return { ok: false, skipped: true, orderNumber, email, created: false };
+        throw new Error("Order storage is not configured.");
     }
 
     const existing = await existingOrderBySession(session.id);
@@ -180,8 +181,9 @@ export async function savePaidCheckoutSession({ stripe, session, origin, queueEm
     const fulfilmentStatus = paymentStatus === "paid" ? "processing" : "pending";
     const history = orderHistory("checkout.session.completed", "", fulfilmentStatus, "Order created after verified Stripe payment.");
 
-    await supabaseRequest("orders?on_conflict=stripe_session_id", {
+    const inserted = await supabaseRequest("orders?on_conflict=stripe_session_id", {
         method: "POST",
+        headers: { Prefer: "return=representation,resolution=ignore-duplicates" },
         body: JSON.stringify([{
             stripe_session_id: session.id,
             stripe_payment_intent: cleanText(session.payment_intent, 180),
@@ -208,6 +210,8 @@ export async function savePaidCheckoutSession({ stripe, session, origin, queueEm
             order_status_history: history
         }])
     });
+
+    if (!inserted?.length) return { ok: true, orderNumber, email, created: false, alreadyExists: true };
 
     await Promise.allSettled([
         syncSubscriber(session),

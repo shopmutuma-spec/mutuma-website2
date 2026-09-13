@@ -3494,6 +3494,7 @@ function normalizeBaseProduct(product) {
 export const products = baseProducts.map(normalizeBaseProduct);
 export let activeStoreOffers = [];
 let catalogLoaded = false;
+let catalogPromise;
 
 function normalizeRemoteProduct(product) {
     const currency = product.currency || BASE_CURRENCY;
@@ -3508,7 +3509,7 @@ function normalizeRemoteProduct(product) {
         currency: BASE_CURRENCY,
         rating: 4.8,
         reviews: 0,
-        stock: product.stock || null,
+        stock: product.stock ?? null,
         images: [product.image_url].filter(Boolean),
         tags: Array.isArray(product.tags) ? product.tags : [],
         featured: Boolean(product.featured),
@@ -3531,9 +3532,10 @@ function applyOffer(product, offer) {
 }
 
 async function fetchStoreCatalog(timeout = 900) {
-    const cacheKey = "mutuma.storeCatalog.v2";
+    const cacheKey = "mutuma.storeCatalog.v3";
     const cacheMaxAge = 10 * 60 * 1000;
-    const storage = globalThis.sessionStorage;
+    let storage;
+    try { storage = globalThis.sessionStorage; } catch { /* Storage can be disabled. */ }
 
     if (storage) {
         try {
@@ -3542,7 +3544,7 @@ async function fetchStoreCatalog(timeout = 900) {
                 return cached.data;
             }
         } catch (error) {
-            storage.removeItem(cacheKey);
+            try { storage.removeItem(cacheKey); } catch { /* Use the network instead. */ }
         }
     }
 
@@ -3558,10 +3560,10 @@ async function fetchStoreCatalog(timeout = 900) {
 
         const data = await response.json();
         if (storage) {
-            storage.setItem(cacheKey, JSON.stringify({
+            try { storage.setItem(cacheKey, JSON.stringify({
                 savedAt: Date.now(),
                 data
-            }));
+            })); } catch { /* A full cache must not discard a valid response. */ }
         }
         return data;
     } finally {
@@ -3571,20 +3573,22 @@ async function fetchStoreCatalog(timeout = 900) {
 
 export async function loadStoreCatalog() {
     if (catalogLoaded) return products;
-    catalogLoaded = true;
+    if (catalogPromise) return catalogPromise;
+    catalogPromise = refreshStoreCatalog().finally(() => { catalogPromise = null; });
+    return catalogPromise;
+}
+
+async function refreshStoreCatalog() {
 
     try {
         const data = await fetchStoreCatalog();
         activeStoreOffers = Array.isArray(data.offers) && data.offers.length ? data.offers : [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
         const remoteProducts = Array.isArray(data.products) ? data.products.map(normalizeRemoteProduct) : [];
-        const existingIds = new Set(products.map((product) => product.id));
-
-        remoteProducts.forEach((product) => {
-            if (product.images?.[0] && !existingIds.has(product.id)) {
-                products.push(product);
-                existingIds.add(product.id);
-            }
-        });
+        const merged = new Map(baseProducts.map(normalizeBaseProduct).map((product) => [product.id, product]));
+        remoteProducts.forEach((product) => merged.set(product.id, { ...merged.get(product.id), ...product }));
+        (data.unpublishedIds || []).forEach((id) => merged.delete(id));
+        products.splice(0, products.length, ...merged.values());
+        catalogLoaded = true;
 
     } catch (error) {
         activeStoreOffers = [storeSettings.fallbackOffer].filter((offer) => offer?.enabled);
