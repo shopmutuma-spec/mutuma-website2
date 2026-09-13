@@ -1,0 +1,72 @@
+/* Storefront colours only; dimensions and the admin theme stay unchanged. */
+:root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-soft: #f4f4f4;
+    --text: #171717;
+    --muted: #626262;
+    --line: rgba(0, 0, 0, 0.14);
+    --shadow: 0 12px 36px rgba(0, 0, 0, 0.09);
+}
+
+html, body { background: #ffffff; color: var(--text); }
+body::before { display: none; }
+:focus-visible { outline-color: #171717; }
+
+.loading-screen, .mobile-menu, .cart-drawer, .modal-panel,
+.auth-divider span, .home-split-panel, .home-newsletter,
+.product-card, .premium-product-grid .product-card {
+    background: #ffffff;
+    color: var(--text);
+}
+
+.site-header.scrolled, .nav, .redesigned-home .nav {
+    background: rgba(255, 255, 255, 0.97);
+    border-color: var(--line);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.redesigned-home .section-head a { color: #525252; }
+.button.primary, .card-actions .buy-now-button,
+.redesigned-home .card-actions .buy-now-button {
+    background: #171717;
+    border-color: #171717;
+    color: #ffffff;
+}
+
+.button.secondary, .icon-button, input, select, textarea {
+    border-color: var(--line);
+}
+.button.secondary, .icon-button { background-color: #f4f4f4; }
+.button.secondary:hover, .icon-button:hover { background-color: #e9e9e9; }
+select, select option { color: #171717; background-color: #ffffff; }
+input::placeholder, textarea::placeholder { color: #626262; }
+
+.product-badges span, .category-card, .social-tile span, .limited-drop {
+    color: #ffffff;
+}
+.limited-drop { --text: #ffffff; --muted: #eeeeee; }
+.category-card:focus-visible, .limited-drop :focus-visible { outline-color: #ffffff; }
+
+.home-split-panel, .home-newsletter, .product-card { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); }
+.drawer-upsells button, .mobile-sticky-add, .toast {
+    background: #ffffff;
+    color: #171717;
+}
+.privacy-choice {
+    color: #171717;
+    background: #ffffff;
+    border-color: #bdbdbd;
+    box-shadow: var(--shadow);
+}
+.mobile-menu-head .icon-button { color: #171717; background: #f4f4f4; }
+.card-actions .quick-add-button, .card-actions .icon-button {
+    color: #171717;
+    background: #f4f4f4;
+    border-color: var(--line);
+}
+.card-actions .icon-button.active { color: #d7193f; border-color: #d7193f; }
+.redesigned-home .home-product-rail .product-card,
+.product-card:hover, .home-split-panel { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06); }
+.mobile-toggle, .mobile-bag { box-shadow: none; }
