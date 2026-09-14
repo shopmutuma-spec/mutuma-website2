@@ -126,7 +126,7 @@ ${galleryThumbs}
         </aside>
     </section>
     <div class="mobile-sticky-add">
-        <span><b data-price="${product.price}">${formatPrice(product.price)}</b> / ${escapeHtml(product.name)}</span>
+        <span><b data-price="${product.price}">${formatPrice(product.price)}</b></span>
         <button class="button primary" data-mobile-add>Add</button>
         <button class="button secondary" data-mobile-buy ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? "Buy Now" : "Purchases paused"}</button>
     </div>

@@ -187,6 +187,22 @@ input, select, textarea { font: inherit; min-height: 44px; border-radius: 6px; }
     .shop-content .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
+    /* Keep embedded browsers on the same spacing as the standard phone layout. */
+    .in-app-browser body.redesigned-home .home-section.has-product-rail,
+    .in-app-browser body.redesigned-home .home-section:has(.home-product-rail),
+    .in-app-browser body.redesigned-home .home-section.has-product-rail + .home-section,
+    .in-app-browser body.redesigned-home .home-section:has(.home-product-rail) + .home-section {
+        padding-block: 24px !important;
+        margin-block: 0 !important;
+    }
+    input, select, textarea, .mobile-currency select { font-size: 16px; }
+    .product-card .product-badges { display: flex; pointer-events: none; }
+    .product-card .product-badges span:first-child { display: inline-flex; }
+    .mobile-sticky-add { grid-template-columns: minmax(0, 1fr) 82px 82px; }
+    .mobile-sticky-add > span { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; font-size: 14px; }
+    .mobile-sticky-add .button { min-height: 44px; }
+    body:has(.mobile-sticky-add) .site-footer { padding-bottom: calc(110px + var(--safe-bottom)); }
+    .mobile-menu, .cart-drawer { height: 100dvh; max-height: var(--app-height); overflow-y: auto; }
     .container { width: calc(100% - 32px); }
     .nav-right { display: none; }
     .mobile-bag { display: inline-flex; }
