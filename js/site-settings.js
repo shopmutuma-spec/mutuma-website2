@@ -14,8 +14,8 @@ export const storeSettings = {
     standardShipping: 6,
     popularSearches: ["lamp", "rug", "poster", "desk", "gaming"],
     fallbackOffer: {
-        name: "15% off everything",
-        discount_percent: 15,
+        name: "20% off everything",
+        discount_percent: 20,
         scope: "all",
         enabled: true
     },

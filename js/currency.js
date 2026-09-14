@@ -1,4 +1,5 @@
 const CURRENCY_KEY = "mutuma.currency";
+const PREFERRED_CURRENCY_KEY = "mutuma.preferredCurrency";
 const RATES_KEY = "mutuma.exchangeRates.usd.v1";
 const GEO_KEY = "mutuma.location";
 const GEO_VERSION = 8;
@@ -150,7 +151,7 @@ const timeZoneCountryMap = {
 };
 
 let currencyState = {
-    currency: normalizeCurrency(safeGet(CURRENCY_KEY)) || BASE_CURRENCY,
+    currency: normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || normalizeCurrency(safeGet(CURRENCY_KEY)) || BASE_CURRENCY,
     rates: fallbackRates
 };
 
@@ -498,10 +499,10 @@ export async function initCurrency() {
 
     currencyInitPromise = (async () => {
         const [currency, rates] = await Promise.all([
-            detectCurrency().catch(() => countryToCurrency(browserCountry()) || getStoredCurrency() || BASE_CURRENCY),
+            normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || detectCurrency().catch(() => countryToCurrency(browserCountry()) || getStoredCurrency() || BASE_CURRENCY),
             loadRates().catch(() => fallbackRates)
         ]);
-        currencyState = { currency, rates };
+        currencyState = { currency: normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || currencyState.manualCurrency || currency, rates };
         window.MUTUMACurrency = {
             currency,
             rates,
@@ -549,6 +550,21 @@ export function currentCurrency() {
 
 export function convertPrice(baseAmount) {
     return baseAmount * (currencyState.rates[currencyState.currency] || fallbackRates[currencyState.currency] || 1);
+}
+
+export function currencyOptions() {
+    return [...supportedCurrencies];
+}
+
+export function setCurrency(value) {
+    const currency = normalizeCurrency(value);
+    if (!currency) return false;
+    safeSet(PREFERRED_CURRENCY_KEY, currency);
+    safeSet(CURRENCY_KEY, currency);
+    currencyState = { ...currencyState, currency, manualCurrency: currency };
+    if (window.MUTUMACurrency) window.MUTUMACurrency.currency = currency;
+    window.dispatchEvent(new CustomEvent("currencychange", { detail: currencyState }));
+    return true;
 }
 
 export function formatPrice(baseAmount) {

@@ -1,4 +1,4 @@
-import { storeSettings } from "./site-settings.js?v=20260914-relaunch";
+import { storeSettings } from "./site-settings.js?v=20260914-sale20";
 
 const baseProducts = [
     {
@@ -3532,7 +3532,7 @@ function applyOffer(product, offer) {
 }
 
 async function fetchStoreCatalog(timeout = 900) {
-    const cacheKey = "mutuma.storeCatalog.v3";
+    const cacheKey = "mutuma.storeCatalog.v4-sale20";
     const cacheMaxAge = 10 * 60 * 1000;
     let storage;
     try { storage = globalThis.sessionStorage; } catch { /* Storage can be disabled. */ }

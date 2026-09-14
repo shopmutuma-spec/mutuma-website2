@@ -1,8 +1,8 @@
-import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260914-relaunch";
-import { initCurrency } from "./currency.js?v=20260914-relaunch";
-import { addToCart } from "./store.js?v=20260914-relaunch";
-import { aboutMutuma, roomEdit } from "./site-content.js?v=20260914-relaunch";
-import { initBaseLayout, notify, productImage, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260914-relaunch";
+import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260914-sale20";
+import { initCurrency } from "./currency.js?v=20260914-sale20";
+import { addToCart } from "./store.js?v=20260914-sale20";
+import { aboutMutuma, roomEdit } from "./site-content.js?v=20260914-sale20";
+import { initBaseLayout, notify, productImage, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260914-sale20";
 
 import { escapeHtml } from "./html.js";
 import { showPageError } from "./page-error.js";
@@ -216,7 +216,7 @@ function bindNewsletterForm() {
         try {
             await submitEmailSignup(email, "homepage-newsletter");
             localStorage.setItem("mutuma.emailSubscribed", "true");
-            newsletterForm.innerHTML = "<strong>You're on the list. 15% off is live across MUTUMA.</strong>";
+            newsletterForm.innerHTML = "<strong>You're on the list. 20% off is live across MUTUMA.</strong>";
         } catch (error) {
             notify(error.message);
             button.disabled = false;

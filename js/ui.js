@@ -1,11 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260914-relaunch";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260914-relaunch";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260914-relaunch";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260914-relaunch";
-import { trackEvent } from "./analytics.js?v=20260914-relaunch";
-import { storeSettings } from "./site-settings.js?v=20260914-relaunch";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260914-relaunch";
-import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260914-relaunch";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260914-sale20";
+import { formatPrice, currentCurrency, currencyOptions, setCurrency } from "./currency.js?v=20260914-sale20";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260914-sale20";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260914-sale20";
+import { trackEvent } from "./analytics.js?v=20260914-sale20";
+import { storeSettings } from "./site-settings.js?v=20260914-sale20";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260914-sale20";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260914-sale20";
 import { escapeHtml, safeImageUrl } from "./html.js";
 import { initPrivacyChoice } from "./privacy-choice.js";
 
@@ -79,6 +79,7 @@ function productBadges(product) {
 export function renderHeader() {
     const header = document.querySelector("[data-header]");
     if (!header) return;
+    const currencySelect = `<select class="currency-chip" data-currency-select aria-label="Currency">${currencyOptions().map((code) => `<option value="${code}" ${code === currentCurrency() ? "selected" : ""}>${code}</option>`).join("")}</select>`;
     const page = location.pathname.split("/").pop() || "index.html";
     const activeAttr = (target) => page === target ? ' aria-current="page" class="active"' : "";
     const recentMenuItems = getRecentlyViewed()
@@ -87,11 +88,11 @@ export function renderHeader() {
         .slice(0, 3);
 
     header.innerHTML = `
-        <div class="sale-ticker" role="note" aria-label="${storeSettings.purchasing?.enabled ? "15% off everything right now." : "Purchases are temporarily paused."}">
+        <div class="sale-ticker" role="note" aria-label="${storeSettings.purchasing?.enabled ? "20% off everything right now." : "Purchases are temporarily paused."}">
             <div class="sale-ticker-track">
                 ${storeSettings.purchasing?.enabled ? `
-                    <span>15% off everything</span><span>No code needed</span><span>Limited time only</span><span>No code needed</span>
-                    <span aria-hidden="true">15% off everything</span><span aria-hidden="true">No code needed</span><span aria-hidden="true">Limited time only</span><span aria-hidden="true">No code needed</span>
+                    <span>20% off everything</span><span>No code needed</span><span>Limited time only</span><span>No code needed</span>
+                    <span aria-hidden="true">20% off everything</span><span aria-hidden="true">No code needed</span><span aria-hidden="true">Limited time only</span><span aria-hidden="true">No code needed</span>
                 ` : `
                     <span>Store preview open</span><span>Purchases temporarily paused</span><span>Browse all products</span><span>We will be back soon</span>
                     <span aria-hidden="true">Store preview open</span><span aria-hidden="true">Purchases temporarily paused</span><span aria-hidden="true">Browse all products</span><span aria-hidden="true">We will be back soon</span>
@@ -117,12 +118,13 @@ export function renderHeader() {
                 <a class="icon-button${page === "account.html" ? " active" : ""}" href="account.html" aria-label="Account"${page === "account.html" ? ' aria-current="page"' : ""}>${icons.user}</a>
                 <a class="icon-button" href="wishlist.html" aria-label="Wishlist">${icons.heart}<span class="count" data-wishlist-count>0</span></a>
                 <button class="icon-button" data-cart-open aria-label="Open shopping bag">${icons.bag}<span class="count" data-cart-count>0</span></button>
-                <span class="currency-chip" data-currency-code>${currentCurrency()}</span>
+                ${currencySelect}
             </div>
             <button class="icon-button mobile-bag" data-cart-open aria-label="Open shopping bag">${icons.bag}<span class="count" data-cart-count>0</span></button>
         </nav>
         <div class="drawer-backdrop" data-menu-close></div>
         <aside class="mobile-menu" data-mobile-menu aria-hidden="true" inert>
+            <label class="mobile-currency">Currency ${currencySelect}</label>
             <div class="mobile-menu-head">
                 <strong>MUTUMA</strong>
                 <button class="icon-button" data-menu-close aria-label="Close menu">${icons.close}</button>
@@ -158,6 +160,9 @@ export function renderHeader() {
     `;
 
     const menu = header.querySelector("[data-mobile-menu]");
+    header.querySelectorAll("[data-currency-select]").forEach((select) => {
+        select.addEventListener("change", () => setCurrency(select.value));
+    });
     const backdrop = header.querySelector("[data-menu-close]");
     const openMenu = () => {
         menu.classList.add("open");
@@ -450,7 +455,7 @@ export function renderCartDrawer() {
         <div class="checkout-trust-row">
             <span>Secure Stripe checkout</span>
             <span>5-8 day delivery</span>
-            <span>15% off applied</span>
+            <span>20% off applied</span>
         </div>
         ${upsells.length ? `
             <div class="drawer-recommendations drawer-upsells">
@@ -463,7 +468,7 @@ export function renderCartDrawer() {
                 `).join("")}
             </div>
         ` : ""}
-        <small>15% off is already applied to product prices. No code needed.</small>
+        <small>20% off is already applied to product prices. No code needed.</small>
         <button class="button secondary wide" data-cart-close>Continue Shopping</button>
         <a class="button secondary wide" href="cart.html">View Full Cart</a>
     `;
@@ -561,6 +566,7 @@ export function closeCartDrawer() {
 }
 
 export function updatePrices() {
+    document.querySelectorAll("[data-currency-select]").forEach((select) => { select.value = currentCurrency(); });
     document.querySelectorAll("[data-price]").forEach((item) => {
         item.textContent = formatPrice(Number(item.dataset.price));
     });
@@ -1022,7 +1028,7 @@ function initEmailOffer() {
                         <input type="email" name="email" placeholder="Email address" aria-label="Email address" required>
                         <button class="button primary">Join</button>
                     </form>
-                    <small>15% off is already applied. No code needed.</small>
+                    <small>20% off is already applied. No code needed.</small>
                 </div>
             </div>
         `;
@@ -1071,7 +1077,7 @@ function initEmailOffer() {
             modal.querySelector(".offer-panel").innerHTML = `
                 <div class="offer-success">
                     <span class="eyebrow">You're on the list</span>
-                    <h2>15% off is live.</h2>
+                    <h2>20% off is live.</h2>
                     <p>No code needed. Sale prices are already applied across MUTUMA.</p>
                     <button class="button primary wide" data-offer-close>Shop Now</button>
                 </div>

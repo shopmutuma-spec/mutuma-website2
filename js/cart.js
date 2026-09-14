@@ -1,14 +1,14 @@
-import { initCurrency, formatPrice } from "./currency.js?v=20260914-relaunch";
+import { initCurrency, formatPrice } from "./currency.js?v=20260914-sale20";
 import { escapeHtml } from "./html.js";
 import { confirmCheckout } from "./checkout-confirmation.js";
 import { showPageError } from "./page-error.js";
-import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260914-relaunch";
-import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260914-relaunch";
-import { trackEvent } from "./analytics.js?v=20260914-relaunch";
-import { storeSettings } from "./site-settings.js?v=20260914-relaunch";
-import { loadStoreCatalog } from "./products.js?v=20260914-relaunch";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260914-relaunch";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260914-relaunch";
+import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260914-sale20";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260914-sale20";
+import { trackEvent } from "./analytics.js?v=20260914-sale20";
+import { storeSettings } from "./site-settings.js?v=20260914-sale20";
+import { loadStoreCatalog } from "./products.js?v=20260914-sale20";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260914-sale20";
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260914-sale20";
 
 const cartItems = document.querySelector("[data-cart-items]");
 const summary = document.querySelector("[data-cart-summary]");
@@ -103,7 +103,7 @@ function renderCart() {
             <div class="checkout-trust-row">
                 <span>${storeSettings.purchasing?.enabled ? "Secure checkout" : "Products remain available to browse"}</span>
                 <span>5-8 day delivery</span>
-                <span>15% off applied</span>
+                <span>20% off applied</span>
             </div>
             ${upsells.length ? `
                 <div class="cart-upsell-list">

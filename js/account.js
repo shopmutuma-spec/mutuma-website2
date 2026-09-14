@@ -1,7 +1,7 @@
-import { initCurrency } from "./currency.js?v=20260914-relaunch";
-import { getCart, getWishlist } from "./store.js?v=20260914-relaunch";
-import { initBaseLayout, notify } from "./ui.js?v=20260914-relaunch";
-import { clearSession, completeOAuthRedirect, getCurrentUser, signIn, signInWithGoogle, signUp } from "./supabase-auth.js?v=20260914-relaunch";
+import { initCurrency } from "./currency.js?v=20260914-sale20";
+import { getCart, getWishlist } from "./store.js?v=20260914-sale20";
+import { initBaseLayout, notify } from "./ui.js?v=20260914-sale20";
+import { clearSession, completeOAuthRedirect, getCurrentUser, signIn, signInWithGoogle, signUp } from "./supabase-auth.js?v=20260914-sale20";
 
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -26,7 +26,8 @@ async function renderAccount() {
     if (!user) {
         panel.innerHTML = `
             <h2>Your MUTUMA space</h2>
-            <p>Sign in to connect your email with future account features. Wishlist and cart still work on this device without an account.</p>
+            <p>Your saved items and order updates, in one place.</p>
+            <div class="split-actions"><a class="button secondary" href="tracking.html">Track an order</a><a class="button secondary" href="wishlist.html">Saved items</a></div>
         `;
         return;
     }

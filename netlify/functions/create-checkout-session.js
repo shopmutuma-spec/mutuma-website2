@@ -143,8 +143,8 @@ function normalizeOffer(offer) {
 
     return {
         ...offer,
-        name: "15% off everything",
-        discount_percent: 15
+        name: "20% off everything",
+        discount_percent: 20
     };
 }
 
@@ -393,7 +393,7 @@ export async function handler(event) {
                 item_count: String(cart.reduce((total, item) => total + item.quantity, 0)),
                 room_reward: reward ? `${reward.discountPercent}%` : "0%",
                 room_reward_discount_usd: String(rewardDiscount),
-                active_offer: "15% off everything"
+                active_offer: "20% off everything"
             },
             success_url: `${origin}/cart.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/cart.html?checkout=cancelled`

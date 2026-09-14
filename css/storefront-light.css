@@ -74,6 +74,7 @@ input::placeholder, textarea::placeholder { color: #626262; }
 /* Storefront relaunch: shared sizing and page templates, excluded from admin. */
 :root { --radius: 8px; --gutter: 24px; --nav-height: 104px; }
 body { font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.5; }
+main { padding-top: 0; }
 body * { letter-spacing: 0; }
 .container { width: min(100% - 48px, 1280px); }
 h1, h2, h3 { line-height: 1.15; text-wrap: balance; }
@@ -91,6 +92,8 @@ input, select, textarea { font: inherit; min-height: 44px; border-radius: 6px; }
 .nav-right { gap: 6px; }
 .nav-right .icon-button { background: transparent; border: 0; }
 .currency-chip { font-size: 12px; padding: 8px; }
+.mobile-currency { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; gap: 16px; }
+.mobile-currency select { width: 100px; }
 .page-hero, .shop-page .page-hero, .categories-page .page-hero { min-height: 0; padding: 136px 0 28px; background: none; border: 0; color: #171717; }
 .page-hero::before, .categories-page .page-hero::before { display: none; }
 .page-hero h1, .shop-page .page-hero h1, .categories-page .page-hero h1 { font-size: 36px; color: #171717; margin: 0 0 12px; }
@@ -170,7 +173,7 @@ input, select, textarea { font: inherit; min-height: 44px; border-radius: 6px; }
     .mobile-toggle { display: inline-flex; }
     .nav { grid-template-columns: 44px 1fr auto; }
     .logo { justify-self: center; }
-    .nav .logo { position: static; grid-column: 2; transform: none; }
+    .nav .logo { position: static; grid-column: 2; transform: none; max-width: 100%; width: auto; overflow: visible; font-size: 24px; white-space: nowrap; }
     .nav .mobile-toggle { grid-column: 1; grid-row: 1; }
     .nav .mobile-bag { grid-column: 3; grid-row: 1; justify-self: end; }
     .shop-content .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

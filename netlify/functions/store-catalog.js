@@ -18,8 +18,8 @@ function normalizeOffer(offer) {
 
     return {
         ...offer,
-        name: "15% off everything",
-        discount_percent: 15
+        name: "20% off everything",
+        discount_percent: 20
     };
 }
 

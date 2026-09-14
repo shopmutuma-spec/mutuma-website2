@@ -1,11 +1,11 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260914-relaunch";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260914-relaunch";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260914-relaunch";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260914-relaunch";
-import { trackEvent } from "./analytics.js?v=20260914-relaunch";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260914-relaunch";
-import { setupBundleForProduct } from "./merchandising.js?v=20260914-relaunch";
-import { storeSettings } from "./site-settings.js?v=20260914-relaunch";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260914-sale20";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260914-sale20";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260914-sale20";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260914-sale20";
+import { trackEvent } from "./analytics.js?v=20260914-sale20";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260914-sale20";
+import { setupBundleForProduct } from "./merchandising.js?v=20260914-sale20";
+import { storeSettings } from "./site-settings.js?v=20260914-sale20";
 
 import { escapeHtml } from "./html.js";
 import { showPageError } from "./page-error.js";
@@ -87,7 +87,7 @@ ${galleryThumbs}
                 <div><dt>Shipping</dt><dd><span data-price="${storeSettings.standardShipping}">${formatPrice(storeSettings.standardShipping)}</span>; free on orders of <span data-price="${storeSettings.freeShippingThreshold}">${formatPrice(storeSettings.freeShippingThreshold)}</span> or more</dd></div>
             </dl>
             <div class="product-offer-strip">
-                <strong>15% off everything.</strong>
+                <strong>20% off everything.</strong>
                 <span>Sale price is already applied. Shipping is included in the checkout total.</span>
             </div>
             <div class="quantity">
