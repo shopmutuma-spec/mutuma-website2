@@ -1,11 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260906-email-batch";
-import { formatPrice, currentCurrency } from "./currency.js?v=20260906-email-batch";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-email-batch";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260906-email-batch";
-import { trackEvent } from "./analytics.js?v=20260906-email-batch";
-import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260906-email-batch";
-import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260906-email-batch";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260914-relaunch";
+import { formatPrice, currentCurrency } from "./currency.js?v=20260914-relaunch";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260914-relaunch";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260914-relaunch";
+import { trackEvent } from "./analytics.js?v=20260914-relaunch";
+import { storeSettings } from "./site-settings.js?v=20260914-relaunch";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260914-relaunch";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260914-relaunch";
 import { escapeHtml, safeImageUrl } from "./html.js";
 import { initPrivacyChoice } from "./privacy-choice.js";
 
@@ -71,7 +71,7 @@ function productBadges(product) {
     badges.push(productSpendBadge(product));
     if (product.tags.includes("best-seller")) badges.push("Best Seller");
     if (isNewArrival(product)) badges.push("New");
-    if (product.tags.includes("low-stock")) badges.push("Low stock");
+    if (Number.isFinite(product.stock) && product.stock > 0 && product.stock <= 8) badges.push("Low stock");
 
     return badges.slice(0, 3).map((badge) => `<span>${escapeHtml(badge)}</span>`).join("");
 }
@@ -107,7 +107,8 @@ export function renderHeader() {
                 <a class="nav-link" href="categories.html">Collections</a>
                 <a class="nav-link" href="shop.html?sort=newest">New Arrivals</a>
                 <a class="nav-link" href="shop.html?tag=best-seller">Best Sellers</a>
-                <a class="nav-link" href="index.html#shop-room">Room Setups</a>
+                <a class="nav-link" href="shop.html?category=Rugs">Rugs</a>
+                <a class="nav-link" href="shop.html?category=Posters">Posters</a>
             </div>
             <a class="logo" href="index.html">MUTUMA</a>
             <div class="nav-group nav-right">
@@ -121,7 +122,7 @@ export function renderHeader() {
             <button class="icon-button mobile-bag" data-cart-open aria-label="Open shopping bag">${icons.bag}<span class="count" data-cart-count>0</span></button>
         </nav>
         <div class="drawer-backdrop" data-menu-close></div>
-        <aside class="mobile-menu" data-mobile-menu aria-hidden="true">
+        <aside class="mobile-menu" data-mobile-menu aria-hidden="true" inert>
             <div class="mobile-menu-head">
                 <strong>MUTUMA</strong>
                 <button class="icon-button" data-menu-close aria-label="Close menu">${icons.close}</button>
@@ -146,7 +147,7 @@ export function renderHeader() {
                 </div>
             ` : ""}
         </aside>
-        <aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="Shopping bag">
+        <aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="Shopping bag" inert>
             <div class="cart-drawer-head">
                 <strong>Shopping Bag</strong>
                 <button class="icon-button" data-cart-close aria-label="Close cart">${icons.close}</button>
@@ -163,12 +164,14 @@ export function renderHeader() {
         backdrop.classList.add("open");
         document.body.classList.add("menu-open");
         menu.setAttribute("aria-hidden", "false");
+        menu.inert = false;
     };
     const closeMenu = () => {
         menu.classList.remove("open");
         backdrop.classList.remove("open");
         document.body.classList.remove("menu-open");
         menu.setAttribute("aria-hidden", "true");
+        menu.inert = true;
     };
 
     header.querySelector("[data-menu-toggle]").addEventListener("click", openMenu);
@@ -359,7 +362,7 @@ export function renderCategories(target) {
     if (!element) return;
     element.innerHTML = categories.map((category) => `
         <a class="category-card" href="categories.html?category=${encodeURIComponent(category.name)}#category-${category.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}">
-            <img src="${category.image}" alt="${escapeHtml(category.name)}" loading="lazy" decoding="async" onerror="this.style.opacity='0';">
+            ${productImage(category.image, category.name, { sizes: "(max-width: 600px) 75vw, (max-width: 1000px) 45vw, 320px" })}
             <span>${escapeHtml(category.name)}</span>
         </a>
     `).join("");
@@ -541,6 +544,7 @@ export function openCartDrawer() {
     backdrop.classList.add("open");
     document.body.classList.add("menu-open");
     drawer.setAttribute("aria-hidden", "false");
+    drawer.inert = false;
     drawer.querySelector("[data-cart-close]")?.focus();
 }
 
@@ -553,6 +557,7 @@ export function closeCartDrawer() {
     backdrop.classList.remove("open");
     document.body.classList.remove("menu-open");
     drawer.setAttribute("aria-hidden", "true");
+    drawer.inert = true;
 }
 
 export function updatePrices() {

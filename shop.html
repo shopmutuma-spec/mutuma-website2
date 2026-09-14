@@ -5,32 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>MUTUMA Shop | Premium Room Finds</title>
     <meta name="description" content="Shop MUTUMA lighting, desk objects, wall art, furniture and tech.">
-    <link rel="preload" as="image" href="images/hero/shop-room-finds.webp" fetchpriority="high">
     <link rel="stylesheet" href="css/style.css?v=20260913-review">
-    <link rel="stylesheet" href="css/storefront-light.css?v=20260913-white2">
+    <link rel="stylesheet" href="css/storefront-light.css?v=20260914-relaunch">
 </head>
 <body class="shop-page">
     <div class="loading-screen" data-loader aria-hidden="true">
         <div class="loading-logo">MUTUMA</div>
     </div>
-    <script src="js/ambient-theme.js?v=20260906-email-batch"></script>
-    <script src="js/loader.js?v=20260906-email-batch"></script>
+    <script src="js/ambient-theme.js?v=20260914-relaunch"></script>
+    <script src="js/loader.js?v=20260914-relaunch"></script>
     <header class="site-header" data-header></header>
 
     <main>
         <!-- Shop Header -->
         <section class="page-hero container">
-            <span class="eyebrow">Shop</span>
-            <h1>ROOM FINDS.</h1>
-            <p>Fast search, sharp filters and product-first buying.</p>
+            <h1>Shop all</h1>
         </section>
 
         <!-- Shop Controls -->
         <section class="shop-shell container">
-            <aside class="filters" id="categories">
-                <h2>Filters</h2>
+            <details class="filters" id="categories" data-shop-filters open>
+                <summary>Filters</summary>
                 <div class="filter-buttons" data-category-filters></div>
-            </aside>
+            </details>
             <div class="shop-content">
                 <div class="shop-toolbar">
                     <input type="search" data-shop-search placeholder="Search products" aria-label="Search products">
@@ -50,7 +47,7 @@
 
     <footer class="site-footer" data-footer></footer>
     <div data-modal></div>
-    <script type="module" src="js/shop.js?v=20260906-email-batch"></script>
+    <script type="module" src="js/shop.js?v=20260914-relaunch"></script>
 </body>
 </html>
 

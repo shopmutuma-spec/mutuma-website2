@@ -1,4 +1,4 @@
-import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
+import { storeSettings } from "./site-settings.js?v=20260914-relaunch";
 
 const baseProducts = [
     {

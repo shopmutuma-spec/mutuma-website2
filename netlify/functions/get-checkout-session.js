@@ -15,7 +15,8 @@ function json(statusCode, body) {
     return {
         statusCode,
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store"
         },
         body: JSON.stringify(body)
     };
@@ -54,6 +55,7 @@ export async function handler(event) {
         const trackingUrl = `${getOrigin(event)}/tracking.html?order=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`;
 
         return json(200, {
+            paymentStatus: session.payment_status,
             email,
             name: session.customer_details?.name || "",
             orderNumber,

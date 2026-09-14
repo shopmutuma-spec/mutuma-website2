@@ -22,7 +22,20 @@ Changed implementation files: js/product.js and js/product-purchase.js. Regressi
 
 ## Approved queue
 
-2. Currency-aware filters, safe filter rendering and currency request failure investigation.
+### 14 September implementation status
+
+- Confirmation: implemented server-paid confirmation before cart clearing. Invalid, unpaid, mismatched and unavailable responses preserve the cart; no browser cache can certify payment. Server replies are no-store. Removed the browser-side marketing signup from the confirmation dependency chain; existing server order/email work is unchanged.
+- Images: category tiles now reuse the existing responsive Netlify image helper and missing-image fallback. Confirm CDN delivery on a hosted preview before measuring byte savings.
+- Accessibility: closed menu/cart drawers are inert; cart quantity controls have product-specific names; shop banner contrast, crossed-out prices and reduced-motion ticker handling improved. Versioned storefront CSS references ensure returning browsers receive the update. Admin stylesheet is unchanged.
+- Trust: unknown stock no longer implies low stock. Product data itself is unchanged.
+
+Metrics: confirmation targets checkout completion/recovery and protects purchase measurement; responsive images target listing click-through through faster rendering; accessibility targets successful navigation/add-to-cart; stock messaging targets trust rather than fabricated urgency. Monitor each release separately, including error rate, verified orders, mobile product views and AOV guardrails. No measured uplift is claimed.
+
+Verification: eleven test files passed, production build passed. An invalid return URL preserved both existing cart lines in the local browser. The shop banner's corrected white text was visually checked after stylesheet cache-versioning. No real payment, email delivery or real iOS/TikTok test was performed.
+
+Remaining work is NOT complete: homepage loading-shift remediation; currency-provider failure handling; full modal focus management; real SKU-aware variants; atomic inventory/retryable side effects; verified review and delivery facts; progressive filters/purchase-layout experiments; abandoned-checkout recovery. Supplier mappings/facts are required for variants and claims. Database and email work needs a staging environment and integration verification before production rollout. Do not deploy these changes as proof that the whole backlog is finished.
+
+2. Currency-aware filters and safe filter rendering implemented locally in Round 2 (see CRO_AUDIT.md). Currency request failure investigation remains pending.
 3. Verified confirmation before clearing the cart or reporting success.
 4. Stable homepage collection positioning during loading.
 5. Responsive category images.

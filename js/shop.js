@@ -1,7 +1,9 @@
-import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260906-email-batch";
-import { initCurrency } from "./currency.js?v=20260906-email-batch";
-import { trackEvent } from "./analytics.js?v=20260906-email-batch";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260906-email-batch";
+import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260914-relaunch";
+import { initCurrency, formatPrice } from "./currency.js?v=20260914-relaunch";
+import { escapeHtml } from "./html.js";
+import { priceBands, normalizePriceBand, priceBandLabel, matchesPriceBand, shopSearchParams } from "./shop-filters.js";
+import { trackEvent } from "./analytics.js?v=20260914-relaunch";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260914-relaunch";
 
 import { showPageError } from "./page-error.js";
 
@@ -17,19 +19,21 @@ await loadStoreCatalog();
 
 const params = new URLSearchParams(window.location.search);
 const state = {
-    query: params.get("q") || "",
+    query: params.get("q") || params.get("query") || "",
     category: params.get("category") || "All",
     colour: params.get("colour") || "All",
     size: params.get("size") || "All",
     availability: params.get("availability") || "All",
     style: params.get("style") || "All",
     type: params.get("type") || "All",
-    collection: params.get("collection") || "All",
-    price: params.get("price") || "All",
+    collection: params.get("collection") || ({ trending: "Trending", "best-seller": "Best Seller", featured: "Featured" }[params.get("tag")]) || "All",
+    price: normalizePriceBand(params.get("price")),
     sort: params.get("sort") || (params.get("tag") === "best-seller" ? "best-seller" : "featured")
 };
 
 const searchInput = document.querySelector("[data-shop-search]");
+const filterPanel = document.querySelector("[data-shop-filters]");
+if (filterPanel) filterPanel.open = !window.matchMedia("(max-width: 760px)").matches;
 const categoryFilters = document.querySelector("[data-category-filters]");
 const sortSelect = document.querySelector("[data-sort]");
 const count = document.querySelector("[data-product-count]");
@@ -52,16 +56,20 @@ const filterConfig = [
     ["collection", "Collection", ["All", "Featured", "Trending", "Best Seller"]]
 ];
 
+filterConfig.forEach(([key, , values]) => {
+    if (!values.includes(state[key])) state[key] = "All";
+});
+
 categoryFilters.innerHTML = filterConfig.map(([key, label, values]) => `
     <label>${label}
         <select data-filter="${key}" aria-label="${label}">
-            ${values.map((value) => `<option value="${value}" ${state[key] === value ? "selected" : ""}>${value}</option>`).join("")}
+            ${values.map((value) => `<option value="${escapeHtml(value)}" ${state[key] === value ? "selected" : ""}>${escapeHtml(value)}</option>`).join("")}
         </select>
     </label>
 `).join("") + `
     <label>Price
         <select data-filter="price" aria-label="Price">
-            ${["All", "Under £25", "£25 to £50", "£50 to £100", "Over £100"].map((value) => `<option value="${value}" ${state.price === value ? "selected" : ""}>${value}</option>`).join("")}
+            ${priceBands.map((value) => `<option value="${value}" ${state.price === value ? "selected" : ""}>${escapeHtml(priceBandLabel(value, formatPrice))}</option>`).join("")}
         </select>
     </label>
     <button class="button secondary wide" data-clear-filters>Clear All</button>
@@ -80,11 +88,12 @@ sortSelect.innerHTML = [
     .map(([value, label]) => `<option value="${value}">${label}</option>`)
     .join("");
 
+if (![...sortSelect.options].some((option) => option.value === state.sort)) state.sort = "featured";
 sortSelect.value = state.sort;
 
 function filteredProducts() {
     let list = [...products];
-    const query = state.query.toLowerCase();
+    const query = state.query.trim().toLowerCase();
 
     if (state.category !== "All") {
         list = list.filter((product) => product.category === state.category);
@@ -116,10 +125,7 @@ function filteredProducts() {
     if (state.availability === "New arrivals") list = list.filter(isNewArrival);
     if (state.availability === "Best sellers") list = list.filter((product) => product.tags.includes("best-seller"));
 
-    if (state.price === "Under £25") list = list.filter((product) => product.price < 25);
-    if (state.price === "£25 to £50") list = list.filter((product) => product.price >= 25 && product.price <= 50);
-    if (state.price === "£50 to £100") list = list.filter((product) => product.price > 50 && product.price <= 100);
-    if (state.price === "Over £100") list = list.filter((product) => product.price > 100);
+    list = list.filter((product) => matchesPriceBand(product.price, state.price));
 
     if (query) {
         list = list.filter((product) => {
@@ -139,17 +145,14 @@ function filteredProducts() {
 }
 
 function syncUrl() {
-    const next = new URLSearchParams();
-    Object.entries(state).forEach(([key, value]) => {
-        if (value && value !== "All" && !(key === "sort" && value === "featured")) next.set(key, value);
-    });
+    const next = shopSearchParams(state);
     history.replaceState(null, "", `${location.pathname}${next.toString() ? `?${next}` : ""}`);
 }
 
 function renderChips() {
     const active = Object.entries(state).filter(([key, value]) => value && value !== "All" && !(key === "sort" && value === "featured") && key !== "query");
     chips.innerHTML = active.length ? active.map(([key, value]) => `
-        <button data-remove-filter="${key}">${value} ×</button>
+        <button data-remove-filter="${key}">${escapeHtml(key === "price" ? priceBandLabel(value, formatPrice) : value)} ×</button>
     `).join("") : "";
 }
 
@@ -207,7 +210,8 @@ chips.addEventListener("click", (event) => {
     if (!button) return;
 
     const key = button.dataset.removeFilter;
-    state[key] = "All";
+    state[key] = key === "sort" ? "featured" : "All";
+    if (key === "sort") sortSelect.value = state.sort;
     const select = categoryFilters.querySelector(`[data-filter="${key}"]`);
     if (select) select.value = "All";
     scheduleRender();
@@ -215,6 +219,13 @@ chips.addEventListener("click", (event) => {
 
 sortSelect.addEventListener("change", (event) => {
     state.sort = event.target.value;
+    scheduleRender();
+});
+
+window.addEventListener("currencychange", () => {
+    categoryFilters.querySelectorAll('[data-filter="price"] option').forEach((option) => {
+        option.textContent = priceBandLabel(option.value, formatPrice);
+    });
     scheduleRender();
 });
 

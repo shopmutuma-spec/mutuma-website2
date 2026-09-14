@@ -1,7 +1,7 @@
-import { initCurrency } from "./currency.js?v=20260906-email-batch";
-import { getCart, getWishlist } from "./store.js?v=20260906-email-batch";
-import { initBaseLayout, notify } from "./ui.js?v=20260906-email-batch";
-import { clearSession, completeOAuthRedirect, getCurrentUser, signIn, signInWithGoogle, signUp } from "./supabase-auth.js?v=20260906-email-batch";
+import { initCurrency } from "./currency.js?v=20260914-relaunch";
+import { getCart, getWishlist } from "./store.js?v=20260914-relaunch";
+import { initBaseLayout, notify } from "./ui.js?v=20260914-relaunch";
+import { clearSession, completeOAuthRedirect, getCurrentUser, signIn, signInWithGoogle, signUp } from "./supabase-auth.js?v=20260914-relaunch";
 
 initBaseLayout();
 initCurrency().catch(() => {});

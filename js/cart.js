@@ -1,13 +1,14 @@
-import { initCurrency, formatPrice } from "./currency.js?v=20260906-email-batch";
+import { initCurrency, formatPrice } from "./currency.js?v=20260914-relaunch";
 import { escapeHtml } from "./html.js";
+import { confirmCheckout } from "./checkout-confirmation.js";
 import { showPageError } from "./page-error.js";
-import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260906-email-batch";
-import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260906-email-batch";
-import { trackEvent } from "./analytics.js?v=20260906-email-batch";
-import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
-import { loadStoreCatalog } from "./products.js?v=20260906-email-batch";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260906-email-batch";
-import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260906-email-batch";
+import { addToCart, addToWishlist, clearCart, getCart, removeFromCart, updateCartQuantity } from "./store.js?v=20260914-relaunch";
+import { checkoutCart, prewarmCheckout } from "./stripe.js?v=20260914-relaunch";
+import { trackEvent } from "./analytics.js?v=20260914-relaunch";
+import { storeSettings } from "./site-settings.js?v=20260914-relaunch";
+import { loadStoreCatalog } from "./products.js?v=20260914-relaunch";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells } from "./merchandising.js?v=20260914-relaunch";
+import { initBaseLayout, lineItemProduct, notify, productImage, submitEmailSignup, updateCounts } from "./ui.js?v=20260914-relaunch";
 
 const cartItems = document.querySelector("[data-cart-items]");
 const summary = document.querySelector("[data-cart-summary]");
@@ -25,13 +26,15 @@ async function boot() {
     await loadStoreCatalog();
 
     if (checkoutStatus === "success") {
-        clearCart();
-        trackEvent("purchase_completed", { sessionId: params.get("session_id") || "" });
-        completedOrder = await syncStripeCustomerEmail(params.get("session_id"));
-        notify(completedOrder?.orderNumber
-            ? `Payment complete. Order ${completedOrder.orderNumber} is ready to track.`
-            : "Payment complete. Your order details are in Stripe.");
-        renderPostPurchasePicks();
+        completedOrder = await confirmCheckout(params.get("session_id"));
+        if (completedOrder) {
+            clearCart();
+            notify(`Payment complete. Order ${completedOrder.orderNumber} is ready to track.`);
+            try { trackEvent("purchase_completed", { sessionId: completedOrder.sessionId }); } catch {}
+            renderPostPurchasePicks();
+        } else {
+            notify("We could not confirm your payment yet. Your cart is saved. Refresh to check again before placing another order.");
+        }
     } else if (checkoutStatus === "cancelled") {
         notify("Checkout cancelled. Your cart is still here.");
     }
@@ -40,47 +43,11 @@ async function boot() {
     window.addEventListener("currencychange", renderCart);
 }
 
-async function syncStripeCustomerEmail(sessionId) {
-    if (!sessionId) return null;
-
-    const cachedOrder = localStorage.getItem(`mutuma.orderTracking.${sessionId}`);
-    if (cachedOrder) {
-        try {
-            return JSON.parse(cachedOrder);
-        } catch (error) {
-            localStorage.removeItem(`mutuma.orderTracking.${sessionId}`);
-        }
-    }
-
-    try {
-        const response = await fetch(`/.netlify/functions/get-checkout-session?session_id=${encodeURIComponent(sessionId)}`);
-        const data = await response.json();
-
-        if (!response.ok) return null;
-
-        if (data.email && !localStorage.getItem(`mutuma.stripeEmailSynced.${sessionId}`)) {
-            await submitEmailSignup(data.email, "stripe-checkout", {
-                stripeSessionId: sessionId
-            });
-            localStorage.setItem(`mutuma.stripeEmailSynced.${sessionId}`, "true");
-        }
-
-        if (data.orderNumber) {
-            localStorage.setItem(`mutuma.orderTracking.${sessionId}`, JSON.stringify(data));
-        }
-
-        return data;
-    } catch (error) {
-        console.warn("Stripe email sync skipped.", error);
-        return null;
-    }
-}
-
 function renderCart() {
     const cart = getCart().map(lineItemProduct).filter((line) => line.product);
 
     if (!cart.length) {
-        cartItems.innerHTML = checkoutStatus === "success"
+        cartItems.innerHTML = completedOrder
             ? postPurchaseMessage()
             : '<div class="empty-state">Your cart is empty.</div>';
         summary.innerHTML = "";
@@ -98,9 +65,9 @@ function renderCart() {
                 <button data-save-later="${escapeHtml(product.id)}">Save for later</button>
             </div>
             <div class="quantity small">
-                <button data-decrease="${escapeHtml(product.id)}">-</button>
+                <button data-decrease="${escapeHtml(product.id)}" aria-label="Decrease ${escapeHtml(product.name)} quantity">-</button>
                 <input value="${quantity}" readonly aria-label="${escapeHtml(product.name)} quantity">
-                <button data-increase="${escapeHtml(product.id)}">+</button>
+                <button data-increase="${escapeHtml(product.id)}" aria-label="Increase ${escapeHtml(product.name)} quantity">+</button>
             </div>
             <b data-price="${product.price * quantity}">${formatPrice(product.price * quantity)}</b>
         </article>

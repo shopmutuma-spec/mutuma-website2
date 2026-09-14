@@ -8,11 +8,11 @@
     <link rel="preconnect" href="https://checkout.stripe.com" crossorigin>
     <link rel="preconnect" href="https://js.stripe.com" crossorigin>
     <link rel="stylesheet" href="css/style.css?v=20260913-review">
-    <link rel="stylesheet" href="css/storefront-light.css?v=20260913-white2">
-    <link rel="modulepreload" href="js/main.js?v=20260906-email-batch">
-    <link rel="modulepreload" href="js/ui.js?v=20260906-email-batch">
-    <link rel="modulepreload" href="js/products.js?v=20260906-email-batch">
-    <link rel="modulepreload" href="js/currency.js?v=20260906-email-batch">
+    <link rel="stylesheet" href="css/storefront-light.css?v=20260914-relaunch">
+    <link rel="modulepreload" href="js/main.js?v=20260914-relaunch">
+    <link rel="modulepreload" href="js/ui.js?v=20260914-relaunch">
+    <link rel="modulepreload" href="js/products.js?v=20260914-relaunch">
+    <link rel="modulepreload" href="js/currency.js?v=20260914-relaunch">
     <script type="application/ld+json">
         {"@context":"https://schema.org","@type":"Store","name":"MUTUMA","slogan":"YOUR ROOM. YOUR CULTURE.","priceRange":"USD"}
     </script>
@@ -21,18 +21,31 @@
     <div class="loading-screen" data-loader aria-hidden="true">
         <div class="loading-logo">MUTUMA</div>
     </div>
-    <script src="js/ambient-theme.js?v=20260906-email-batch"></script>
-    <script src="js/loader.js?v=20260906-email-batch"></script>
+    <script src="js/ambient-theme.js?v=20260914-relaunch"></script>
+    <script src="js/loader.js?v=20260914-relaunch"></script>
     <header class="site-header" data-header></header>
 
     <main>
-        <h1 class="visually-hidden">MUTUMA room decor</h1>
+        <section class="store-intro">
+            <img src="images/hero/categories-room.webp" alt="Rugs, wall art and lighting in a styled room" width="1600" height="900" fetchpriority="high">
+            <div class="container store-intro-copy">
+                <h1>MUTUMA</h1>
+                <p>Your room. Your culture.</p>
+                <a class="button primary" href="shop.html">Shop all</a>
+            </div>
+        </section>
+        <nav class="category-shortcuts container" aria-label="Shop by category">
+            <a href="shop.html?category=Rugs">Rugs</a>
+            <a href="shop.html?category=Posters">Posters</a>
+            <a href="shop.html?category=Lighting">Lighting</a>
+            <a href="shop.html?category=Decor">Decor</a>
+            <a href="shop.html?sort=newest">New arrivals</a>
+        </nav>
         <!-- Trending -->
         <section class="section container home-section" id="trending" data-reveal>
             <div class="section-head">
                 <div>
-                    <span class="eyebrow">Trending now</span>
-                    <h2>Trending.</h2>
+                    <h2>Trending now</h2>
                 </div>
                 <a href="shop.html?tag=trending">Shop trending</a>
             </div>
@@ -43,8 +56,7 @@
         <section class="section container home-section" id="categories" data-reveal>
             <div class="section-head">
                 <div>
-                    <span class="eyebrow">Collections</span>
-                    <h2>By room.</h2>
+                    <h2>Find your style</h2>
                 </div>
                 <a href="categories.html">View categories</a>
             </div>
@@ -52,14 +64,12 @@
         </section>
 
         <!-- Shop the Room -->
-        <section class="section container home-section" id="shop-room" data-room-section data-reveal></section>
 
         <!-- Best Sellers -->
         <section class="section container home-section" data-reveal>
             <div class="section-head">
                 <div>
-                    <span class="eyebrow">Best sellers</span>
-                    <h2>Best sellers.</h2>
+                    <h2>Best sellers</h2>
                 </div>
                 <a href="shop.html?tag=best-seller">Shop best sellers</a>
             </div>
@@ -88,16 +98,8 @@
             <div class="home-split-products" data-new-arrivals></div>
         </section>
 
-        <section class="section container home-section limited-drop" data-reveal>
-            <div>
-                <span class="eyebrow">Limited drops</span>
-                <h2>Drop energy.</h2>
-            </div>
-            <a class="button primary" href="shop.html?tag=new">Shop the drop</a>
-        </section>
 
         <!-- Why MUTUMA -->
-        <section class="about-section container why-mutuma" id="about" data-about data-reveal></section>
 
         <!-- Newsletter -->
         <section class="newsletter container home-newsletter" data-reveal>
@@ -123,6 +125,6 @@
 
     <footer class="site-footer" data-footer></footer>
     <div data-modal></div>
-    <script type="module" src="js/main.js?v=20260906-email-batch"></script>
+    <script type="module" src="js/main.js?v=20260914-relaunch"></script>
 </body>
 </html>

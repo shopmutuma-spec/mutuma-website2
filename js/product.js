@@ -1,11 +1,11 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260906-email-batch";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260906-email-batch";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260906-email-batch";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260906-email-batch";
-import { trackEvent } from "./analytics.js?v=20260906-email-batch";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260906-email-batch";
-import { setupBundleForProduct } from "./merchandising.js?v=20260906-email-batch";
-import { storeSettings } from "./site-settings.js?v=20260906-email-batch";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260914-relaunch";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260914-relaunch";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260914-relaunch";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260914-relaunch";
+import { trackEvent } from "./analytics.js?v=20260914-relaunch";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260914-relaunch";
+import { setupBundleForProduct } from "./merchandising.js?v=20260914-relaunch";
+import { storeSettings } from "./site-settings.js?v=20260914-relaunch";
 
 import { escapeHtml } from "./html.js";
 import { showPageError } from "./page-error.js";
@@ -65,6 +65,7 @@ productRoot.innerHTML = `
             <div class="gallery-main" data-gallery-main>
                 ${productImage(galleryImages[0], product.name, { eager: true, sizes: "(max-width: 980px) 100vw, 58vw" })}
             </div>
+            <button type="button" class="button secondary" data-image-zoom>View full image</button>
 ${galleryThumbs}
         </div>
         <aside class="purchase-panel">
@@ -76,7 +77,7 @@ ${galleryThumbs}
                 <strong data-price="${product.price}">${formatPrice(product.price)}</strong>
                 ${product.oldPrice ? `<s data-price="${product.oldPrice}">${formatPrice(product.oldPrice)}</s>` : ""}
             </div>
-            <p class="stock">${product.stock === 0 ? "Out of stock" : product.stock <= 8 ? "Low stock" : "In stock"}</p>
+            ${Number.isFinite(product.stock) ? `<p class="stock">${product.stock === 0 ? "Out of stock" : product.stock <= 8 ? "Low stock" : "In stock"}</p>` : ""}
             <dl class="product-facts">
                 <div><dt>Sizes</dt><dd>${escapeProductText(sizeList)}</dd></div>
                 ${product.material ? `<div><dt>Material</dt><dd>${escapeProductText(product.material)}</dd></div>` : ""}
@@ -132,6 +133,21 @@ ${galleryThumbs}
 `;
 
 let activeGalleryIndex = 0;
+const bundlePanel = productRoot.querySelector(".setup-bundle-card");
+if (bundlePanel) productRoot.querySelector(".purchase-panel .details").before(bundlePanel);
+
+const imageDialog = document.createElement("dialog");
+imageDialog.className = "product-image-dialog";
+imageDialog.setAttribute("aria-label", `${product.name} image`);
+imageDialog.innerHTML = '<form method="dialog"><button class="button secondary">Close image</button></form><div data-zoom-image></div>';
+productRoot.append(imageDialog);
+productRoot.querySelector("[data-image-zoom]").addEventListener("click", () => {
+    imageDialog.querySelector("[data-zoom-image]").innerHTML = productImage(galleryImages[activeGalleryIndex], product.name, { eager: true, sizes: "95vw" });
+    imageDialog.showModal();
+});
+imageDialog.addEventListener("click", (event) => {
+    if (event.target === imageDialog) imageDialog.close();
+});
 
 function escapeProductText(value) {
     return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);

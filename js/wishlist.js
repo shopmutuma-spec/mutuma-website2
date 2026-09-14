@@ -1,7 +1,7 @@
-import { findProductById, loadStoreCatalog } from "./products.js?v=20260906-email-batch";
-import { initCurrency } from "./currency.js?v=20260906-email-batch";
-import { getWishlist } from "./store.js?v=20260906-email-batch";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260906-email-batch";
+import { findProductById, loadStoreCatalog } from "./products.js?v=20260914-relaunch";
+import { initCurrency } from "./currency.js?v=20260914-relaunch";
+import { getWishlist } from "./store.js?v=20260914-relaunch";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260914-relaunch";
 
 boot();
 
