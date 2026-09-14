@@ -1,6 +1,7 @@
 import { initCurrency } from "./currency.js?v=20260914-sale20";
-import { initBaseLayout } from "./ui.js?v=20260914-sale20";
+import { initBaseLayout, notify } from "./ui.js?v=20260914-sale20";
 import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260914-sale20";
+import { filterRows, pageRows, localDateTime, orderChangePrompt } from "./admin-management.js";
 
 initBaseLayout();
 initCurrency().catch(() => {});
@@ -12,6 +13,40 @@ const panel = document.querySelector("[data-admin-panel]");
 const layout = document.querySelector(".admin-layout");
 let currentAdminUser = null;
 let commandOpen = false;
+let selectedOrderNumber = "";
+let dirty = false;
+let loading = false;
+let saving = false;
+const listState = Object.fromEntries(["orders", "products", "customers"].map((kind) => [kind, { query: "", status: "", page: 1 }]));
+
+function managementOrders(data = adminData) {
+    return data?.managementOrders || data?.orders || [];
+}
+
+function managedList(kind, rows) {
+    const state = listState[kind];
+    const result = pageRows(filterRows(rows, state.query, state.status, kind), state.page);
+    state.page = result.page;
+    const render = { orders: orderRows, products: productRows, customers: customerRows }[kind];
+    return `${render(result.rows)}<div class="admin-card-head" aria-label="Pagination">
+        <button class="button secondary" data-list-page="${kind}" data-step="-1" ${result.page === 1 ? "disabled" : ""}>Previous</button>
+        <span role="status">${result.total} results / Page ${result.page} of ${result.pages}</span>
+        <button class="button secondary" data-list-page="${kind}" data-step="1" ${result.page === result.pages ? "disabled" : ""}>Next</button>
+    </div>`;
+}
+
+function updateList(kind) {
+    const rows = kind === "orders" ? managementOrders() : adminData[kind] || [];
+    const target = panel.querySelector(`[data-admin-${kind}]`);
+    if (target) target.innerHTML = managedList(kind, rows);
+}
+
+function discardEdits() {
+    if (saving) return false;
+    if (dirty && !window.confirm("Discard your unsaved admin changes?")) return false;
+    dirty = false;
+    return true;
+}
 
 let adminData = null;
 let adminHealth = null;
@@ -1011,9 +1046,9 @@ function offersPanel(data) {
             <form class="admin-update-form" data-offer-form>
                 <input type="hidden" name="id" value="${escapeHtml(activeOffer.id || "")}">
                 <label>Offer name<input name="name" value="${escapeHtml(activeOffer.name || "20% off everything")}" required></label>
-                <label>Discount percent<input name="discountPercent" type="number" min="0" max="90" step="1" value="${escapeHtml(activeOffer.discount_percent || 25)}" required></label>
-                <label>Start date<input name="startsAt" type="datetime-local"></label>
-                <label>End date<input name="endsAt" type="datetime-local"></label>
+                <label>Discount percent<input name="discountPercent" type="number" min="1" max="90" step="1" value="${escapeHtml(activeOffer.discount_percent ?? 20)}" required></label>
+                <label>Start date<input name="startsAt" type="datetime-local" value="${localDateTime(activeOffer.starts_at)}"></label>
+                <label>End date<input name="endsAt" type="datetime-local" value="${localDateTime(activeOffer.ends_at)}"></label>
                 <label class="check-row"><input name="enabled" type="checkbox" ${activeOffer.enabled !== false ? "checked" : ""}> Active on website</label>
                 <button class="button primary">Save Offer</button>
                 <p class="form-message" data-offer-message></p>
@@ -1138,7 +1173,7 @@ function customerRows(customers) {
             <table class="admin-table">
                 <thead><tr><th>Email</th><th>Orders</th><th>Total spent</th><th>Last order</th><th>Source</th></tr></thead>
                 <tbody>
-                    ${customers.slice(0, 50).map((customer) => `
+                    ${customers.map((customer) => `
                         <tr>
                             <td>${escapeHtml(customer.email)}</td>
                             <td>${escapeHtml(customer.orders)}</td>
@@ -1159,14 +1194,15 @@ function productRows(products) {
     return `
         <div class="admin-table-wrap">
             <table class="admin-table">
-                <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Status</th></tr></thead>
+                <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Image</th></tr></thead>
                 <tbody>
-                    ${products.slice(0, 80).map((product) => `
+                    ${products.map((product) => `
                         <tr>
                             <td><strong>${escapeHtml(product.name)}</strong><br><span class="muted">${escapeHtml(product.id)}</span></td>
                             <td>${escapeHtml(product.category)}</td>
                             <td>${money(product.price, "USD")}</td>
-                            <td>${product.image ? "Visible" : "Missing image"}</td>
+                            <td>${product.stock == null ? "Untracked" : escapeHtml(product.stock)}</td>
+                            <td>${product.image ? "Available" : "Missing image"}</td>
                         </tr>
                     `).join("")}
                 </tbody>
@@ -1320,7 +1356,8 @@ function livePage(data) {
 }
 
 function ordersPage(data, selectedOrderNumber = "") {
-    const selectedOrder = data.orders.find((order) => order.order_number === selectedOrderNumber) || data.orders[0];
+    const orders = managementOrders(data);
+    const selectedOrder = orders.find((order) => order.order_number === selectedOrderNumber) || orders[0];
     return `
         ${pageTitle("Orders", "Search, inspect and update real Stripe-synced orders.")}
         <div class="admin-split">
@@ -1329,8 +1366,10 @@ function ordersPage(data, selectedOrderNumber = "") {
                     <div><span class="eyebrow">Orders</span><h3>Order Queue</h3></div>
                     <button class="button secondary" data-export-report>Export Report</button>
                 </div>
-                <input class="admin-search" data-admin-search="orders" placeholder="Search orders by email, number or status">
-                ${orderSection(data.orders || [])}
+                <p class="muted">Latest ${orders.length} orders loaded (maximum 500), independent of analytics filters.</p>
+                <label>Search orders<input class="admin-search" data-admin-search="orders" value="${escapeHtml(listState.orders.query)}" placeholder="Customer, order, product, SKU or tracking"></label>
+                <label>Fulfilment<select data-order-filter>${["", "processing", "shipped", "delivered", "refunded", "payment_failed"].map((status) => `<option value="${status}" ${listState.orders.status === status ? "selected" : ""}>${status || "All statuses"}</option>`).join("")}</select></label>
+                <div data-admin-orders>${managedList("orders", orders)}</div>
             </section>
             ${orderDetail(selectedOrder)}
         </div>
@@ -1351,7 +1390,9 @@ function customersPage(data) {
                 <div><span class="eyebrow">Customers</span><h3>Customer Intelligence</h3></div>
                 <button class="button secondary" data-export-subscribers>Email CSV</button>
             </div>
-            ${customerRows(data.customers || [])}
+            <p class="muted">Order counts and spending cover the selected analytics range, not lifetime value.</p>
+            <label>Search customers<input class="admin-search" data-admin-search="customers" value="${escapeHtml(listState.customers.query)}" placeholder="Email or source"></label>
+            <div data-admin-customers>${managedList("customers", data.customers || [])}</div>
         </section>
         <section class="admin-card">
             <div class="admin-card-head">
@@ -1374,8 +1415,8 @@ function productsPage(data) {
                 <div><span class="eyebrow">Catalogue</span><h3>Products</h3></div>
                 <button class="button secondary" data-export-product-analytics>Product Analytics CSV</button>
             </div>
-            <input class="admin-search" data-admin-search="products" placeholder="Search products by name or category">
-            <div data-admin-products>${productRows(data.products || [])}</div>
+            <label>Search products<input class="admin-search" data-admin-search="products" value="${escapeHtml(listState.products.query)}" placeholder="Name, category or product ID"></label>
+            <div data-admin-products>${managedList("products", data.products || [])}</div>
         </section>
         <section class="admin-card">
             <div class="admin-card-head">
@@ -1641,12 +1682,18 @@ function routeContent(user, selectedOrderNumber = "") {
     return overviewPage(data);
 }
 
-function renderAdmin(user, selectedOrderNumber = "") {
+function renderAdmin(user, orderNumber = selectedOrderNumber) {
+    selectedOrderNumber = orderNumber;
     const content = routeContent(user, selectedOrderNumber);
 
     panel.innerHTML = `
         ${adminShell(user, currentRoute(), content)}
     `;
+    const status = document.createElement("p");
+    status.dataset.adminFreshness = "";
+    status.setAttribute("role", "status");
+    status.textContent = `Last updated ${formatDate(adminData.generatedAt)}. Automatic refresh pauses while editing.`;
+    panel.prepend(status);
 }
 
 function adminDataUrl() {
@@ -1659,6 +1706,8 @@ function adminDataUrl() {
 
 async function loadAdmin(options = {}) {
     const silent = Boolean(options.silent);
+    if (loading || dirty || saving) return;
+    loading = true;
     const user = await getCurrentUser().catch(() => null);
     if (!user) {
         currentAdminUser = null;
@@ -1666,13 +1715,16 @@ async function loadAdmin(options = {}) {
         layout?.classList.remove("is-signed-in");
         form.hidden = false;
         panel.hidden = true;
+        loading = false;
         return;
     }
 
     try {
         currentAdminUser = user;
         if (!silent) message.textContent = "Loading admin data...";
-        adminData = await adminFetch(adminDataUrl());
+        const result = await adminFetch(adminDataUrl());
+        if (dirty || saving) return;
+        adminData = result;
         form.hidden = true;
         panel.hidden = false;
         layout?.classList.add("is-signed-in");
@@ -1680,10 +1732,18 @@ async function loadAdmin(options = {}) {
         maybeLoadRouteData();
         message.textContent = "";
     } catch (error) {
+        if (adminData && panel.hidden === false && !/admin access|sign in|session expired/i.test(error.message)) {
+            const status = panel.querySelector("[data-admin-freshness]");
+            if (status) status.textContent = `Refresh failed. Showing previously loaded data. ${error.message}`;
+            return;
+        }
         layout?.classList.remove("is-signed-in");
+        adminData = null;
         form.hidden = false;
         panel.hidden = true;
-        if (!silent) message.textContent = error.message;
+        message.textContent = error.message;
+    } finally {
+        loading = false;
     }
 }
 
@@ -1703,9 +1763,9 @@ async function loadAdminHealth() {
     }
 }
 
-function rerenderAdmin(selectedOrderNumber = "") {
+function rerenderAdmin(orderNumber = selectedOrderNumber) {
     if (currentAdminUser && adminData) {
-        renderAdmin(currentAdminUser, selectedOrderNumber);
+        renderAdmin(currentAdminUser, orderNumber);
     }
 }
 
@@ -1727,7 +1787,12 @@ function closeCommandPalette() {
 }
 
 async function saveOrder(formElement) {
+    if (saving) return;
     const orderNumber = formElement.dataset.orderUpdate;
+    const order = managementOrders().find((item) => item.order_number === orderNumber);
+    const prompt = orderChangePrompt(orderNumber, fulfilmentStatus(order || {}), formElement.status.value);
+    if (prompt && !window.confirm(prompt)) return;
+    saving = true;
     const statusMessage = formElement.querySelector("[data-order-message]");
     const submitButton = formElement.querySelector("button");
     submitButton.disabled = true;
@@ -1748,16 +1813,26 @@ async function saveOrder(formElement) {
                 adminNotes: formElement.adminNotes.value
             })
         });
+        dirty = false;
+        saving = false;
         await loadAdmin();
         notify(result.notification?.status === "failed" ? "Order saved. Customer email failed; check order details and retry." : "Order saved.");
     } catch (error) {
         statusMessage.textContent = error.message;
     } finally {
+        saving = false;
         submitButton.disabled = false;
     }
 }
 
 async function saveOffer(formElement) {
+    if (saving) return;
+    if (formElement.startsAt.value && formElement.endsAt.value && formElement.endsAt.value <= formElement.startsAt.value) {
+        formElement.querySelector("[data-offer-message]").textContent = "End date must be after start date.";
+        return;
+    }
+    if (!window.confirm(`Save this storewide offer at ${formElement.discountPercent.value}% off? Active on website: ${formElement.enabled.checked ? "yes" : "no"}.`)) return;
+    saving = true;
     const statusMessage = formElement.querySelector("[data-offer-message]");
     const submitButton = formElement.querySelector("button");
     submitButton.disabled = true;
@@ -1778,16 +1853,22 @@ async function saveOffer(formElement) {
                 enabled: formElement.enabled.checked
             })
         });
+        dirty = false;
+        saving = false;
         await loadAdmin({ silent: true });
-        statusMessage.textContent = "Offer saved.";
+        notify("Offer saved.");
     } catch (error) {
         statusMessage.textContent = error.message;
     } finally {
+        saving = false;
         submitButton.disabled = false;
     }
 }
 
 async function saveProduct(formElement) {
+    if (saving) return;
+    if (formElement.published.checked && !window.confirm(`Publish ${formElement.name.value} at USD ${formElement.price.value}?`)) return;
+    saving = true;
     const statusMessage = formElement.querySelector("[data-product-message]");
     const submitButton = formElement.querySelector("button");
     submitButton.disabled = true;
@@ -1814,11 +1895,14 @@ async function saveProduct(formElement) {
         });
         formElement.reset();
         formElement.published.checked = true;
+        dirty = false;
+        saving = false;
         await loadAdmin({ silent: true });
-        statusMessage.textContent = "Product added.";
+        notify("Product added.");
     } catch (error) {
         statusMessage.textContent = error.message;
     } finally {
+        saving = false;
         submitButton.disabled = false;
     }
 }
@@ -1840,8 +1924,21 @@ form.addEventListener("submit", async (event) => {
 });
 
 panel.addEventListener("click", async (event) => {
+    const navigation = event.target.closest("a[href]");
+    if (navigation && !discardEdits()) {
+        event.preventDefault();
+        return;
+    }
+    const pageButton = event.target.closest("[data-list-page]");
+    if (pageButton) {
+        const kind = pageButton.dataset.listPage;
+        listState[kind].page += Number(pageButton.dataset.step);
+        updateList(kind);
+        return;
+    }
     const retryEmail = event.target.closest("[data-retry-order-email]");
     if (retryEmail) {
+        if (!discardEdits()) return;
         retryEmail.disabled = true;
         try {
             const result = await adminFetch("/.netlify/functions/admin-retry-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderNumber: retryEmail.dataset.retryOrderEmail }) });
@@ -1853,6 +1950,7 @@ panel.addEventListener("click", async (event) => {
     }
     const row = event.target.closest("[data-order-row]");
     if (row && adminData) {
+        if (!discardEdits()) return;
         renderAdmin(currentAdminUser, row.dataset.orderRow);
     }
 
@@ -1861,6 +1959,7 @@ panel.addEventListener("click", async (event) => {
     }
 
     if (event.target.closest("[data-command-open]")) {
+        if (!discardEdits()) return;
         openCommandPalette();
     }
 
@@ -1873,6 +1972,7 @@ panel.addEventListener("click", async (event) => {
     }
 
     if (event.target.closest("[data-refresh-admin]")) {
+        if (!discardEdits()) return;
         loadAdmin();
     }
 
@@ -1930,6 +2030,7 @@ panel.addEventListener("click", async (event) => {
 });
 
 panel.addEventListener("input", (event) => {
+    if (event.target.closest("[data-order-update], [data-offer-form], [data-product-form]")) dirty = true;
     const commandInput = event.target.closest("[data-command-input]");
     if (commandInput) {
         const results = panel.querySelector("[data-command-results]");
@@ -1940,17 +2041,39 @@ panel.addEventListener("input", (event) => {
     const search = event.target.closest("[data-admin-search]");
     if (!search || !adminData) return;
 
-    const query = search.value.trim().toLowerCase();
+    const kind = search.dataset.adminSearch;
+    listState[kind].query = search.value;
+    listState[kind].page = 1;
+    updateList(kind);
+});
 
-    if (search.dataset.adminSearch === "products") {
-        const products = adminData.products.filter((product) => [product.name, product.category, product.id].join(" ").toLowerCase().includes(query));
-        panel.querySelector("[data-admin-products]").innerHTML = productRows(products);
+panel.addEventListener("change", (event) => {
+    if (event.target.closest("[data-order-update], [data-offer-form], [data-product-form]")) dirty = true;
+    if (event.target.matches("[data-order-filter]")) {
+        listState.orders.status = event.target.value;
+        listState.orders.page = 1;
+        updateList("orders");
     }
+});
 
-    if (search.dataset.adminSearch === "orders") {
-        const orders = adminData.orders.filter((order) => [order.order_number, order.email, order.status, order.tracking_number].join(" ").toLowerCase().includes(query));
-        panel.querySelector("[data-admin-orders]").innerHTML = orderRows(orders);
+panel.addEventListener("keydown", (event) => {
+    if (event.target.matches("[data-order-row]") && ["Enter", " "].includes(event.key)) {
+        event.preventDefault();
+        event.target.click();
     }
+});
+
+panel.addEventListener("error", (event) => {
+    if (event.target.matches(".admin-order-preview img, .admin-line-item img") && !event.target.dataset.fallback) {
+        event.target.dataset.fallback = "true";
+        event.target.src = "images/products/product-placeholder.svg";
+    }
+}, true);
+
+window.addEventListener("beforeunload", (event) => {
+    if (!dirty && !saving) return;
+    event.preventDefault();
+    event.returnValue = "";
 });
 
 panel.addEventListener("submit", (event) => {
@@ -1962,6 +2085,7 @@ panel.addEventListener("submit", (event) => {
     if (!updateForm && !offerForm && !productForm && !toolbar) return;
     event.preventDefault();
     if (toolbar) {
+        if (!discardEdits()) return;
         adminState = {
             days: toolbar.days.value,
             compare: toolbar.compare.value,
@@ -1982,6 +2106,7 @@ panel.addEventListener("submit", (event) => {
 loadAdmin();
 
 window.addEventListener("hashchange", () => {
+    if (dirty || saving) return;
     rerenderAdmin();
     maybeLoadRouteData();
 });
@@ -1991,6 +2116,7 @@ window.addEventListener("keydown", (event) => {
     if (isCommandShortcut) {
         event.preventDefault();
         if (panel.hidden) return;
+        if (!discardEdits()) return;
         openCommandPalette();
     }
 

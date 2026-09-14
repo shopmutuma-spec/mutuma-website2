@@ -1067,6 +1067,7 @@ export async function handler(event) {
             },
             subscribers,
             orders: currentRows.orders,
+            managementOrders: orders,
             customers: buildCustomers(currentRows.orders, subscribers),
             offers: offers.map(normalizeOffer),
             goals,

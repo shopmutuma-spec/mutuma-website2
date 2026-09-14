@@ -1,6 +1,14 @@
 /* Storefront colours only; dimensions and the admin theme stay unchanged. */
 :root {
     color-scheme: light;
+    --action-primary: #1d4ed8;
+    --action-hover: #1e40af;
+    --action-pressed: #1e3a8a;
+    --action-text: #ffffff;
+    --control-border: #767676;
+    --state-success: #166534;
+    --state-error: #b91c1c;
+    --state-warning: #854d0e;
     --bg: #ffffff;
     --surface: #ffffff;
     --surface-soft: #f4f4f4;
@@ -223,4 +231,47 @@ input, select, textarea { font: inherit; min-height: 44px; border-radius: 6px; }
 @media (prefers-reduced-motion: reduce) {
     .sale-ticker-track { animation: none; }
     html { scroll-behavior: auto; }
+}
+
+/* Purchase intent only: editorial links, offers and signup stay neutral. */
+body :is([data-add-product], [data-mobile-add], [data-buy-stripe],
+    [data-mobile-buy], [data-buy-now], [data-checkout], [data-drawer-checkout],
+    [data-qv-add], [data-qv-buy], .store-intro-copy .button.primary) {
+    background: var(--action-primary);
+    color: var(--action-text);
+    border-color: var(--action-primary);
+    opacity: 1;
+}
+body :is([data-add-product], [data-mobile-add], [data-buy-stripe],
+    [data-mobile-buy], [data-buy-now], [data-checkout], [data-drawer-checkout],
+    [data-qv-add], [data-qv-buy], .store-intro-copy .button.primary):hover:not(:disabled) {
+    background: var(--action-hover);
+    border-color: var(--action-hover);
+}
+body :is([data-add-product], [data-mobile-add], [data-buy-stripe],
+    [data-mobile-buy], [data-buy-now], [data-checkout], [data-drawer-checkout],
+    [data-qv-add], [data-qv-buy], .store-intro-copy .button.primary):active:not(:disabled) {
+    background: var(--action-pressed);
+    border-color: var(--action-pressed);
+}
+body .button.button:disabled {
+    background: var(--surface-soft);
+    color: var(--muted);
+    border-color: var(--control-border);
+    cursor: not-allowed;
+    opacity: 1;
+}
+:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+input, select, textarea { border-color: var(--control-border); background: var(--surface); color: var(--text); }
+.price-large s, .price-large del { color: var(--muted); }
+[aria-invalid="true"] { border-color: var(--state-error); }
+.page-error { color: var(--state-error); }
+@media (max-width: 760px) {
+    /* Buy Now is hidden in the mobile grid, so Add becomes its primary action. */
+    .shop-content .card-actions .quick-add-button:not(:disabled) {
+        background: var(--action-primary);
+        color: var(--action-text);
+        border-color: var(--action-primary);
+    }
+    .shop-content .card-actions .quick-add-button:hover:not(:disabled) { background: var(--action-hover); }
 }
