@@ -1,8 +1,8 @@
-import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260914-sale20";
-import { initCurrency } from "./currency.js?v=20260914-sale20";
-import { addToCart } from "./store.js?v=20260914-sale20";
-import { aboutMutuma, roomEdit } from "./site-content.js?v=20260914-sale20";
-import { initBaseLayout, notify, productImage, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260914-sale20";
+import { findProductById, products, loadStoreCatalog } from "./products.js?v=20260915-geo";
+import { initCurrency } from "./currency.js?v=20260915-geo";
+import { addToCart } from "./store.js?v=20260915-geo";
+import { aboutMutuma, roomEdit } from "./site-content.js?v=20260915-geo";
+import { initBaseLayout, notify, productImage, renderCategories, renderProductGrid, submitEmailSignup, updateCounts } from "./ui.js?v=20260915-geo";
 
 import { escapeHtml } from "./html.js";
 import { showPageError } from "./page-error.js";

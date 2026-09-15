@@ -1,11 +1,11 @@
-import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260914-sale20";
-import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260914-sale20";
-import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260914-sale20";
-import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260914-sale20";
-import { trackEvent } from "./analytics.js?v=20260914-sale20";
-import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260914-sale20";
-import { setupBundleForProduct } from "./merchandising.js?v=20260914-sale20";
-import { storeSettings } from "./site-settings.js?v=20260914-sale20";
+import { findProductById, getFamilyProducts, getProductById, getRecommendedProducts, loadStoreCatalog, productFamilyLabel, productOptions, productVariantLabel } from "./products.js?v=20260915-geo";
+import { initCurrency, formatPrice, currentCurrency } from "./currency.js?v=20260915-geo";
+import { addRecentlyViewed, addToCart, clearRecentlyViewed, getRecentlyViewed, getWishlist, toggleWishlist } from "./store.js?v=20260915-geo";
+import { checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260915-geo";
+import { trackEvent } from "./analytics.js?v=20260915-geo";
+import { initBaseLayout, notify, openCartDrawer, productImage, renderProductGrid, updateCounts } from "./ui.js?v=20260915-geo";
+import { setupBundleForProduct } from "./merchandising.js?v=20260915-geo";
+import { storeSettings } from "./site-settings.js?v=20260915-geo";
 
 import { escapeHtml } from "./html.js";
 import { showPageError } from "./page-error.js";

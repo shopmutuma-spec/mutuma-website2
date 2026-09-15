@@ -1,6 +1,6 @@
-import { initCurrency } from "./currency.js?v=20260914-sale20";
-import { initBaseLayout, notify } from "./ui.js?v=20260914-sale20";
-import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260914-sale20";
+import { initCurrency } from "./currency.js?v=20260915-geo";
+import { initBaseLayout, notify } from "./ui.js?v=20260915-geo";
+import { adminFetch, getCurrentUser, signIn } from "./supabase-auth.js?v=20260915-geo";
 import { filterRows, pageRows, localDateTime, orderChangePrompt } from "./admin-management.js";
 
 initBaseLayout();

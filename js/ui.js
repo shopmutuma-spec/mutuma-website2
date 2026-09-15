@@ -1,11 +1,11 @@
-import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260914-sale20";
-import { formatPrice, currentCurrency, currencyOptions, setCurrency } from "./currency.js?v=20260914-sale20";
-import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260914-sale20";
-import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260914-sale20";
-import { trackEvent } from "./analytics.js?v=20260914-sale20";
-import { storeSettings } from "./site-settings.js?v=20260914-sale20";
-import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260914-sale20";
-import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260914-sale20";
+import { products, categories, discountPercent, findProductById, getProductById, getProductsByTag, productOptions, isNewArrival } from "./products.js?v=20260915-geo";
+import { formatPrice, currentCurrency, currencyOptions, setCurrency } from "./currency.js?v=20260915-geo";
+import { checkoutCart, checkoutProduct, prewarmCheckout } from "./stripe.js?v=20260915-geo";
+import { addToCart, addToWishlist, getCart, getRecentlyViewed, getWishlist, removeFromCart, toggleWishlist, updateCartQuantity } from "./store.js?v=20260915-geo";
+import { trackEvent } from "./analytics.js?v=20260915-geo";
+import { storeSettings } from "./site-settings.js?v=20260915-geo";
+import { cartItemCount, cartRewardDiscount, cartRewardMessage, complementaryProducts, freeShippingUpsells, productSpendBadge } from "./merchandising.js?v=20260915-geo";
+import { getSession, signInWithGoogle } from "./supabase-auth.js?v=20260915-geo";
 import { escapeHtml, safeImageUrl } from "./html.js";
 import { initPrivacyChoice } from "./privacy-choice.js";
 

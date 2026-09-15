@@ -1,7 +1,7 @@
-import { findProductById, loadStoreCatalog } from "./products.js?v=20260914-sale20";
-import { initCurrency } from "./currency.js?v=20260914-sale20";
-import { getWishlist } from "./store.js?v=20260914-sale20";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260914-sale20";
+import { findProductById, loadStoreCatalog } from "./products.js?v=20260915-geo";
+import { initCurrency } from "./currency.js?v=20260915-geo";
+import { getWishlist } from "./store.js?v=20260915-geo";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260915-geo";
 
 boot();
 

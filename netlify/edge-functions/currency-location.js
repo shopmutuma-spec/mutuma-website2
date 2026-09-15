@@ -42,8 +42,9 @@ function normalizeCountry(country) {
 
 function countryToCurrency(countryCode) {
     const country = normalizeCountry(countryCode);
+    if (countryCurrencyMap[country]) return countryCurrencyMap[country];
     if (euroCountries.includes(country)) return "EUR";
-    return countryCurrencyMap[country] || "GBP";
+    return "USD";
 }
 
 function geoCountry(context) {
@@ -87,7 +88,7 @@ function languageCountry(request) {
 }
 
 export default async (request, context) => {
-    const country = geoCountry(context) || headerCountry(request) || languageCountry(request);
+    const country = geoCountry(context) || headerCountry(request);
     const currency = countryToCurrency(country);
 
     return Response.json({

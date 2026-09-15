@@ -1,9 +1,9 @@
-import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260914-sale20";
-import { initCurrency, formatPrice } from "./currency.js?v=20260914-sale20";
+import { products, categories, discountPercent, productOptions, isNewArrival, loadStoreCatalog } from "./products.js?v=20260915-geo";
+import { initCurrency, formatPrice } from "./currency.js?v=20260915-geo";
 import { escapeHtml } from "./html.js";
 import { priceBands, normalizePriceBand, priceBandLabel, matchesPriceBand, shopSearchParams } from "./shop-filters.js";
-import { trackEvent } from "./analytics.js?v=20260914-sale20";
-import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260914-sale20";
+import { trackEvent } from "./analytics.js?v=20260915-geo";
+import { initBaseLayout, renderProductGrid } from "./ui.js?v=20260915-geo";
 
 import { showPageError } from "./page-error.js";
 

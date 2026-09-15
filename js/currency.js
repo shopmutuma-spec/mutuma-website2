@@ -2,7 +2,7 @@ const CURRENCY_KEY = "mutuma.currency";
 const PREFERRED_CURRENCY_KEY = "mutuma.preferredCurrency";
 const RATES_KEY = "mutuma.exchangeRates.usd.v1";
 const GEO_KEY = "mutuma.location";
-const GEO_VERSION = 8;
+const GEO_VERSION = 9;
 const RATE_TTL = 1000 * 60 * 60 * 6;
 const GEO_TTL = 1000 * 60 * 15;
 const BASE_CURRENCY = "USD";
@@ -76,7 +76,6 @@ const countryCurrencyMap = {
     NZ: "NZD",
     PH: "PHP",
     PL: "PLN",
-    QA: "AED",
     RO: "RON",
     SA: "SAR",
     SE: "SEK",
@@ -151,7 +150,7 @@ const timeZoneCountryMap = {
 };
 
 let currencyState = {
-    currency: normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || normalizeCurrency(safeGet(CURRENCY_KEY)) || BASE_CURRENCY,
+    currency: normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || countryToCurrency(browserCountry()),
     rates: fallbackRates
 };
 
@@ -218,13 +217,14 @@ async function fetchText(url, timeout = 2400) {
 
 function countryToCurrency(countryCode) {
     const country = String(countryCode || "").toUpperCase();
-    if (euroCountries.includes(country)) return "EUR";
     if (countryCurrencyMap[country]) return countryCurrencyMap[country];
+    if (euroCountries.includes(country)) return "EUR";
     return BASE_CURRENCY;
 }
 
 function localeCountry() {
-    const locales = navigator.languages?.length ? navigator.languages : [navigator.language || "en-US"];
+    const browser = typeof navigator === "undefined" ? {} : navigator;
+    const locales = browser.languages?.length ? browser.languages : [browser.language || "en-US"];
 
     for (const locale of locales) {
         try {
@@ -498,13 +498,19 @@ export async function initCurrency() {
     if (currencyInitPromise) return currencyInitPromise;
 
     currencyInitPromise = (async () => {
+        const preferred = normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || currencyState.manualCurrency;
         const [currency, rates] = await Promise.all([
-            normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || detectCurrency().catch(() => countryToCurrency(browserCountry()) || getStoredCurrency() || BASE_CURRENCY),
+            Promise.resolve(preferred || detectCurrency().catch(() => countryToCurrency(browserCountry()))).then((detected) => {
+                const selected = normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || currencyState.manualCurrency || detected;
+                currencyState = { ...currencyState, currency: selected };
+                window.dispatchEvent(new CustomEvent("currencychange", { detail: currencyState }));
+                return selected;
+            }),
             loadRates().catch(() => fallbackRates)
         ]);
         currencyState = { currency: normalizeCurrency(safeGet(PREFERRED_CURRENCY_KEY)) || currencyState.manualCurrency || currency, rates };
         window.MUTUMACurrency = {
-            currency,
+            currency: currencyState.currency,
             rates,
             country: safeJsonGet(GEO_KEY)?.country || "",
             debug: () => window.MUTUMACurrencyDebug,
