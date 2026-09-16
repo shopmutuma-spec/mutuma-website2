@@ -38,6 +38,10 @@ try {
     await sendEmail(message);
     assert.equal(calls.at(-1).options.headers["Idempotency-Key"], key);
     assert.equal((await notifyOrder("ABC")).status, "accepted");
+    const confirmation = calls.filter(call => call.url.includes("api.resend.com")).at(-1).body;
+    assert.equal(confirmation.template.id, "order-confirmation");
+    assert.equal(confirmation.template.variables.ORDER_NUMBER, "ABC");
+    assert.equal(confirmation.text, undefined);
     const count = calls.filter(call => call.url.includes("api.resend.com")).length;
     await notifyOrder("ABC");
     assert.equal(calls.filter(call => call.url.includes("api.resend.com")).length, count);
@@ -47,6 +51,7 @@ try {
     assert.equal(order.payment_status, "paid");
     failure = false;
     assert.equal((await notifyOrder("ABC", "shipped")).status, "accepted");
+    assert.equal(calls.filter(call => call.url.includes("api.resend.com")).at(-1).body.template, undefined);
     order.payment_status = "refunded";
     await assert.rejects(notifyOrder("ABC"), /paid order/);
     assert.equal((await retry({ httpMethod: "POST", headers: {}, body: '{"orderNumber":"ABC"}' })).statusCode, 403);

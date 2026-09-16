@@ -34,3 +34,21 @@ Existing subscriber rows are not mass-imported automatically: some were created 
 The public contact endpoint validates lengths and addresses and includes a honeypot. Monitor abuse; platform rate limiting or a verified challenge should be added if needed.
 
 Product facts use existing sizes and optional material, dimensions and framed fields. Generic size labels still need supplier-confirmed dimensions. No materials, contents, frame inclusion or processing times have been invented.
+# Resend order confirmation template
+
+Paid-order confirmations now use the published Resend alias `order-confirmation`.
+Set `RESEND_ORDER_TEMPLATE_ID` in Netlify Functions only if the actual alias or UUID differs.
+Set `BUSINESS_POSTAL_ADDRESS` to the real business correspondence address for the footer; no address is invented when absent.
+
+Register these string variables in the template: CUSTOMER_NAME, ORDER_NUMBER, ORDER_DATE,
+PRODUCT_IMAGE_URL, PRODUCT_NAME, PRODUCT_OPTIONS, QUANTITY, LINE_TOTAL, SUBTOTAL, DISCOUNT,
+SHIPPING, TAX, TOTAL_PAID, TRACKING_URL, DELIVERY_ADDRESS, DELIVERY_ESTIMATE, BUSINESS_POSTAL_ADDRESS.
+Use Resend's variable editor, or its documented triple-brace syntax in imported HTML.
+The application HTML-escapes these values. The existing single-image layout shows a combined
+summary for multi-product orders, with each product name and quantity; it does not repeat image rows.
+
+Publish the template before deploying. Publishing alone does not connect the website.
+Shipping/delivery emails remain plain text. Provider rejection stays visible as a failed email
+in admin and does not change payment status; retry after correcting template configuration.
+Test with a test-mode paid order after deployment and inspect Resend's email log and your inbox.
+No live email was sent by the automated tests.

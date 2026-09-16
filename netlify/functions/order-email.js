@@ -1,5 +1,6 @@
 import { supabaseRequest } from "./supabase-client.js";
 import { sendEmail } from "./email-service.js";
+import { orderTemplateVariables } from "./order-template.js";
 
 export async function notifyOrder(orderNumber, kind = "processing") {
     if (!["processing", "shipped", "delivered"].includes(kind)) throw new Error("Invalid email type.");
@@ -17,7 +18,12 @@ export async function notifyOrder(orderNumber, kind = "processing") {
         // Fragment values stay out of HTTP request URLs and referrer headers.
         url.hash = new URLSearchParams({ order: orderNumber, email: order.email }).toString();
         const message = kind === "shipped" ? "Your order has shipped." : kind === "delivered" ? "Your order has been marked delivered." : "Thank you for your order. We are preparing it for dispatch.";
-        notification.messageId = await sendEmail({ to: order.email, replyTo: process.env.SUPPORT_EMAIL || "shopmutuma@gmail.com", subject: `MUTUMA order ${orderNumber} - ${kind}`, text: `${message}\n\nOrder: ${orderNumber}\nTrack your order: ${url.href}\n\nTracking details appear on this page when dispatch information is added. Estimated delivery is 5-8 business days after dispatch.\n\nFor help, reply to this email.` });
+        notification.messageId = await sendEmail({
+            to: order.email, replyTo: process.env.SUPPORT_EMAIL || "shopmutuma@gmail.com",
+            subject: kind === "processing" ? `Your MUTUMA order ${orderNumber} is confirmed` : `MUTUMA order ${orderNumber} - ${kind}`,
+            ...(kind === "processing" ? { template: { id: process.env.RESEND_ORDER_TEMPLATE_ID || "order-confirmation", variables: orderTemplateVariables(order, url.href) } } : {}),
+            text: `${message}\n\nOrder: ${orderNumber}\nTrack your order: ${url.href}\n\nTracking details appear on this page when dispatch information is added. Estimated delivery is 5-8 business days after dispatch.\n\nFor help, reply to this email.`
+        });
         notification.status = "accepted";
     } catch (error) {
         notification.status = "failed";
