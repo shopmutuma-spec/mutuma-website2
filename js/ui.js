@@ -454,7 +454,7 @@ export function renderCartDrawer() {
         <button class="button primary wide" data-drawer-checkout ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? `Checkout - ${formatPrice(total)}` : "Purchases temporarily paused"}</button>
         <div class="checkout-trust-row">
             <span>Secure Stripe checkout</span>
-            <span>5-8 day delivery</span>
+            <span>Est. 7 business days after dispatch</span>
             <span>20% off applied</span>
         </div>
         ${upsells.length ? `

@@ -1,3 +1,5 @@
+import { deliveryEstimateMessage } from "../../js/delivery-date.js";
+
 function escapeHtml(value) {
     return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
@@ -26,7 +28,7 @@ export function orderTemplateVariables(order, trackingUrl) {
         SHIPPING: money(order.shipping_cost), TAX: money(order.tax), TOTAL_PAID: money(order.total),
         TRACKING_URL: trackingUrl,
         DELIVERY_ADDRESS: [shipping.name, address.line1, address.line2, address.city, address.state, address.postal_code, address.country].filter(Boolean).join(", ") || "View your order for delivery details",
-        DELIVERY_ESTIMATE: "5-8 business days after dispatch",
+        DELIVERY_ESTIMATE: deliveryEstimateMessage(order).replace(/^Estimated delivery: /, "").replace(/\.$/, ""),
         BUSINESS_POSTAL_ADDRESS: process.env.BUSINESS_POSTAL_ADDRESS || ""
     };
     return Object.fromEntries(Object.entries(variables).map(([key, value]) => [key, escapeHtml(value)]));

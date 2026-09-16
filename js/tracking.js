@@ -77,7 +77,9 @@ function renderTrackingMessage(data) {
         message.append(link);
     }
 
-    const estimate = document.createElement("small");
-    estimate.textContent = "Estimated delivery is 5-8 business days once dispatched.";
-    message.append(estimate);
+    if (data.order?.deliveryEstimate) {
+        const estimate = document.createElement("p");
+        estimate.textContent = data.order.deliveryEstimate;
+        message.append(estimate);
+    }
 }

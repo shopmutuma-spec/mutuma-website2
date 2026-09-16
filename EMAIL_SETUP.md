@@ -23,7 +23,7 @@ Keep the existing Supabase and Stripe variables. Remove the old MailerLite track
 2. Complete a Stripe test purchase in a test environment. Open order details in admin and check Customer email. Accepted means Resend accepted the message, not that the recipient received it; check Resend delivery activity and inbox too.
 3. Change an order to shipped and then delivered. Check one email for each change. On failure, check configuration and use Retry customer email. This retry uses the current stored order status and recipient, not a browser-supplied email.
 4. Send a contact enquiry. Check SUPPORT_EMAIL and reply to the sender. On errors, the form preserves the message.
-5. Check product shipping prices in multiple currencies against checkout. Delivery remains an estimate of 5-8 business days after dispatch.
+5. Check product shipping prices in multiple currencies against checkout. Delivery remains an estimate of 7 business days after dispatch.
 
 ## Limits
 

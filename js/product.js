@@ -83,7 +83,7 @@ ${galleryThumbs}
                 ${product.material ? `<div><dt>Material</dt><dd>${escapeProductText(product.material)}</dd></div>` : ""}
                 ${product.dimensions ? `<div><dt>Dimensions</dt><dd>${escapeProductText(product.dimensions)}</dd></div>` : ""}
                 ${typeof product.framed === "boolean" ? `<div><dt>Frame</dt><dd>${product.framed ? "Included" : "Not included"}</dd></div>` : ""}
-                <div><dt>Delivery</dt><dd>Estimated 5-8 business days after dispatch</dd></div>
+                <div><dt>Delivery</dt><dd>Estimated 7 business days after dispatch</dd></div>
                 <div><dt>Shipping</dt><dd><span data-price="${storeSettings.standardShipping}">${formatPrice(storeSettings.standardShipping)}</span>; free on orders of <span data-price="${storeSettings.freeShippingThreshold}">${formatPrice(storeSettings.freeShippingThreshold)}</span> or more</dd></div>
             </dl>
             <div class="product-offer-strip">
@@ -120,7 +120,7 @@ ${galleryThumbs}
             <div class="details">
                 <details open><summary>Description</summary><p>${escapeHtml(product.description)}</p></details>
                 <details><summary>Specifications</summary><p>Category: ${escapeHtml(product.category)}. Sizes: ${escapeHtml(sizeList)}. Variations: ${escapeHtml(variationList)}. Style: ${escapeHtml(options.styles.join(", "))}.</p></details>
-                <details><summary>Delivery Estimate</summary><p>Estimated delivery is 5-8 business days once dispatched. Europe and US shipping options are confirmed at Stripe Checkout.</p></details>
+                <details><summary>Delivery Estimate</summary><p>Estimated delivery is 7 business days after dispatch. Europe and US shipping options are confirmed at Stripe Checkout.</p></details>
                 <details><summary>Returns</summary><p>Unused products can be returned within 30 days. See the returns page for the full policy.</p></details>
             </div>
         </aside>

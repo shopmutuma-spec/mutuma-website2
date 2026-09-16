@@ -1,6 +1,7 @@
 import { supabaseRequest } from "./supabase-client.js";
 import { sendEmail } from "./email-service.js";
 import { orderTemplateVariables } from "./order-template.js";
+import { deliveryEstimateMessage } from "../../js/delivery-date.js";
 
 export async function notifyOrder(orderNumber, kind = "processing") {
     if (!["processing", "shipped", "delivered"].includes(kind)) throw new Error("Invalid email type.");
@@ -22,7 +23,7 @@ export async function notifyOrder(orderNumber, kind = "processing") {
             to: order.email, replyTo: process.env.SUPPORT_EMAIL || "shopmutuma@gmail.com",
             subject: kind === "processing" ? `Your MUTUMA order ${orderNumber} is confirmed` : `MUTUMA order ${orderNumber} - ${kind}`,
             ...(kind === "processing" ? { template: { id: process.env.RESEND_ORDER_TEMPLATE_ID || "order-confirmation", variables: orderTemplateVariables(order, url.href) } } : {}),
-            text: `${message}\n\nOrder: ${orderNumber}\nTrack your order: ${url.href}\n\nTracking details appear on this page when dispatch information is added. Estimated delivery is 5-8 business days after dispatch.\n\nFor help, reply to this email.`
+            text: `${message}\n\nOrder: ${orderNumber}\nTrack your order: ${url.href}\n\n${deliveryEstimateMessage(order)}\n\nFor help, reply to this email.`
         });
         notification.status = "accepted";
     } catch (error) {

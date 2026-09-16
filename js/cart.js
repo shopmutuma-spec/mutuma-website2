@@ -102,7 +102,7 @@ function renderCart() {
             <button class="button primary wide" data-checkout ${storeSettings.purchasing?.enabled ? "" : "disabled"}>${storeSettings.purchasing?.enabled ? `Checkout - ${formatPrice(total)}` : "Purchases temporarily paused"}</button>
             <div class="checkout-trust-row">
                 <span>${storeSettings.purchasing?.enabled ? "Secure checkout" : "Products remain available to browse"}</span>
-                <span>5-8 day delivery</span>
+                <span>Est. 7 business days after dispatch</span>
                 <span>20% off applied</span>
             </div>
             ${upsells.length ? `
@@ -187,7 +187,7 @@ function postPurchaseMessage() {
             <strong>Payment complete.</strong>
             <span>Your order number is ${completedOrder.orderNumber}.</span>
             <a class="button primary" href="${completedOrder.trackingUrl}">Track your order</a>
-            <small>Save this link. Delivery is estimated at 5-8 business days once dispatched.</small>
+            <small>Save this link. Delivery is estimated at 7 business days after dispatch.</small>
         </div>
     `;
 }

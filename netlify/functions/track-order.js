@@ -1,4 +1,5 @@
 import { json, supabaseRequest } from "./supabase-client.js";
+import { estimatedDeliveryDate, deliveryEstimateMessage } from "../../js/delivery-date.js";
 
 function cleanText(value, maxLength = 120) {
     return String(value || "").trim().slice(0, maxLength);
@@ -26,8 +27,8 @@ function publicMessage(order) {
     }
 
     const messages = {
-        paid: "Your order has been paid and is waiting to be processed. Estimated delivery is 5-8 business days once dispatched.",
-        processing: "Your order is being prepared. Estimated delivery is 5-8 business days once dispatched.",
+        paid: "Your order has been paid and is waiting to be processed. Estimated delivery is 7 business days after dispatch.",
+        processing: "Your order is being prepared. Estimated delivery is 7 business days after dispatch.",
         shipped: "Your order has shipped. Tracking details will be added when available.",
         delivered: "Your order is marked as delivered.",
         refunded: "This order is marked as refunded.",
@@ -55,7 +56,7 @@ export async function handler(event) {
             return json(400, { error: "Order number and email are required." });
         }
 
-        const orders = await supabaseRequest(`orders?select=order_number,email,status,tracking_courier,tracking_number,tracking_url,created_at&order_number=eq.${encodeURIComponent(orderNumber)}&email=eq.${encodeURIComponent(email)}&limit=1`);
+        const orders = await supabaseRequest(`orders?select=order_number,email,status,fulfilment_status,order_status_history,tracking_courier,tracking_number,tracking_url,created_at&order_number=eq.${encodeURIComponent(orderNumber)}&email=eq.${encodeURIComponent(email)}&limit=1`);
 
         if (!orders.length) {
             return json(404, { error: "Order not found." });
@@ -69,7 +70,9 @@ export async function handler(event) {
                 courier: orders[0].tracking_courier || "",
                 trackingNumber: orders[0].tracking_number || "",
                 trackingUrl: safeUrl(orders[0].tracking_url),
-                createdAt: orders[0].created_at
+                createdAt: orders[0].created_at,
+                estimatedDeliveryDate: estimatedDeliveryDate(orders[0]),
+                deliveryEstimate: deliveryEstimateMessage(orders[0])
             }
         });
     } catch (error) {

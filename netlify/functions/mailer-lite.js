@@ -18,7 +18,7 @@ export async function queueTrackingEmail({
     name,
     orderNumber,
     trackingUrl,
-    deliveryEstimate = "5-8 business days once dispatched"
+    deliveryEstimate = "7 business days after dispatch"
 }) {
     const customerEmail = cleanText(email, 180).toLowerCase();
 
